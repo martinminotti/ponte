@@ -1,0 +1,319 @@
+@import '@fontsource-variable/archivo/wdth.css';
+@import 'tailwindcss';
+
+/*
+  Ponte — sistema visivo (vedi brand/STYLEGUIDE.md)
+  Cemento: neutri caldi appena accennati. Asfalto: l'inchiostro. Arancio Ponte: l'unico colore del marchio,
+  riservato ad azione principale, selezione e marchio. Il testo sull'arancio è sempre asfalto, mai bianco.
+  Un'unica famiglia, Archivo, usata sulle sue larghezze: condensata per targhe e cifre, normale per il testo, espansa per i titoli.
+*/
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-wa: var(--wa);
+  --color-on-wa: var(--on-wa);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --radius-card: 20px;
+  --radius-ctl: 14px;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  /* cemento */
+  --bg: #ededeb;
+  --surface: #ffffff;
+  --surface-2: #f5f4f2;
+  --surface-3: #e7e5e1;
+  --line: #e0ded9;
+  --line-strong: #c9c6bf;
+  /* asfalto */
+  --ink: #1c1b19;
+  --ink-2: #5e5b55;
+  --ink-3: #6c6862;
+  /* arancio Ponte */
+  --accent: #ff6a13;
+  --on-accent: #1c1b19;
+  --accent-soft: #ffe7d6;
+  --accent-ink: #b54300;
+  /* segnali */
+  --wa: #0f7f43;
+  --on-wa: #ffffff;
+  --ok: #157347;
+  --ok-soft: #dcf2e5;
+  --warn: #8a5a00;
+  --warn-soft: #fbefcf;
+  --danger: #c0261c;
+  --danger-soft: #fce4e1;
+  --shadow-1: 0 1px 0 rgba(28, 27, 25, 0.04), 0 1px 2px rgba(28, 27, 25, 0.06);
+  --shadow-2: 0 1px 0 rgba(28, 27, 25, 0.04), 0 8px 24px -8px rgba(28, 27, 25, 0.18);
+  --shadow-accent: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 8px 18px -10px rgba(214, 78, 0, 0.75);
+
+  /* stati della scheda */
+  --st-accettato: #6d6a64;
+  --st-diagnosi: #9a6500;
+  --st-ricambi: #7a4fd1;
+  --st-lavorazione: #2556c4;
+  --st-pronto: #14864d;
+  --st-consegnato: #3e3c38;
+
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root[data-theme='dark'] {
+  /* asfalto di notte */
+  --bg: #121110;
+  --surface: #1b1a18;
+  --surface-2: #232220;
+  --surface-3: #2d2b28;
+  --line: #2f2d2a;
+  --line-strong: #423f3a;
+  --ink: #f3f1ed;
+  --ink-2: #aba69e;
+  --ink-3: #918c84;
+  --accent: #ff7a2e;
+  --on-accent: #1c1b19;
+  --accent-soft: #3a2416;
+  --accent-ink: #ff8a47;
+  --wa: #25c26a;
+  --on-wa: #04210f;
+  --ok: #4ccf8a;
+  --ok-soft: #133524;
+  --warn: #f0c35a;
+  --warn-soft: #3a2f14;
+  --danger: #ff8a80;
+  --danger-soft: #401a17;
+  --shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.025);
+  --shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.035), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+  --shadow-accent: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 8px 18px -10px rgba(255, 106, 19, 0.55);
+
+  --st-accettato: #a29d95;
+  --st-diagnosi: #e8b04c;
+  --st-ricambi: #b79cff;
+  --st-lavorazione: #79a2ff;
+  --st-pronto: #47c985;
+  --st-consegnato: #8a857d;
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+html {
+  background: var(--bg);
+  overscroll-behavior-y: none;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.45;
+  font-variation-settings: 'wdth' 100;
+  font-feature-settings: 'ss01' 0;
+}
+
+button,
+[role='button'],
+a {
+  touch-action: manipulation;
+}
+button {
+  -webkit-user-select: none;
+  user-select: none;
+}
+input,
+textarea,
+select {
+  font-size: 16px; /* evita lo zoom automatico su iOS */
+}
+input[type='date'],
+input[type='month'] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 52px;
+}
+input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+}
+::selection {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+:focus-visible {
+  outline: 2.5px solid var(--accent-ink);
+  outline-offset: 2px;
+}
+
+@layer components {
+/* larghezze tipografiche */
+.w-cond {
+  font-stretch: 75%;
+  font-variation-settings: 'wdth' 75;
+}
+.w-semi {
+  font-stretch: 87%;
+  font-variation-settings: 'wdth' 87;
+}
+.w-wide {
+  font-stretch: 112%;
+  font-variation-settings: 'wdth' 112;
+}
+.w-xwide {
+  font-stretch: 125%;
+  font-variation-settings: 'wdth' 125;
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pb-safe-bar {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 112px);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* superfici */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-1);
+}
+.raised {
+  box-shadow: var(--shadow-2);
+}
+.hairline {
+  border-color: var(--line);
+}
+
+/* campi */
+.ctl {
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 14px;
+  border-radius: var(--radius-ctl);
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid transparent;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s,
+    box-shadow 0.15s;
+}
+.ctl::placeholder {
+  color: var(--ink-3);
+}
+.ctl:hover {
+  border-color: var(--line);
+}
+.ctl:focus {
+  outline: none;
+  background: var(--surface);
+  border-color: var(--accent-ink);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+textarea.ctl {
+  padding: 13px 14px;
+  line-height: 1.45;
+  resize: vertical;
+  min-height: 96px;
+}
+select.ctl {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238a929c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+/* pressione: risposta tattile visiva */
+.press {
+  transition:
+    transform 0.16s var(--ease-out-soft),
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    opacity 0.15s,
+    box-shadow 0.15s;
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+}
+
+/* vaul */
+[data-vaul-drawer] {
+  touch-action: none;
+}
+[data-vaul-drawer-direction='bottom']::after {
+  background: var(--surface) !important;
+}
+
+/* foglio di stampa per il conto */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    box-shadow: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
