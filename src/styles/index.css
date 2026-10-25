@@ -9,6 +9,8 @@
 */
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+@custom-variant glass (&:where([data-glass='on'], [data-glass='on'] *));
+@custom-variant noglass (&:where([data-glass='off'], [data-glass='off'] *, :root:not([data-glass]) *));
 
 @theme {
   --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -71,6 +73,15 @@
   --shadow-2: 0 1px 0 rgba(28, 27, 25, 0.04), 0 8px 24px -8px rgba(28, 27, 25, 0.18);
   --shadow-accent: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 8px 18px -10px rgba(214, 78, 0, 0.75);
 
+  /* vetro liquido (iOS) */
+  --glass-fill: rgba(255, 255, 255, 0.52);
+  --glass-fill-thick: rgba(250, 249, 247, 0.78);
+  --glass-rim: rgba(255, 255, 255, 0.95);
+  --glass-rim-low: rgba(255, 255, 255, 0.28);
+  --glass-sheen: rgba(255, 255, 255, 0.55);
+  --glass-lens: rgba(255, 255, 255, 0.62);
+  --glass-shadow: 0 12px 32px -12px rgba(28, 27, 25, 0.32), 0 3px 10px -4px rgba(28, 27, 25, 0.14);
+
   /* stati della scheda */
   --st-accettato: #6d6a64;
   --st-diagnosi: #9a6500;
@@ -113,6 +124,14 @@
   --shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.025);
   --shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.035), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
   --shadow-accent: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 8px 18px -10px rgba(255, 106, 19, 0.55);
+
+  --glass-fill: rgba(44, 42, 39, 0.5);
+  --glass-fill-thick: rgba(36, 34, 32, 0.8);
+  --glass-rim: rgba(255, 255, 255, 0.38);
+  --glass-rim-low: rgba(255, 255, 255, 0.06);
+  --glass-sheen: rgba(255, 255, 255, 0.14);
+  --glass-lens: rgba(255, 255, 255, 0.13);
+  --glass-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.7), 0 3px 10px -4px rgba(0, 0, 0, 0.4);
 
   --st-accettato: #a29d95;
   --st-diagnosi: #e8b04c;
@@ -282,6 +301,97 @@ select.ctl {
   transform: scale(0.97);
 }
 
+}
+
+/* ---------------- vetro liquido ----------------
+   Imitazione del Liquid Glass di iOS 26: riempimento traslucido con sfocatura e saturazione dello sfondo,
+   bordo speculare più luminoso in alto a sinistra, riflesso morbido, ombra che stacca dal contenuto.
+   Attivo con [data-glass='on'] (automatico su iPhone e iPad); altrove .glass è una barra traslucida classica. */
+@layer components {
+  .glass {
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    backdrop-filter: blur(24px) saturate(1.5);
+  }
+  [data-glass='on'] .glass {
+    position: relative;
+    isolation: isolate;
+    background: var(--glass-fill);
+    -webkit-backdrop-filter: blur(12px) saturate(1.9) brightness(1.04);
+    backdrop-filter: blur(12px) saturate(1.9) brightness(1.04);
+    box-shadow: var(--glass-shadow);
+  }
+  [data-glass='on'] .glass.glass-thick {
+    background: var(--glass-fill-thick);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8);
+    backdrop-filter: blur(28px) saturate(1.8);
+  }
+  [data-glass='on'] .glass::before,
+  [data-glass='on'] .glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  /* bordo speculare */
+  [data-glass='on'] .glass::before {
+    padding: 1px;
+    background: linear-gradient(140deg, var(--glass-rim) 0%, var(--glass-rim-low) 38%, var(--glass-rim-low) 62%, var(--glass-rim) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+  /* riflesso */
+  [data-glass='on'] .glass::after {
+    background: radial-gradient(130% 90% at 25% -10%, var(--glass-sheen), transparent 55%);
+  }
+  /* vetro colorato: l'azione principale */
+  [data-glass='on'] .glass.glass-tint {
+    background: color-mix(in srgb, var(--accent) 86%, transparent);
+    color: var(--on-accent);
+  }
+  /* bordo superiore e inferiore sfumati sotto le barre flottanti (scroll edge) */
+  [data-glass='on'] .edge-top {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 29;
+    height: calc(env(safe-area-inset-top, 0px) + 84px);
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    background: linear-gradient(var(--bg) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 50%, transparent);
+    -webkit-mask-image: linear-gradient(#000 55%, transparent);
+    mask-image: linear-gradient(#000 55%, transparent);
+  }
+  [data-glass='on'] .edge-bottom {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 39;
+    height: calc(env(safe-area-inset-bottom, 0px) + 96px);
+    pointer-events: none;
+    background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 70%, transparent));
+  }
+  [data-glass='off'] .edge-top,
+  [data-glass='off'] .edge-bottom {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  [data-glass='on'] .glass {
+    background: var(--surface) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* sonner: la pila di notifiche non deve mai allargare la pagina */
+[data-sonner-toaster] {
+  max-width: calc(100vw - 24px);
 }
 
 /* vaul */

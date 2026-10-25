@@ -6,6 +6,7 @@ import { db } from '@/data/db';
 import { Shell } from './Shell';
 import { PanePlaceholder, Workspace } from './layout';
 import { JobPage } from '@/features/job/JobPage';
+import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { UpdatePrompt } from './UpdatePrompt';
 
 // le schermate meno frequenti si caricano quando servono
@@ -24,7 +25,8 @@ const router = createHashRouter([
         path: '/',
         element: <Workspace />,
         children: [
-          { index: true, element: <PanePlaceholder /> },
+          { index: true, element: <DashboardPage /> },
+          { path: 'schede', element: <PanePlaceholder /> },
           { path: 'job/:id', element: <JobPage /> },
           { path: 'job/:id/conto', element: L(<DocPage />) },
           { path: 'job/:id/modifica', element: L(<FormPage />) },

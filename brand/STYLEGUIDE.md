@@ -78,6 +78,26 @@ Sei tappe, sempre in quest'ordine: Accettato, In diagnosi, Attesa ricambi, In la
 - Icone ricorrenti: `CarFront` schede, `ReceiptText` fatture ditte, `Settings2` officina, `Plus` nuova, `MessageCircle` WhatsApp, `Phone` chiama, `FileText` conto, `Share2` condividi PDF, `Camera` foto, `Building2` azienda.
 - Le icone accompagnano una parola; da sole solo se il loro significato è universale (chiudi, chiama) e con etichetta accessibile.
 
+## Vetro liquido (iOS)
+
+Su iPhone e iPad Ponte usa il linguaggio del vetro di iOS 26; su Android e desktop resta la barra traslucida classica. L'utente può forzarlo in Officina → Aspetto → Vetro liquido.
+
+- **Cosa diventa vetro**: solo i comandi che galleggiano sul contenuto. Barra delle sezioni (capsula flottante con la lente che scorre sotto la voce attiva, pulsante "+" separato in vetro arancio), campo di ricerca, pulsanti tondi in alto (indietro, altre azioni), barra azioni della scheda, fogli dal basso, notifiche.
+- **Cosa non lo diventa mai**: schede, sezioni, campi dei moduli, documenti. Il contenuto resta su superfici piene; il vetro sta sopra.
+- **Ricetta**: riempimento `glass-fill` (sottile) o `glass-fill-thick` (fogli), sfocatura 12–28px con saturazione 1.8–1.9, bordo speculare più chiaro in alto a sinistra, riflesso radiale morbido, ombra `glass-shadow`. Il vetro colorato si usa solo per l'azione principale (`accent` all'86%).
+- **Comportamento**: scorrendo verso il basso la barra si compatta (solo icone); risalendo torna intera. Sotto le barre compare una sfumatura del fondo solo quando il contenuto scorre.
+- **Accessibilità**: con "Riduci trasparenza" attivo tutto torna su superfici piene. Il testo sul vetro usa sempre `ink`/`ink-2`, mai colori chiari.
+
+## Oggi
+
+La prima schermata è la giornata dell'officina, non l'elenco.
+
+- In alto data e saluto, poi la ricerca: toccandola si apre l'archivio con il campo già attivo.
+- "In officina ora": il numero grande dei veicoli sul ponte e una riga per stato con la barra nel colore dello stato. Tocca per aprire l'elenco filtrato.
+- Quattro riquadri: Pronte da ritirare, Da incassare, Da fatturare, Incassato nel mese (con il confronto sul mese prima). Importi in euro interi; i centesimi restano nelle schede.
+- Consegne promesse (in ritardo, oggi, domani), incassi delle ultime 8 settimane in colonne arancio (una sola serie, valore sull'ultima colonna o su quella toccata), ultime accettazioni.
+- Ogni riquadro porta a un elenco: nessun numero è un vicolo cieco.
+
 ## Movimento e tatto
 
 - Le molle (`stiffness` 420–520, `damping` 34–40) muovono solo ciò che l'utente ha toccato: il pallino del binario degli stati, l'indicatore dei controlli segmentati, i fogli dal basso.

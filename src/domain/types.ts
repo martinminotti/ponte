@@ -5,6 +5,7 @@ export type ClientType = 'privato' | 'azienda';
 export type PlateCountry = 'I' | 'RSM';
 export type Billing = 'mensile' | 'singola';
 export type ThemePref = 'system' | 'light' | 'dark';
+export type GlassPref = 'auto' | 'on' | 'off';
 
 export interface Company {
   name: string;
@@ -97,6 +98,8 @@ export interface Settings {
   logo: string;
   workers: string[];
   theme: ThemePref;
+  /** vetro liquido: auto = solo iPhone e iPad */
+  glass: GlassPref;
   nextNumber: number;
   lastBackupAt?: number;
   migratedV1?: boolean;
@@ -125,6 +128,7 @@ export const DEFAULT_SETTINGS: Settings = {
   logo: '',
   workers: [],
   theme: 'system',
+  glass: 'auto',
   nextNumber: 1,
 };
 

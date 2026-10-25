@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { Building2, ChevronDown, Copy, FileText, MessageCircle, MoreHorizontal, Pencil, Phone, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AnimatePresence, motion } from 'motion/react';
-import { ActionBar, Page, TopBar } from '@/app/layout';
+import { ActionBar, BarButton, Page, TopBar } from '@/app/layout';
 import { useJob, useJobs, useSettings } from '@/app/hooks';
 import { STATI, statoIndex, statoLabel } from '@/domain/constants';
 import { fmtDateTime, fmtIsoDay, jobNumber } from '@/domain/format';
@@ -12,7 +12,7 @@ import { buildMsg } from '@/domain/messages';
 import type { Job, StatusKey } from '@/domain/types';
 import { deleteJob, mutateJob, restoreJob } from '@/data/repo';
 import { copyText, haptic, openExternal } from '@/platform/native';
-import { Button, IconButton, Section } from '@/ui/controls';
+import { Button, Section } from '@/ui/controls';
 import { Plate } from '@/ui/Plate';
 import { Sheet } from '@/ui/Sheet';
 import { StatusRail, stColor } from '@/ui/status';
@@ -102,9 +102,9 @@ function JobView({ job }: { job: Job }) {
         hideBackOnWide
         title={<span className="tnum text-ink-2">Scheda N. {jobNumber(job.number)}</span>}
         right={
-          <IconButton label="Altre azioni" variant="ghost" onClick={() => setMore(true)}>
+          <BarButton label="Altre azioni" onClick={() => setMore(true)}>
             <MoreHorizontal size={22} />
-          </IconButton>
+          </BarButton>
         }
       />
 

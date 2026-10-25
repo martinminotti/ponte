@@ -10,6 +10,11 @@ function it(desc: string, euro: number) {
   return { id: uid('i'), desc, amount: Math.round(euro * 100) };
 }
 
+function iso(ts: number) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function hist(path: StatusKey[], start: number, step: number) {
   return path.map((s, i) => ({ s, t: start + i * step }));
 }
@@ -31,19 +36,19 @@ export async function seedDemo(): Promise<number> {
       services: ['Meccanica'], request: 'Tagliando e rumore dai freni anteriori in frenata.', notes: 'Graffio sul paraurti posteriore sx. Spia service accesa.',
       status: 'lavorazione', history: hist(['accettato', 'diagnosi', 'lavorazione'], now - 5 * H, H),
       items: [it('Tagliando completo', 189), it('Pastiglie freni anteriori', 96.5), it("Mano d'opera", 70)],
-      workers: ['Luca', 'Davide'], createdAt: now - 5 * H, dueDate: new Date(now + D).toISOString().slice(0, 10),
+      workers: ['Luca', 'Davide'], createdAt: now - 5 * H, dueDate: iso(now + D),
     },
     {
       plate: 'A4721', plateCountry: 'RSM', make: 'Fiat', model: 'Panda Cross', km: '64.120', owner: 'Giulia Terenzi', phone: '+378 0549 887 120',
       services: ['Gomme'], tyres: '185/65 R15', request: 'Cambio gomme invernali.', status: 'pronto',
       history: hist(['accettato', 'lavorazione', 'pronto'], now - 26 * H, 2 * H), closedAt: now - 22 * H,
-      items: [it('Cambio gomme (4)', 48), it('Equilibratura', 32)], deposit: 0, workers: ['Davide'], createdAt: now - 26 * H,
+      items: [it('Cambio gomme (4)', 48), it('Equilibratura', 32)], deposit: 0, workers: ['Davide'], createdAt: now - 26 * H, dueDate: iso(now),
     },
     {
       plate: 'FX903LM', make: 'BMW', model: 'X3 xDrive20d', km: '91.870', owner: 'Andrea Gasperoni', phone: '338 220 9013',
       services: ['Elettrauto'], request: 'Batteria scarica la mattina, avviamento difficile.', status: 'ricambi',
       history: hist(['accettato', 'diagnosi', 'ricambi'], now - 2 * D, 3 * H), items: [it('Diagnosi elettronica', 45)],
-      deposit: 5000, workers: ['Luca'], createdAt: now - 2 * D,
+      deposit: 5000, workers: ['Luca'], createdAt: now - 2 * D, dueDate: iso(now - D),
     },
     {
       plate: 'EZ215KB', make: 'Iveco', model: 'Daily 35S14', km: '211.300', client: 'azienda', company: ditta, owner: 'Paolo Gualdi', phone: '335 760 1180',
@@ -75,6 +80,27 @@ export async function seedDemo(): Promise<number> {
       items: [], createdAt: now - 40 * 60_000,
     },
   ];
+  // storico: lavori consegnati e pagati nelle ultime settimane, per dare vita a Oggi e ai grafici
+  const storico: [string, string, string, string, number, number, string][] = [
+    ['FG219PL', 'Audi', 'A4 Avant', 'Nicola Ugolini', 6, 412, 'Carta / POS'],
+    ['EK330ST', 'Fiat', 'Ducato', 'Stefano Guidi', 13, 265, 'Contanti'],
+    ['GA771MM', 'Mini', 'Cooper S', 'Laura Michelotti', 17, 138, 'Bonifico'],
+    ['DZ402AR', 'Opel', 'Corsa', 'Roberto Zonzini', 24, 96, 'Contanti'],
+    ['FK118BN', 'Volvo', 'XC60 B4', 'Marta Berardi', 30, 640, 'Carta / POS'],
+    ['GC905TT', 'Kia', 'Sportage', 'Davide Muccioli', 37, 228, 'Carta / POS'],
+    ['EH644CV', 'Lancia', 'Ypsilon', 'Anna Selva', 44, 74, 'Contanti'],
+    ['FP287LK', 'Skoda', 'Octavia', 'Paolo Casali', 47, 352, 'Bonifico'],
+  ];
+  for (const [plate, make, model, owner, daysAgo, euro, payMethod] of storico) {
+    const t0 = now - daysAgo * D - 2 * D;
+    const paidAt = now - daysAgo * D;
+    raw.push({
+      plate, make, model, owner, phone: '', services: ['Meccanica'], status: 'consegnato',
+      history: hist(['accettato', 'lavorazione', 'pronto', 'consegnato'], t0, 12 * H), closedAt: paidAt - 6 * H, deliveredAt: paidAt,
+      items: [it('Tagliando completo', euro * 0.7), it("Mano d'opera", euro * 0.3)], paid: true, paidAt, paidAmount: Math.round(euro * 100), payMethod, createdAt: t0,
+    });
+  }
+
   const sorted = raw.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   let n = Math.max(s.nextNumber || 1, ((await db.jobs.orderBy('number').last())?.number ?? 0) + 1);
   const jobs = sorted.map((j) =>

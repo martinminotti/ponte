@@ -6,7 +6,7 @@ import { useJobs, useSettings, useWide } from '@/app/hooks';
 import { BrandMark } from '@/app/Shell';
 import { GARANZIE, PRESETS, VATS } from '@/domain/constants';
 import { fmtDateTime } from '@/domain/format';
-import type { ThemePref } from '@/domain/types';
+import type { GlassPref, ThemePref } from '@/domain/types';
 import { backupFileName, exportBackup, importBackup } from '@/data/backup';
 import { seedDemo } from '@/data/demo';
 import { deleteDemo, requestPersistence, saveSettings } from '@/data/repo';
@@ -173,6 +173,18 @@ export function SettingsPage() {
                   { v: 'system', l: 'Automatico' },
                   { v: 'light', l: 'Chiaro' },
                   { v: 'dark', l: 'Scuro' },
+                ]}
+              />
+            </Field>
+            <Field label="Vetro liquido" hint="Barre e comandi traslucidi in stile iOS. Automatico: attivo su iPhone e iPad.">
+              <Segmented<GlassPref>
+                label="Vetro liquido"
+                value={s.glass || 'auto'}
+                onChange={(v) => save({ glass: v })}
+                options={[
+                  { v: 'auto', l: 'Automatico' },
+                  { v: 'on', l: 'Sempre' },
+                  { v: 'off', l: 'Mai' },
                 ]}
               />
             </Field>

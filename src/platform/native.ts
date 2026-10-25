@@ -9,6 +9,14 @@ import { Capacitor } from '@capacitor/core';
 export const isNative = () => Capacitor.isNativePlatform();
 export const platform = () => Capacitor.getPlatform() as 'web' | 'ios' | 'android';
 
+/** iPhone e iPad, nell'app nativa o in Safari (iPadOS si presenta come Mac con touch). */
+export function isAppleMobile(): boolean {
+  if (platform() === 'ios') return true;
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1);
+}
+
 export async function haptic(kind: 'light' | 'medium' | 'success' | 'warning' = 'light') {
   try {
     if (isNative()) {

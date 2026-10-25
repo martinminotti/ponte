@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
-import { useMatch, useNavigate } from 'react-router';
-import { Plus, Search, Sparkles, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMatch, useNavigate, useSearchParams } from 'react-router';
+import { Plus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { useJobs, useWide } from '@/app/hooks';
+import { useGlass, useJobs, useWide } from '@/app/hooks';
 import { BrandMark } from '@/app/Shell';
 import { FILTRI, type FilterKey } from '@/domain/constants';
 import { eur } from '@/domain/format';
@@ -12,6 +12,7 @@ import { deleteDemo } from '@/data/repo';
 import { Button, Chip, EmptyState } from '@/ui/controls';
 import { Plate } from '@/ui/Plate';
 import { JobCard } from './JobCard';
+import { SearchField } from '@/ui/SearchField';
 
 const FK = 'ro:filter';
 const readFilter = (): FilterKey => {
@@ -36,6 +37,19 @@ export function ListPage() {
     lastQuery = v;
     setQState(v);
   };
+  const glass = useGlass();
+  const searchRef = useRef<HTMLInputElement>(null);
+  const [sp, setSp] = useSearchParams();
+
+  // filtro o ricerca arrivati da un riquadro di Oggi: /schede?f=pronti, /schede?cerca=1
+  useEffect(() => {
+    const f = sp.get('f') as FilterKey | null;
+    if (f && FILTRI.some((x) => x.k === f)) setFilter(f);
+    if (sp.get('cerca')) setTimeout(() => searchRef.current?.focus(), 60);
+    if (f || sp.get('cerca')) setSp({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sp]);
+
   const setFilter = (f: FilterKey) => {
     setFilterState(f);
     try {
@@ -75,28 +89,15 @@ export function ListPage() {
         </header>
       )}
 
-      <div className="sticky top-[env(safe-area-inset-top,0px)] z-30 bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] px-4 pt-3 pb-2 backdrop-blur-xl backdrop-saturate-150 lg:top-0 lg:pt-5">
+      {!wide && <h1 className="w-wide px-4 pt-5 text-[32px] leading-none font-semibold tracking-[-0.02em] text-ink">Schede</h1>}
+
+      <div
+        className={`sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:top-0 lg:pt-5 ${
+          glass && !wide ? '' : 'bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] backdrop-blur-xl backdrop-saturate-150'
+        }`}
+      >
         {wide && <h1 className="w-wide mb-3 text-[26px] font-semibold tracking-[-0.01em] text-ink">Schede</h1>}
-        <label className="relative block">
-          <span className="sr-only">Cerca</span>
-          <Search size={20} className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-ink-3" />
-          <input
-            type="search"
-            inputMode="search"
-            autoComplete="off"
-            spellCheck={false}
-            enterKeyHint="search"
-            placeholder="Targa, telaio, cliente, ditta, telefono"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="ctl h-[52px] !rounded-[16px] !bg-surface pr-11 pl-12 shadow-[var(--shadow-1)] [&::-webkit-search-cancel-button]:hidden"
-          />
-          {q && (
-            <button type="button" onClick={() => setQ('')} aria-label="Cancella ricerca" className="press absolute top-1/2 right-2 grid size-9 -translate-y-1/2 place-items-center rounded-full text-ink-3 hover:bg-surface-2">
-              <X size={18} />
-            </button>
-          )}
-        </label>
+        <SearchField ref={searchRef} value={q} onChange={setQ} />
         <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1" role="group" aria-label="Filtra le schede">
           {FILTRI.map((f) => (
             <Chip key={f.k} on={filter === f.k} count={jobs ? counts[f.k] : undefined} onClick={() => setFilter(f.k)}>

@@ -5,14 +5,14 @@ import { haptic } from '@/platform/native';
 
 export const stColor = (k: StatusKey) => `var(--st-${k})`;
 
-export function StatusPill({ s, size = 'md' }: { s: StatusKey; size?: 'sm' | 'md' }) {
+export function StatusPill({ s, size = 'md', short }: { s: StatusKey; size?: 'sm' | 'md'; short?: boolean }) {
   return (
     <span
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full font-semibold whitespace-nowrap ${size === 'sm' ? 'h-6 px-2 text-[13px]' : 'h-7 px-2.5 text-[14px]'}`}
       style={{ color: `color-mix(in srgb, ${stColor(s)} 72%, var(--ink))`, background: `color-mix(in srgb, ${stColor(s)} 12%, transparent)` }}
     >
       <span className="size-1.5 rounded-full" style={{ background: stColor(s) }} />
-      {statoLabel(s)}
+      {short ? STATI[statoIndex(s)].short : statoLabel(s)}
     </span>
   );
 }

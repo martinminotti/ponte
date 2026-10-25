@@ -207,7 +207,7 @@ function FormInner({ job }: { job?: Job }) {
 
   return (
     <Page className="pb-28">
-      <TopBar back={-1} backLabel={editing ? 'Scheda' : 'Annulla'} title={editing ? 'Modifica dati' : 'Nuova accettazione'} />
+      <TopBar back={job ? `/job/${job.id}` : '/'} backLabel={editing ? 'Scheda' : 'Annulla'} title={editing ? 'Modifica dati' : 'Nuova accettazione'} />
       <form id="job-form" onSubmit={submit} noValidate className="mx-auto flex max-w-[760px] flex-col gap-3 px-4 pt-1">
         <Segmented
           label="Tipo di cliente"

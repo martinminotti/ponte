@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
-import { Building2, CarFront, Plus, ReceiptText, Settings2, Store, User } from 'lucide-react';
+import { Building2, CarFront, Gauge, Plus, ReceiptText, Settings2, Store, User } from 'lucide-react';
+import { motion } from 'motion/react';
 import { PonteIcon, PonteWordmark } from '@/ui/Brand';
 import { Toaster } from 'sonner';
-import { useSettings, useThemeSync, useWide } from './hooks';
+import { useGlass, useScrolledDown, useScrolledPast, useSettings, useThemeSync, useWide } from './hooks';
 import { Sheet } from '@/ui/Sheet';
 import { bindAndroidBack, haptic, initNative } from '@/platform/native';
 
 const NAV = [
-  { to: '/', label: 'Schede', icon: CarFront, end: true },
-  { to: '/mensile', label: 'Fatture ditte', icon: ReceiptText, end: false },
+  { to: '/', label: 'Oggi', icon: Gauge, end: true },
+  { to: '/schede', label: 'Schede', icon: CarFront, end: false },
+  { to: '/mensile', label: 'Fatture', icon: ReceiptText, end: false },
   { to: '/impostazioni', label: 'Officina', icon: Settings2, end: false },
 ];
 
@@ -85,8 +87,12 @@ export function Shell() {
   const nav = useNavigate();
   const [newOpen, setNewOpen] = useState(false);
 
+  const glass = useGlass();
+  const compact = useScrolledDown();
+  const scrolled = useScrolledPast();
+
   // la barra in basso compare solo sulle schermate principali
-  const top = loc.pathname === '/' || loc.pathname === '/mensile' || loc.pathname === '/impostazioni';
+  const top = ['/', '/schede', '/mensile', '/impostazioni'].includes(loc.pathname);
 
   useEffect(() => {
     initNative(dark);
@@ -110,10 +116,16 @@ export function Shell() {
     return () => window.removeEventListener('ro:new-job', open);
   }, []);
 
+  const openNew = () => {
+    haptic('medium');
+    setNewOpen(true);
+  };
+
   return (
     <div className="min-h-dvh lg:flex">
       {/* copre l'area della barra di stato del telefono mentre si scorre */}
-      <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[45] h-[env(safe-area-inset-top,0px)] bg-bg" />
+      {!glass && <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[45] h-[env(safe-area-inset-top,0px)] bg-bg" />}
+      {glass && !wide && <div aria-hidden="true" className="edge-top transition-opacity duration-300" style={{ opacity: scrolled ? 1 : 0 }} />}
       {wide && (
         <aside className="safe-top sticky top-0 flex h-dvh w-[248px] shrink-0 flex-col border-r border-line bg-surface px-4 pb-5">
           <div className="flex items-center gap-2.5 pt-6 pb-7 pl-1 text-ink">
@@ -151,28 +163,49 @@ export function Shell() {
         <Outlet />
       </div>
 
-      {!wide && top && (
-        <nav
-          aria-label="Sezioni"
-          className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line bg-[color-mix(in_srgb,var(--surface)_88%,transparent)] backdrop-blur-xl backdrop-saturate-150"
-        >
-          <div className="mx-auto grid h-[68px] max-w-[560px] grid-cols-4 items-center px-2">
-            {NAV.slice(0, 2).map((n) => (
+      {!wide && top && glass && (
+        <>
+          <div aria-hidden="true" className="edge-bottom" />
+          <nav aria-label="Sezioni" className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
+            <div className="mx-auto flex max-w-[560px] items-end gap-2.5 px-3.5 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
+              <motion.div
+                layout
+                transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                className={`glass pointer-events-auto flex flex-1 items-stretch rounded-full p-1 ${compact ? 'h-[52px]' : 'h-[62px]'}`}
+              >
+                {NAV.map((n) => (
+                  <GlassTab key={n.to} {...n} compact={compact} />
+                ))}
+              </motion.div>
+              <motion.button
+                layout
+                transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                type="button"
+                aria-label="Nuova accettazione"
+                onClick={openNew}
+                className={`glass glass-tint press pointer-events-auto grid shrink-0 place-items-center rounded-full ${compact ? 'size-[52px]' : 'size-[62px]'}`}
+              >
+                <Plus size={compact ? 24 : 27} strokeWidth={2.5} />
+              </motion.button>
+            </div>
+          </nav>
+        </>
+      )}
+
+      {!wide && top && !glass && (
+        <nav aria-label="Sezioni" className="glass safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line">
+          <div className="mx-auto grid h-[68px] max-w-[560px] grid-cols-5 items-center px-1">
+            {NAV.map((n) => (
               <TabLink key={n.to} {...n} />
             ))}
-            <TabLink {...NAV[2]} />
             <div className="flex justify-center">
               <button
                 type="button"
                 aria-label="Nuova accettazione"
-                onClick={() => {
-                  haptic('medium');
-                  setNewOpen(true);
-                }}
-                className="press flex h-12 items-center gap-1.5 rounded-full bg-accent pr-4 pl-3.5 font-semibold text-on-accent shadow-[var(--shadow-accent)]"
+                onClick={openNew}
+                className="press grid size-12 place-items-center rounded-full bg-accent text-on-accent shadow-[var(--shadow-accent)]"
               >
-                <Plus size={22} strokeWidth={2.6} />
-                <span className="text-[15px]">Nuova</span>
+                <Plus size={24} strokeWidth={2.6} />
               </button>
             </div>
           </div>
@@ -183,17 +216,38 @@ export function Shell() {
       <Toaster
         position={wide ? 'top-right' : 'top-center'}
         offset={wide ? 24 : 'calc(env(safe-area-inset-top, 0px) + 12px)'}
-        mobileOffset={{ top: 'calc(env(safe-area-inset-top, 0px) + 10px)' }}
+        mobileOffset={{ top: 'calc(env(safe-area-inset-top, 0px) + 10px)', left: 12, right: 12 }}
         theme={dark ? 'dark' : 'light'}
         toastOptions={{
           classNames: {
-            toast: '!rounded-[16px] !border-line !bg-surface !text-ink !shadow-[var(--shadow-2)] !font-sans !text-[15px] !gap-2.5',
+            toast: `!font-sans !text-[15px] !gap-2.5 !text-ink ${glass ? '!rounded-[22px] !border-white/30 !bg-[var(--glass-fill-thick)] backdrop-blur-2xl backdrop-saturate-150 !shadow-[var(--glass-shadow)]' : '!rounded-[16px] !border-line !bg-surface !shadow-[var(--shadow-2)]'}`,
             description: '!text-ink-2',
             actionButton: '!bg-accent !text-on-accent !rounded-[10px] !h-8 !px-3 !font-semibold !text-[14px]',
           },
         }}
       />
     </div>
+  );
+}
+
+/** Scheda della barra in vetro: la "lente" più chiara scorre sotto la voce attiva. */
+function GlassTab({ to, label, icon: Icon, end, compact }: (typeof NAV)[number] & { compact: boolean }) {
+  return (
+    <NavLink to={to} end={end} className="press relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full" onClick={() => haptic('light')}>
+      {({ isActive }) => (
+        <>
+          {isActive && (
+            <motion.span
+              layoutId="glass-tab-lens"
+              className="absolute inset-0 rounded-full bg-[var(--glass-lens)] shadow-[inset_0_0.5px_0_rgba(255,255,255,.7),0_1px_3px_rgba(0,0,0,.08)]"
+              transition={{ type: 'spring', stiffness: 480, damping: 38 }}
+            />
+          )}
+          <Icon size={compact ? 21 : 22} strokeWidth={isActive ? 2.3 : 1.9} className={`relative ${isActive ? 'text-accent-ink' : 'text-ink'}`} />
+          {!compact && <span className={`relative text-[10.5px] leading-none ${isActive ? 'font-semibold text-accent-ink' : 'font-medium text-ink'}`}>{label}</span>}
+        </>
+      )}
+    </NavLink>
   );
 }
 

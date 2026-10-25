@@ -18,7 +18,7 @@ export function DocPage() {
   const wa = j.wa !== false ? waLink(j.phone, buildMsg(j, kind, s), s.prefix) : null;
   return (
     <Page className="pb-10">
-      <TopBar back={-1} backLabel="Scheda" title={`Conto N. ${jobNumber(j.number)}`} />
+      <TopBar back={`/job/${j.id}`} backLabel="Scheda" title={`Conto N. ${jobNumber(j.number)}`} />
       <div className="mx-auto flex max-w-[760px] flex-col gap-4 px-4">
         {!j.items.length && <Note tone="warn">Il conto è vuoto: aggiungi i lavori eseguiti nella scheda.</Note>}
         <JobPaper j={j} s={s} />
