@@ -1,0 +1,17 @@
+{
+  "name": "Registro Officina",
+  "short_name": "Officina",
+  "description": "Accettazione veicoli, stato lavori su WhatsApp, conto e fatture per officine, elettrauti e gommisti.",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E8ECF0",
+  "theme_color": "#1B4FA3",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
