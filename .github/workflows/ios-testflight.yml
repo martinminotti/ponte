@@ -58,8 +58,44 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
           mkdir -p "$RUNNER_TEMP/asc"
-          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc/AuthKey.p8"
+          # ricostruisce il PEM anche se incollato su una riga sola (capita dal telefono)
+          node -e '
+            const raw = process.env.ASC_KEY_P8.trim();
+            const body = raw.replace(/-----(BEGIN|END) PRIVATE KEY-----/g, "").replace(/[^A-Za-z0-9+/=]/g, "");
+            const pem = "-----BEGIN PRIVATE KEY-----\n" + body.match(/.{1,64}/g).join("\n") + "\n-----END PRIVATE KEY-----\n";
+            require("fs").writeFileSync(process.argv[1], pem, { mode: 0o600 });
+          ' "$RUNNER_TEMP/asc/AuthKey.p8"
           echo "ASC_KEY_PATH=$RUNNER_TEMP/asc/AuthKey.p8" >> "$GITHUB_ENV"
+
+      - name: Verifica accesso ad App Store Connect
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          node -e '
+            const crypto = require("crypto"), fs = require("fs");
+            const fail = (m) => { console.log("::error title=Chiave API::" + m); process.exit(1); };
+            let key;
+            try { key = crypto.createPrivateKey(fs.readFileSync(process.env.ASC_KEY_PATH)); }
+            catch { fail("Il contenuto di ASC_KEY_P8 non è una chiave .p8 valida: incolla tutto il file, righe BEGIN/END comprese."); }
+            const kid = process.env.KEY_ID.trim(), iss = process.env.ISSUER.trim();
+            if (!/^[A-Z0-9]{10}$/.test(kid)) fail("ASC_KEY_ID dovrebbe essere di 10 caratteri (lettere maiuscole e cifre). Controlla di non aver invertito Key ID e Issuer ID.");
+            if (!/^[0-9a-f-]{36}$/i.test(iss)) fail("ASC_ISSUER_ID dovrebbe essere un UUID (formato 8-4-4-4-12). Controlla di non aver invertito Key ID e Issuer ID.");
+            const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+            const now = Math.floor(Date.now() / 1000);
+            const data = b64({ alg: "ES256", kid, typ: "JWT" }) + "." + b64({ iss, iat: now, exp: now + 600, aud: "appstoreconnect-v1" });
+            const sig = crypto.sign("sha256", Buffer.from(data), { key, dsaEncoding: "ieee-p1363" }).toString("base64url");
+            fetch("https://api.appstoreconnect.apple.com/v1/apps?filter[bundleId]=app.ponte.officina", { headers: { Authorization: "Bearer " + data + "." + sig } })
+              .then(async (r) => {
+                const j = await r.json().catch(() => ({}));
+                if (r.status === 401) fail("Apple rifiuta la chiave (401): Key ID, Issuer ID e file .p8 non appartengono alla stessa chiave, oppure la chiave è stata revocata. Usa una chiave del team (non individuale).");
+                if (r.status === 403) fail("La chiave non ha i permessi necessari (403): crea una chiave del team con ruolo Admin.");
+                if (!r.ok) fail("App Store Connect ha risposto " + r.status + ": " + JSON.stringify(j.errors || j).slice(0, 400));
+                if (!j.data || !j.data.length) fail("Chiave valida, ma su App Store Connect non c è nessuna app con ID pacchetto app.ponte.officina: creala in App → Nuova app.");
+                console.log("Accesso ok: app trovata (" + j.data[0].attributes.name + ").");
+              })
+              .catch((e) => fail("Non riesco a contattare App Store Connect: " + e.message));
+          '
 
       - name: Archivia
         run: |
