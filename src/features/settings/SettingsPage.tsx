@@ -86,7 +86,7 @@ export function SettingsPage() {
     <Page className="pb-safe-bar lg:pb-10">
       <div className="mx-auto max-w-[760px] px-4">
         {!wide && (
-          <header className="safe-top pt-4">
+          <header className="pt-[calc(env(safe-area-inset-top,0px)+16px)]">
             <BrandMark />
           </header>
         )}

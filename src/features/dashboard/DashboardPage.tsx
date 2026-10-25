@@ -38,7 +38,7 @@ export function DashboardPage() {
   const header = (
     <>
       {!wide && (
-        <header className="safe-top px-4 pt-4">
+        <header className="px-4 pt-[calc(env(safe-area-inset-top,0px)+16px)]">
           <BrandMark />
         </header>
       )}

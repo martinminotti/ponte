@@ -350,7 +350,7 @@ function Viewer({ p, onClose }: { p: Photo; onClose: () => void }) {
   const url = useObjectUrl(p.blob);
   return (
     <motion.div className="fixed inset-0 z-[60] flex flex-col bg-black/92" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-label="Foto">
-      <div className="safe-top flex items-center justify-between p-3">
+      <div className="flex items-center justify-between px-3 pb-3 pt-[calc(env(safe-area-inset-top,0px)+12px)]">
         <button
           type="button"
           onClick={async () => {
@@ -369,7 +369,7 @@ function Viewer({ p, onClose }: { p: Photo; onClose: () => void }) {
       <div className="flex min-h-0 flex-1 items-center justify-center p-3" onClick={onClose}>
         {url && <img src={url} alt="" className="max-h-full max-w-full rounded-[10px] object-contain" />}
       </div>
-      <p className="safe-bottom pb-4 text-center text-[13px] text-white/60">{fmtDateTime(p.createdAt)}</p>
+      <p className="pb-[calc(env(safe-area-inset-bottom,0px)+16px)] text-center text-[13px] text-white/60">{fmtDateTime(p.createdAt)}</p>
     </motion.div>
   );
 }

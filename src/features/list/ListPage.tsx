@@ -84,7 +84,7 @@ export function ListPage() {
   return (
     <div className={`mx-auto w-full ${wide ? 'max-w-none' : 'max-w-[680px]'} pb-safe-bar lg:pb-10`}>
       {!wide && (
-        <header className="safe-top px-4 pt-4">
+        <header className="px-4 pt-[calc(env(safe-area-inset-top,0px)+16px)]">
           <BrandMark />
         </header>
       )}
