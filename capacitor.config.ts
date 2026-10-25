@@ -1,12 +1,18 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'sm.registroofficina.app',
-  appName: 'Registro Officina',
+  appId: 'app.ponte.officina',
+  appName: 'Ponte',
   webDir: 'dist',
-  backgroundColor: '#F2F3F1',
+  backgroundColor: '#EDEDEB',
   plugins: {
-    SplashScreen: { launchShowDuration: 0, backgroundColor: '#F2F3F1' },
+    SplashScreen: {
+      launchShowDuration: 500,
+      launchAutoHide: true,
+      launchFadeOutDuration: 250,
+      backgroundColor: '#FF6A13',
+      showSpinner: false,
+    },
   },
   ios: { contentInset: 'never' },
   android: { allowMixedContent: false },

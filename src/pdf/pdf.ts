@@ -192,7 +192,7 @@ class Doc {
 async function newDoc(s: Settings) {
   const { jsPDF } = await import('jspdf');
   const d = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
-  d.setProperties({ creator: 'Registro Officina', author: s.shop || 'Officina' });
+  d.setProperties({ creator: 'Ponte', author: s.shop || 'Officina' });
   return new Doc(d, s.accent);
 }
 

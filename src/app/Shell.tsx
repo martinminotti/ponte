@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
-import { Building2, CarFront, Plus, ReceiptText, Settings2, User } from 'lucide-react';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
+import { Building2, CarFront, Plus, ReceiptText, Settings2, Store, User } from 'lucide-react';
+import { PonteIcon, PonteWordmark } from '@/ui/Brand';
 import { Toaster } from 'sonner';
 import { useSettings, useThemeSync, useWide } from './hooks';
 import { Sheet } from '@/ui/Sheet';
@@ -12,25 +13,37 @@ const NAV = [
   { to: '/impostazioni', label: 'Officina', icon: Settings2, end: false },
 ];
 
-export function BrandMark({ compact }: { compact?: boolean }) {
+/** L'officina che usa l'app: logo e nome, oppure l'invito a impostarli. */
+export function ShopBadge({ align = 'right' }: { align?: 'left' | 'right' }) {
   const s = useSettings();
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <Link to="/impostazioni" className={`press flex min-w-0 items-center gap-2.5 rounded-full py-1 ${align === 'right' ? 'flex-row-reverse pr-1 pl-3 text-right' : 'pr-3 pl-1'} hover:bg-surface-2`}>
       {s.logo ? (
-        <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-[12px] bg-white p-1 ring-1 ring-line">
+        <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-white p-1 ring-1 ring-line">
           <img src={s.logo} alt="" className="max-h-full max-w-full object-contain" />
         </span>
       ) : (
-        <span className="grid size-11 shrink-0 place-items-center rounded-[12px] bg-accent text-on-accent">
-          <CarFront size={22} strokeWidth={2.2} />
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-surface-2 text-ink-2 ring-1 ring-line">
+          <Store size={17} />
         </span>
       )}
-      {!compact && (
-        <div className="min-w-0">
-          <p className="w-wide truncate text-[17px] leading-tight font-semibold text-ink">{s.shop || 'Registro Officina'}</p>
-          <p className="truncate text-[13px] text-ink-3">{s.shop ? 'Registro Officina' : 'Imposta il nome in Officina'}</p>
-        </div>
-      )}
+      <span className="min-w-0">
+        <span className="block truncate text-[14.5px] leading-tight font-semibold text-ink">{s.shop || 'La tua officina'}</span>
+        <span className="block truncate text-[12.5px] leading-tight text-ink-3">{s.shop ? 'Officina' : 'Imposta nome e logo'}</span>
+      </span>
+    </Link>
+  );
+}
+
+/** Intestazione delle schermate principali su telefono: marchio Ponte a sinistra, officina a destra. */
+export function BrandMark() {
+  return (
+    <div className="flex min-h-11 items-center justify-between gap-3">
+      <span className="flex items-center gap-2.5 text-ink">
+        <PonteIcon size={32} />
+        <PonteWordmark height={21} />
+      </span>
+      <ShopBadge />
     </div>
   );
 }
@@ -103,13 +116,14 @@ export function Shell() {
       <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[45] h-[env(safe-area-inset-top,0px)] bg-bg" />
       {wide && (
         <aside className="safe-top sticky top-0 flex h-dvh w-[248px] shrink-0 flex-col border-r border-line bg-surface px-4 pb-5">
-          <div className="pt-5 pb-6">
-            <BrandMark />
+          <div className="flex items-center gap-2.5 pt-6 pb-7 pl-1 text-ink">
+            <PonteIcon size={34} />
+            <PonteWordmark height={22} />
           </div>
           <button
             type="button"
             onClick={() => setNewOpen(true)}
-            className="press mb-5 flex h-12 items-center justify-center gap-2 rounded-[14px] bg-accent font-semibold text-on-accent shadow-[0_6px_16px_-8px_var(--accent)]"
+            className="press mb-5 flex h-12 items-center justify-center gap-2 rounded-[14px] bg-accent font-semibold text-on-accent shadow-[var(--shadow-accent)]"
           >
             <Plus size={20} strokeWidth={2.6} /> Nuova accettazione
           </button>
@@ -127,6 +141,9 @@ export function Shell() {
               </NavLink>
             ))}
           </nav>
+          <div className="mt-auto border-t border-line pt-4">
+            <ShopBadge align="left" />
+          </div>
         </aside>
       )}
 
@@ -152,7 +169,7 @@ export function Shell() {
                   haptic('medium');
                   setNewOpen(true);
                 }}
-                className="press flex h-12 items-center gap-1.5 rounded-full bg-accent pr-4 pl-3.5 font-semibold text-on-accent shadow-[0_8px_20px_-8px_var(--accent)]"
+                className="press flex h-12 items-center gap-1.5 rounded-full bg-accent pr-4 pl-3.5 font-semibold text-on-accent shadow-[var(--shadow-accent)]"
               >
                 <Plus size={22} strokeWidth={2.6} />
                 <span className="text-[15px]">Nuova</span>

@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import type { PlateCountry } from '@/domain/types';
+import { fmtPlate } from '@/domain/format';
 
 /** Campo targa disegnato come una targa vera: si scrive direttamente sulla placca. */
 export const PlateInput = forwardRef<HTMLInputElement, { value: string; onChange: (v: string) => void; country: PlateCountry; id?: string; invalid?: boolean }>(
@@ -35,8 +36,8 @@ export const PlateInput = forwardRef<HTMLInputElement, { value: string; onChange
         <input
           ref={ref}
           id={id}
-          value={value}
-          onChange={(e) => onChange(e.target.value.toUpperCase())}
+          value={rsm ? value : fmtPlate(value, 'I')}
+          onChange={(e) => onChange(rsm ? e.target.value.toUpperCase() : e.target.value.toUpperCase().replace(/\s+/g, ''))}
           autoCapitalize="characters"
           autoComplete="off"
           autoCorrect="off"

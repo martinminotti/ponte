@@ -2,8 +2,9 @@
 @import 'tailwindcss';
 
 /*
-  Registro Officina — sistema visivo
-  Base fredda "cemento d'officina", superfici bianche nette, un solo accento (il colore dell'officina, di default il blu della banda UE).
+  Ponte — sistema visivo (vedi brand/STYLEGUIDE.md)
+  Cemento: neutri caldi appena accennati. Asfalto: l'inchiostro. Arancio Ponte: l'unico colore del marchio,
+  riservato ad azione principale, selezione e marchio. Il testo sull'arancio è sempre asfalto, mai bianco.
   Un'unica famiglia, Archivo, usata sulle sue larghezze: condensata per targhe e cifre, normale per il testo, espansa per i titoli.
 */
 
@@ -41,37 +42,42 @@
 }
 
 :root {
-  --bg: #eceef0;
+  /* cemento */
+  --bg: #ededeb;
   --surface: #ffffff;
-  --surface-2: #f4f5f7;
-  --surface-3: #e6e9ec;
-  --ink: #14181d;
-  --ink-2: #565f6b;
-  --ink-3: #8a929c;
-  --line: #dde1e5;
-  --line-strong: #c4cad1;
-  --accent: #1f3f99;
-  --on-accent: #ffffff;
-  --accent-soft: #e2e8f6;
-  --accent-ink: #1f3f99;
-  --wa: #128c4a;
+  --surface-2: #f5f4f2;
+  --surface-3: #e7e5e1;
+  --line: #e0ded9;
+  --line-strong: #c9c6bf;
+  /* asfalto */
+  --ink: #1c1b19;
+  --ink-2: #5e5b55;
+  --ink-3: #6c6862;
+  /* arancio Ponte */
+  --accent: #ff6a13;
+  --on-accent: #1c1b19;
+  --accent-soft: #ffe7d6;
+  --accent-ink: #b54300;
+  /* segnali */
+  --wa: #0f7f43;
   --on-wa: #ffffff;
   --ok: #157347;
   --ok-soft: #dcf2e5;
   --warn: #8a5a00;
   --warn-soft: #fbefcf;
-  --danger: #b3261e;
-  --danger-soft: #fbe4e1;
-  --shadow-1: 0 1px 0 rgba(20, 24, 29, 0.04), 0 1px 2px rgba(20, 24, 29, 0.06);
-  --shadow-2: 0 1px 0 rgba(20, 24, 29, 0.04), 0 8px 24px -8px rgba(20, 24, 29, 0.18);
-  --shadow-bar: 0 -1px 0 rgba(20, 24, 29, 0.06), 0 -12px 32px -16px rgba(20, 24, 29, 0.16);
+  --danger: #c0261c;
+  --danger-soft: #fce4e1;
+  --shadow-1: 0 1px 0 rgba(28, 27, 25, 0.04), 0 1px 2px rgba(28, 27, 25, 0.06);
+  --shadow-2: 0 1px 0 rgba(28, 27, 25, 0.04), 0 8px 24px -8px rgba(28, 27, 25, 0.18);
+  --shadow-accent: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 8px 18px -10px rgba(214, 78, 0, 0.75);
 
-  --st-accettato: #6b7480;
-  --st-diagnosi: #b7791f;
-  --st-ricambi: #c2541b;
+  /* stati della scheda */
+  --st-accettato: #6d6a64;
+  --st-diagnosi: #9a6500;
+  --st-ricambi: #7a4fd1;
   --st-lavorazione: #2556c4;
   --st-pronto: #14864d;
-  --st-consegnato: #3d4651;
+  --st-consegnato: #3e3c38;
 
   color-scheme: light;
   font-synthesis: none;
@@ -82,15 +88,20 @@
 }
 
 :root[data-theme='dark'] {
-  --bg: #0e1114;
-  --surface: #171b1f;
-  --surface-2: #1d2227;
-  --surface-3: #262c32;
-  --ink: #eceef1;
-  --ink-2: #a3abb5;
-  --ink-3: #6f7883;
-  --line: #2a3037;
-  --line-strong: #3a424b;
+  /* asfalto di notte */
+  --bg: #121110;
+  --surface: #1b1a18;
+  --surface-2: #232220;
+  --surface-3: #2d2b28;
+  --line: #2f2d2a;
+  --line-strong: #423f3a;
+  --ink: #f3f1ed;
+  --ink-2: #aba69e;
+  --ink-3: #918c84;
+  --accent: #ff7a2e;
+  --on-accent: #1c1b19;
+  --accent-soft: #3a2416;
+  --accent-ink: #ff8a47;
   --wa: #25c26a;
   --on-wa: #04210f;
   --ok: #4ccf8a;
@@ -99,16 +110,16 @@
   --warn-soft: #3a2f14;
   --danger: #ff8a80;
   --danger-soft: #401a17;
-  --shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.02);
-  --shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
-  --shadow-bar: 0 -1px 0 rgba(255, 255, 255, 0.05), 0 -12px 32px -16px rgba(0, 0, 0, 0.7);
+  --shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.025);
+  --shadow-2: 0 0 0 1px rgba(255, 255, 255, 0.035), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+  --shadow-accent: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 8px 18px -10px rgba(255, 106, 19, 0.55);
 
-  --st-accettato: #96a0ab;
-  --st-diagnosi: #e4ad4b;
-  --st-ricambi: #f08a52;
-  --st-lavorazione: #6f9bff;
+  --st-accettato: #a29d95;
+  --st-diagnosi: #e8b04c;
+  --st-ricambi: #b79cff;
+  --st-lavorazione: #79a2ff;
   --st-pronto: #47c985;
-  --st-consegnato: #7d8792;
+  --st-consegnato: #8a857d;
   color-scheme: dark;
 }
 
@@ -159,7 +170,7 @@ input[type='date']::-webkit-date-and-time-value {
   background: color-mix(in srgb, var(--accent) 28%, transparent);
 }
 :focus-visible {
-  outline: 2.5px solid var(--accent);
+  outline: 2.5px solid var(--accent-ink);
   outline-offset: 2px;
 }
 
@@ -239,8 +250,8 @@ input[type='date']::-webkit-date-and-time-value {
 .ctl:focus {
   outline: none;
   background: var(--surface);
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: var(--accent-ink);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 textarea.ctl {
   padding: 13px 14px;

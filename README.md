@@ -1,8 +1,31 @@
-# Registro Officina
+# Ponte
 
-Gestionale da telefono per officine meccaniche, elettrauti e gommisti: accettazione del veicolo, stato dei lavori con avvisi WhatsApp, conto per il cliente in PDF, fatture mensili per le ditte. Targhe italiane e di San Marino.
+**Il registro dell'officina.** Gestionale da telefono per officine meccaniche, elettrauti e gommisti: accettazione del veicolo, stato dei lavori con avvisi WhatsApp, conto per il cliente in PDF, fatture mensili per le ditte. Targhe italiane e di San Marino.
 
 Funziona come **web app installabile** (PWA, anche offline) e come **app Android e iOS** dallo stesso codice, tramite Capacitor.
+
+---
+
+## Marchio
+
+Ponte prende il nome dal ponte sollevatore. Il marchio è una "p" minuscola con la pancia a forma di pneumatico, asfalto su arancio. Regole di colore, tipografia, voce e componenti: [`brand/STYLEGUIDE.md`](brand/STYLEGUIDE.md).
+
+| File | Uso |
+|---|---|
+| `brand/ponte-icon.svg` | icona dell'app (sorgente di PWA, Android, iOS) |
+| `brand/ponte-logo.svg`, `ponte-logo-white.svg` | logo completo su fondo chiaro / scuro |
+| `brand/ponte-mark*.svg`, `ponte-wordmark*.svg` | marchio e logotipo separati |
+| `brand/tokens.json` | token di colore (chiaro e scuro), tipo, spazi, raggi, ombre |
+
+Rigenerare gli asset dopo una modifica al marchio:
+
+```bash
+pip install fonttools brotli && python3 brand/generate.py   # SVG
+node brand/rasterize.mjs                                     # PNG per PWA e sorgenti native
+npx capacitor-assets generate --iconBackgroundColor '#FF6A13' --iconBackgroundColorDark '#1C1B19' --splashBackgroundColor '#FF6A13' --splashBackgroundColorDark '#1C1B19'
+```
+
+L'interfaccia usa sempre l'arancio Ponte; il colore scelto dall'officina in Impostazioni colora solo i documenti (conto e PDF).
 
 ---
 
@@ -92,8 +115,8 @@ Da Android Studio o Xcode si avvia sull'emulatore o sul telefono e si firma per 
 
 Prima della pubblicazione:
 
-1. **Identificativo app**: in `capacitor.config.ts` cambia `appId` (ora `sm.registroofficina.app`) con il dominio del proprietario, poi `npx cap sync`.
-2. **Icone e splash**: metti un'icona 1024×1024 in `assets/icon.png` e lancia `npx @capacitor/assets generate`.
+1. **Identificativo app**: `app.ponte.officina` (in `capacitor.config.ts`, Android `build.gradle`, iOS bundle id). Se il proprietario ha un dominio, cambialo prima della prima pubblicazione: dopo non si può più.
+2. **Icone e splash**: già generate dal marchio Ponte (vedi Marchio).
 3. **Permessi** già dichiarati: fotocamera (foto all'arrivo) su Android; fotocamera e libreria foto su iOS, con testi in italiano in `Info.plist`.
 
 Dentro l'app nativa: il PDF si condivide con il foglio di sistema (Capacitor Share + Filesystem), la vibrazione usa il motore aptico del telefono, il tasto indietro di Android torna alla schermata precedente.

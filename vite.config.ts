@@ -20,18 +20,20 @@ export default defineConfig(({ mode }) => {
         ? viteSingleFile()
         : VitePWA({
             registerType: 'prompt',
-            includeAssets: ['icons/apple-touch-icon.png', 'icons/icon-192.png'],
+            includeAssets: ['icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/favicon.svg'],
             manifest: {
-              name: 'Registro Officina',
-              short_name: 'Officina',
-              description: 'Accettazione veicoli, stato lavori su WhatsApp, conto e fatture per officine, elettrauti e gommisti.',
+              id: './',
+              categories: ['business', 'productivity'],
+              name: 'Ponte',
+              short_name: 'Ponte',
+              description: 'Il registro dell\'officina: accettazione veicoli, stato lavori su WhatsApp, conto e fatture per officine, elettrauti e gommisti.',
               lang: 'it',
               start_url: './',
               scope: './',
               display: 'standalone',
               orientation: 'any',
-              background_color: '#F2F3F1',
-              theme_color: '#F2F3F1',
+              background_color: '#EDEDEB',
+              theme_color: '#EDEDEB',
               icons: [
                 { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
                 { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },

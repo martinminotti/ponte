@@ -44,7 +44,7 @@ class Boundary extends Component<{ children: ReactNode }, { err: Error | null }>
     return { err };
   }
   componentDidCatch(err: Error) {
-    console.error('[Registro Officina]', err);
+    console.error('[Ponte]', err);
   }
   render() {
     if (!this.state.err) return this.props.children;

@@ -1,4 +1,4 @@
-package sm.registroofficina.app;
+package app.ponte.officina;
 
 import com.getcapacitor.BridgeActivity;
 

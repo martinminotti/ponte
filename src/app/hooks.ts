@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/data/db';
 import { getSettings } from '@/data/repo';
 import { DEFAULT_SETTINGS, type Job, type Settings } from '@/domain/types';
-import { applyBrand } from '@/platform/brand';
+import { applyThemeMeta } from '@/platform/brand';
 
 export function useSettings(): Settings {
   return useLiveQuery(getSettings, [], DEFAULT_SETTINGS);
@@ -44,8 +44,8 @@ export function useThemeSync(s: Settings): boolean {
     } catch {
       /* non disponibile */
     }
-    applyBrand(s.accent, dark);
-  }, [dark, s.accent]);
+    applyThemeMeta(dark);
+  }, [dark]);
   return dark;
 }
 

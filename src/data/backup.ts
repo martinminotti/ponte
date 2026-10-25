@@ -146,7 +146,7 @@ export async function importBackup(text: string, mode: 'merge' | 'replace'): Pro
     throw new Error('Il file non è un backup valido (JSON non leggibile).');
   }
   const d = data as Partial<BackupFile> & { jobs?: unknown[]; settings?: Record<string, unknown> };
-  if (!d || !Array.isArray(d.jobs)) throw new Error('Il file non contiene schede di Registro Officina.');
+  if (!d || !Array.isArray(d.jobs)) throw new Error('Il file non contiene schede di Ponte.');
 
   let jobs: Job[];
   let settings: Partial<Settings>;
@@ -195,5 +195,5 @@ export async function importBackup(text: string, mode: 'merge' | 'replace'): Pro
 export function backupFileName(ts = Date.now()): string {
   const d = new Date(ts);
   const p = (x: number) => String(x).padStart(2, '0');
-  return `registro-officina-backup-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.json`;
+  return `ponte-backup-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.json`;
 }

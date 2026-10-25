@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "sm.registroofficina.app"
+    namespace = "app.ponte.officina"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "sm.registroofficina.app"
+        applicationId "app.ponte.officina"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

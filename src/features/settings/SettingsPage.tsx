@@ -128,7 +128,7 @@ export function SettingsPage() {
           </Section>
 
           <Section title="Aspetto">
-            <Field label="Colore dell'officina">
+            <Field label="Colore dei documenti" hint="Il colore di intestazione e totali sul conto e sui PDF. L'app resta arancio Ponte.">
               <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Colore">
                 {PRESETS.map((p) => {
                   const on = p.c.toLowerCase() === s.accent.toLowerCase();
@@ -291,7 +291,7 @@ export function SettingsPage() {
           </Section>
 
           <p className="px-1 pt-2 pb-4 text-[13px] leading-relaxed text-ink-3">
-            Registro Officina {APP_VERSION}
+            Ponte {APP_VERSION}
             {__BUILD_SINGLE__ ? ' (anteprima)' : ''}. I documenti generati sono riepiloghi, non fatture: la fattura fiscale va emessa con il gestionale o il portale di fatturazione elettronica. Le aliquote IVA proposte vanno verificate con il commercialista.
           </p>
         </div>
