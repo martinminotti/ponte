@@ -62,28 +62,26 @@ jobs:
           echo "ASC_KEY_PATH=$RUNNER_TEMP/asc/AuthKey.p8" >> "$GITHUB_ENV"
 
       - name: Archivia
-        env:
-          TEAM: ${{ secrets.APPLE_TEAM_ID }}
-          KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
         run: |
           VERSION=$(node -p "require('./package.json').version")
           BUILD=$(( ${{ github.run_number }} + 100 ))
           echo "Versione $VERSION, build $BUILD"
+          # Archivio senza firma: la firma per l'App Store la applica Xcode all'esportazione,
+          # con certificato e profilo gestiti nel cloud tramite la chiave API (nessun Mac, nessun certificato da esportare).
+          set -o pipefail
           xcodebuild archive \
             -project ios/App/App.xcodeproj \
             -scheme App \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath "$RUNNER_TEMP/Ponte.xcarchive" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$ASC_KEY_PATH" \
-            -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER" \
-            DEVELOPMENT_TEAM="$TEAM" \
-            CODE_SIGN_STYLE=Automatic \
             MARKETING_VERSION="$VERSION" \
-            CURRENT_PROJECT_VERSION="$BUILD"
+            CURRENT_PROJECT_VERSION="$BUILD" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            2>&1 | tee "$RUNNER_TEMP/archive.log" || {
+              grep -E "error:|fatal|BUILD FAILED|ARCHIVE FAILED" "$RUNNER_TEMP/archive.log" | sort -u | head -15 | while IFS= read -r l; do echo "::error title=Archivia::${l:0:900}"; done
+              exit 1
+            }
 
       - name: Carica su App Store Connect
         env:
@@ -105,6 +103,7 @@ jobs:
           </dict>
           </plist>
           EOF
+          set -o pipefail
           xcodebuild -exportArchive \
             -archivePath "$RUNNER_TEMP/Ponte.xcarchive" \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
@@ -112,7 +111,11 @@ jobs:
             -allowProvisioningUpdates \
             -authenticationKeyPath "$ASC_KEY_PATH" \
             -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER"
+            -authenticationKeyIssuerID "$ISSUER" \
+            2>&1 | tee "$RUNNER_TEMP/export.log" || {
+              grep -iE "error|fail|denied|not found|no .* profile|certificate|forbidden|unauthori" "$RUNNER_TEMP/export.log" | sort -u | head -15 | while IFS= read -r l; do echo "::error title=Carica::${l:0:900}"; done
+              exit 1
+            }
 
       - name: Pulizia
         if: always()
