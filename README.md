@@ -1,107 +1,170 @@
 # Registro Officina
 
-Web app per officine meccaniche, elettrauti e gommisti. Si usa da telefono, si installa sulla schermata Home e non ha bisogno di un server: i dati restano nel browser del dispositivo.
+Gestionale da telefono per officine meccaniche, elettrauti e gommisti: accettazione del veicolo, stato dei lavori con avvisi WhatsApp, conto per il cliente in PDF, fatture mensili per le ditte. Targhe italiane e di San Marino.
+
+Funziona come **web app installabile** (PWA, anche offline) e come **app Android e iOS** dallo stesso codice, tramite Capacitor.
+
+---
 
 ## Cosa fa
 
-- **Accettazione veicolo** in pochi tocchi, per cliente **privato** o **azienda**.
-- **Archivio** con ricerca unica per targa, telaio, proprietario, ditta, partita IVA, telefono, operaio. Targhe italiane e di San Marino (RSM).
-- **Stato lavorazione** (accettato, in diagnosi, attesa ricambi, in lavorazione, pronto, consegnato) con cronologia.
-- **Messaggi WhatsApp** già scritti per ogni stato, modificabili. Si apre la chat con `wa.me` e il testo compilato; l'invio lo conferma l'utente in WhatsApp.
-- **Conto per il cliente**: lavori, totale, acconto, da saldare, garanzia, metodo di pagamento (contanti, POS, bonifico, assegno). Avviso "auto e conto pronti". Salvataggio in **PDF** A4.
-- **Aziende**: dati per la fattura (ragione sociale, P.IVA o COE, codice fiscale, indirizzo, SDI o PEC), aliquota IVA con importi IVA inclusa o esclusa, numero fattura, filtro "Da fatturare".
-- **Fattura mensile per ditta**: i lavori di una ditta si raccolgono durante il mese e a fine mese si prepara un solo documento con tutte le voci, con IVA divisa per aliquota. Si segnano fatture emesse e incasso per tutti i lavori insieme.
-- **Operai** che hanno eseguito il lavoro, **logo** e **colore** dell'officina, tema chiaro e scuro automatico.
+- **Accettazione** in pochi tocchi, per cliente privato o azienda. La targa si scrive su una targa disegnata (italiana o RSM). Se il veicolo è già passato in officina compare "Già visto" e un tocco ricopia proprietario, telefono e dati ditta.
+- **Archivio** con ricerca unica per targa, telaio, cliente, ditta, partita IVA, telefono, operaio o numero scheda. Filtri con conteggio: in officina, pronte, da incassare (con totale), da fatturare, chiuse.
+- **Stato lavorazione** su un binario a sei tappe (accettato → consegnato) con cronologia. A ogni cambio di stato l'app propone di avvisare il cliente.
+- **WhatsApp**: messaggi già scritti per ogni stato, modificabili, aperti in `wa.me`. Rispetta il consenso del cliente.
+- **Lavori e conto**: voci con importo, voci frequenti con un tocco, acconto, totale, garanzia, metodo di pagamento, incasso. Conto A4 in PDF con logo, dati dell'officina e numero scheda progressivo.
+- **Condivisione nativa del PDF**: dove il telefono lo supporta, *Condividi PDF* apre il foglio di sistema e il documento arriva in WhatsApp già allegato.
+- **Aziende**: ragione sociale, P.IVA o COE, codice fiscale, SDI/PEC, aliquota IVA (22, 17, 10, 4, esente), importi IVA inclusa o esclusa.
+- **Fatture ditte**: i lavori di una ditta si raccolgono nel mese; si prepara un unico conto con IVA divisa per aliquota, si segnano fattura emessa e incasso per tutti i lavori insieme.
+- **Foto all'arrivo** (graffi, cruscotto, chilometri) salvate sulla scheda, compresse sul dispositivo.
+- **Officina**: nome, indirizzo, P.IVA, telefono, logo, colore, operai, valori predefiniti, tema chiaro/scuro/automatico.
+- **Backup** JSON (schede, impostazioni e foto) con importazione "unisci" o "sostituisci", promemoria settimanale, protezione dell'archivio dalla pulizia automatica del browser.
+- **Annulla** su eliminazione scheda, rimozione voce e incasso.
+- **Tablet e desktop**: archivio e dettaglio affiancati, barra laterale.
 
-> I documenti generati sono riepiloghi, non fatture. La fattura fiscale va emessa con un gestionale o con il portale di fatturazione elettronica. Le aliquote IVA proposte (22, 17, 10, 4, esente) vanno verificate con un commercialista.
+> I documenti generati sono riepiloghi, non fatture. La fattura fiscale va emessa con un gestionale o con il portale di fatturazione elettronica. Le aliquote IVA proposte vanno verificate con un commercialista.
 
-## Avvio in locale
+---
 
-Non c'è nessuna build e nessuna dipendenza da installare. Servono solo file statici serviti via HTTP:
+## Perché questo stack
+
+| Scelta | Motivo |
+|---|---|
+| **React 19 + TypeScript** | Il codice tipizzato rende sicuri i calcoli di importi e IVA; ecosistema più ampio per UI di qualità. |
+| **Vite** | Build veloce, PWA tramite `vite-plugin-pwa`, output statico per qualunque hosting. |
+| **Capacitor 8** | Lo stesso build web diventa app Android/iOS vera (store, icona, splash), con plugin nativi per condivisione file, vibrazione, barra di stato, tasto indietro Android. Nessuna riscrittura, a differenza di React Native o Flutter. |
+| **Tailwind CSS 4** | Token di design in CSS (`src/styles/index.css`), tema scuro e colore dell'officina applicati a runtime. |
+| **Dexie (IndexedDB)** | Archivio locale robusto e veloce, query reattive, spazio ben superiore a `localStorage`, foto come Blob. Un solo modulo da sostituire per aggiungere un backend. |
+| **Motion, vaul, sonner, lucide** | Transizioni con fisica a molla, fogli dal basso trascinabili in stile iOS, notifiche con "Annulla", icone coerenti. |
+| **jsPDF** | PDF A4 generati sul dispositivo, anche offline. |
+
+Il router usa l'hash (`#/job/…`): funziona su ogni hosting statico senza regole di rewrite, dentro Capacitor e come file singolo.
+
+---
+
+## Avvio
+
+Serve Node 20.19 o più recente (vedi `.nvmrc`).
 
 ```bash
-git clone <url-del-repo> registro-officina
-cd registro-officina
-python3 -m http.server 8080
-# apri http://localhost:8080
+npm install
+npm run dev          # http://localhost:5173
 ```
 
-Aprendo `index.html` con doppio clic funziona quasi tutto, ma il service worker e l'installazione come app richiedono `http://localhost` oppure HTTPS.
+Comandi utili:
 
-## Pubblicazione
+```bash
+npm test             # test unitari (calcoli, IVA, mensile, WhatsApp, migrazione, backup)
+npm run lint
+npm run typecheck
+npm run build        # build di produzione in dist/ con service worker
+npm run preview      # serve dist/ su http://localhost:4173
+npm run check        # lint + typecheck + test + build (come la CI)
+```
 
-Qualunque hosting statico va bene, purché serva la cartella in **HTTPS** (obbligatorio per installare l'app su iPhone):
+La prima volta che si apre l'app su un dispositivo dove era installata la **bozza precedente**, l'archivio (`localStorage`, chiave `registro-officina-v1`) viene importato da solo: importi convertiti in centesimi, numero progressivo assegnato in ordine di data. Il vecchio archivio resta intatto come copia di sicurezza.
 
-- **GitHub Pages**: Settings, Pages, branch `main`, cartella `/ (root)`. Per un repo privato serve un piano a pagamento.
-- **Netlify** o **Cloudflare Pages**: collega il repo, nessun comando di build, cartella di pubblicazione `/`.
+---
 
-## Installare l'app su iPhone
+## Pubblicazione web
 
-1. Apri l'indirizzo pubblicato con **Safari**.
-2. Tocca **Condividi**, poi **Aggiungi alla schermata Home**.
-3. Si apre a schermo intero, con la sua icona.
+Qualunque hosting statico in **HTTPS** (obbligatorio per installare l'app su iPhone e per il service worker).
 
-Su Android, Chrome propone "Installa app".
+- **Netlify** o **Cloudflare Pages**: comando di build `npm run build`, cartella `dist`. Il file `public/_headers` imposta Content-Security-Policy, cache immutabile per gli asset e nessuna cache per `index.html` e `sw.js`.
+- **GitHub Pages**: pubblica la cartella `dist` (es. con l'action `actions/deploy-pages`). Il percorso base è relativo, quindi funziona anche in una sottocartella.
 
-## Dati e limiti da conoscere
+Quando esce una nuova versione, l'app mostra "Nuova versione disponibile" con il pulsante *Aggiorna*.
 
-- **Archivio nel browser** (`localStorage`, chiave `registro-officina-v1`). Non c'è sincronizzazione tra dispositivi, e cancellare i dati del sito o disinstallare l'app cancella l'archivio. Per l'uso reale conviene aggiungere un backend (vedi sotto) o almeno un export/import JSON.
-- **PDF** generati con [jsPDF 2.5.1](https://github.com/parallax/jsPDF) caricato da cdnjs, quindi serve la rete la prima volta. Per usarlo offline scarica `jspdf.umd.min.js`, mettilo nel repo e cambia il `<script src>` in `index.html`.
-- **Font** da Google Fonts, con ripiego su font di sistema se non raggiungibili.
-- **WhatsApp** usa i link `wa.me`: nessuna API, nessun invio automatico. Per messaggi automatici serve WhatsApp Business API.
-- I numeri senza prefisso ricevono quello predefinito (impostazioni, 39 per l'Italia, 378 per San Marino). Un numero scritto con `+` davanti non viene toccato.
+**Installare su iPhone**: Safari → Condividi → Aggiungi alla schermata Home. **Android**: Chrome propone "Installa app".
+
+---
+
+## App Android e iOS
+
+I progetti nativi sono già generati in `android/` e `ios/`.
+
+```bash
+npm run cap:android  # build web + sync + apre Android Studio
+npm run cap:ios      # build web + sync + apre Xcode (serve un Mac)
+```
+
+Da Android Studio o Xcode si avvia sull'emulatore o sul telefono e si firma per gli store.
+
+Prima della pubblicazione:
+
+1. **Identificativo app**: in `capacitor.config.ts` cambia `appId` (ora `sm.registroofficina.app`) con il dominio del proprietario, poi `npx cap sync`.
+2. **Icone e splash**: metti un'icona 1024×1024 in `assets/icon.png` e lancia `npx @capacitor/assets generate`.
+3. **Permessi** già dichiarati: fotocamera (foto all'arrivo) su Android; fotocamera e libreria foto su iOS, con testi in italiano in `Info.plist`.
+
+Dentro l'app nativa: il PDF si condivide con il foglio di sistema (Capacitor Share + Filesystem), la vibrazione usa il motore aptico del telefono, il tasto indietro di Android torna alla schermata precedente.
+
+---
 
 ## Struttura
 
 ```
-index.html              app completa (HTML, CSS e JS in un unico file)
-manifest.webmanifest    metadati per l'installazione
-sw.js                   service worker: rete prima, cache come ripiego
-icons/                  icone dell'app (192, 512, maskable, apple-touch)
+src/
+  domain/        logica pura e testata: tipi, calcoli IVA e saldo, filtri, mensile, messaggi WhatsApp, formati
+  data/          IndexedDB (Dexie), repository, migrazione dalla bozza, backup, dati di esempio
+  pdf/           generazione PDF del conto e del conto mensile
+  platform/      ponte web/nativo (condivisione, salvataggio, vibrazione), immagini, colore dell'officina
+  ui/            componenti: targa, controlli, binario stati, fogli dal basso
+  app/           shell, navigazione, layout, router, aggiornamenti
+  features/      schermate: list, form, job, doc, month, settings
+  styles/        token di design e tema
+android/, ios/   progetti nativi Capacitor
+public/          icone, intestazioni HTTP
 ```
-
-Il JavaScript è senza framework, in un'unica funzione autoinvocante. Le parti principali, cercabili per nome in `index.html`:
-
-| Area | Funzioni |
-|---|---|
-| Archivio | `persist`, `removeJob`, `persistSettings`, `loadLocal`, `saveLocal` |
-| Importi | `calc`, `totale`, `daSaldare`, `monthTotals` |
-| Messaggi | `buildMsg`, `riepilogo`, `monthMsg`, `waNumber` |
-| Documenti | `paperHTML`, `buildPdf`, `monthPaperHTML`, `buildMonthPdf` |
-| Viste | `renderList`, `renderForm`, `renderDetail`, `renderDoc`, `renderMonth`, `renderSettings` |
 
 ### Modello dei dati
 
-Ogni scheda è un oggetto con questi campi principali:
+Tutti gli importi sono **interi in centesimi** (niente errori di arrotondamento sui float).
 
-```js
-{
-  id, createdAt, updatedAt, status,           // status: accettato | diagnosi | ricambi | lavorazione | pronto | consegnato
-  history: [{ s, t }],
-  plate, plateCountry,                         // plateCountry: 'I' | 'RSM'
-  vin, make, model, km, dueDate,
-  client,                                      // 'privato' | 'azienda'
-  company: { name, vat, cf, addr, sdi },       // solo per le aziende
-  owner, phone, wa,                            // wa: consenso ai messaggi WhatsApp
-  services: [], tyres, request, notes, workers: [],
-  items: [{ desc, amount }], deposit,
-  vatRate, vatIncl, billing,                   // billing: 'mensile' | 'singola'
+```ts
+Job {
+  id, number,                      // number: progressivo scheda (0001, 0002…)
+  createdAt, updatedAt, status, history: [{ s, t }],
+  plate, plateCountry: 'I' | 'RSM', vin, make, model, km, dueDate,
+  client: 'privato' | 'azienda', company: { name, vat, cf, addr, sdi },
+  owner, phone, wa,                // wa: consenso ai messaggi
+  services, tyres, request, notes, workers, photoIds,
+  items: [{ id, desc, amount }], deposit,
+  vatRate, vatIncl, billing: 'mensile' | 'singola',
   invoiced, invoicedAt, invoiceNo,
   paid, paidAt, paidAmount, payMethod,
-  warrantyMonths, warrantyNote,
-  closedAt, deliveredAt
+  warrantyMonths, warrantyNote, closedAt, deliveredAt
 }
 ```
 
-Le impostazioni (nome officina, logo come data URL, colore, operai, prefisso, garanzia e IVA predefinite) stanno in un oggetto `settings` a parte.
+Tabelle IndexedDB: `jobs`, `settings` (riga `main`), `photos` (Blob JPEG).
 
-## Aggiungere un backend
+---
 
-Tutta la persistenza passa da tre funzioni (`persist`, `removeJob`, `persistSettings`) e da una sottoscrizione in `init()` che riempie l'array `jobs`. Sostituendole con Supabase, Firebase o una API propria si ottiene l'archivio condiviso tra dispositivi, senza toccare il resto. Dopo il cambio vanno aggiunti login e regole di accesso, perché l'archivio contiene dati personali dei clienti.
+## Aggiungere un backend (sincronizzazione tra dispositivi)
 
-## Origine del progetto
+L'app è *local-first*: tutta la persistenza passa da `src/data/repo.ts` e `src/data/db.ts`, le schermate leggono con query reattive. Per condividere l'archivio tra più telefoni dell'officina:
 
-Nasce come pagina pubblicata su Claude (dove l'archivio usa il database della pagina). Questa versione è la stessa app resa autonoma: archivio locale, salvataggio PDF con download del browser, installazione come app.
+1. Aggiungi un servizio (consigliato **Supabase**: Postgres, autenticazione, storage per le foto, regole RLS per officina).
+2. Mantieni Dexie come cache locale e sincronizza le tabelle (`updatedAt` è già su ogni scheda per risolvere i conflitti "vince il più recente"), oppure usa **Dexie Cloud**, che si innesta sullo stesso database.
+3. Aggiungi login e regole di accesso: l'archivio contiene dati personali dei clienti (GDPR).
+
+---
+
+## Sicurezza e privacy
+
+- I dati restano sul dispositivo; nessuna chiamata a server esterni. Fonts e librerie sono inclusi nel build (niente CDN).
+- CSP restrittiva in `public/_headers`. Se modifichi lo script inline in `index.html` (applica il tema prima del primo disegno), ricalcola l'hash:
+  ```bash
+  python3 -c "import re,hashlib,base64;s=open('dist/index.html').read();print(base64.b64encode(hashlib.sha256(re.findall(r'<script>(.*?)</script>',s,re.S)[0].encode()).digest()).decode())"
+  ```
+- Il consenso WhatsApp del cliente è registrato sulla scheda e rispettato.
+- L'archivio locale può essere cancellato se l'utente svuota i dati del sito: per questo l'app chiede la persistenza al browser e ricorda di fare un backup ogni settimana.
+
+## Limiti noti
+
+- Senza backend non c'è sincronizzazione tra dispositivi.
+- WhatsApp usa i link `wa.me`: l'invio lo conferma l'utente. Per messaggi automatici serve WhatsApp Business API.
+- Nessuna emissione di fattura elettronica (SDI): i documenti sono riepiloghi.
 
 ## Licenza
 

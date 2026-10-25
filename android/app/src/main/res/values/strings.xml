@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Registro Officina</string>
+    <string name="title_activity_main">Registro Officina</string>
+    <string name="package_name">sm.registroofficina.app</string>
+    <string name="custom_url_scheme">sm.registroofficina.app</string>
+</resources>
