@@ -45,11 +45,6 @@ export function fmtPlate(p: string, cc: PlateCountry = 'I'): string {
   return m ? `${m[1]} ${m[2]} ${m[3]}` : s;
 }
 
-/** true se la targa italiana ha il formato attuale AA 000 AA */
-export function isModernItalianPlate(p: string): boolean {
-  return /^[A-Z]{2}\d{3}[A-Z]{2}$/.test(String(p || '').toUpperCase().replace(/\s+/g, ''));
-}
-
 /** chiave di ricerca: minuscole, senza accenti né simboli */
 export function norm(s: unknown): string {
   return String(s ?? '')

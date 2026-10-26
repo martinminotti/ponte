@@ -1,4 +1,4 @@
-import type { Job, Settings, StatusKey } from './types';
+import type { Job, StatusKey } from './types';
 import type { FilterKey } from './constants';
 import { norm } from './format';
 
@@ -150,11 +150,4 @@ export function sameVehicle(a: Job, b: Pick<Job, 'id' | 'plate' | 'plateCountry'
   const pk = plateKey(b);
   const v = norm(b.vin);
   return (!!pk && plateKey(a) === pk) || (v.length >= 10 && norm(a.vin) === v);
-}
-
-export function defaultsFromSettings(s: Settings) {
-  return {
-    vatRate: s.vat ?? 22,
-    warrantyMonths: s.warranty ?? 12,
-  };
 }

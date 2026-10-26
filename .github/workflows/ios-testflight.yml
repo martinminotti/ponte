@@ -23,7 +23,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Controlla i segreti
         env:
@@ -42,7 +42,7 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm

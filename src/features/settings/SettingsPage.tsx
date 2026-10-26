@@ -15,8 +15,6 @@ import { haptic, saveFile } from '@/platform/native';
 import { AutoInput, Button, Field, Note, Section, Segmented } from '@/ui/controls';
 import { Sheet } from '@/ui/Sheet';
 
-declare const __BUILD_SINGLE__: boolean;
-export const APP_VERSION = '2.0.0';
 
 export function SettingsPage() {
   const s = useSettings();
@@ -303,8 +301,7 @@ export function SettingsPage() {
           </Section>
 
           <p className="px-1 pt-2 pb-4 text-[13px] leading-relaxed text-ink-3">
-            Ponte {APP_VERSION}
-            {__BUILD_SINGLE__ ? ' (anteprima)' : ''}. I documenti generati sono riepiloghi, non fatture: la fattura fiscale va emessa con il gestionale o il portale di fatturazione elettronica. Le aliquote IVA proposte vanno verificate con il commercialista.
+            Ponte {__APP_VERSION__}. I documenti generati sono riepiloghi, non fatture: la fattura fiscale va emessa con il gestionale o il portale di fatturazione elettronica. Le aliquote IVA proposte vanno verificate con il commercialista.
           </p>
         </div>
       </div>

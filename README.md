@@ -1,194 +1,167 @@
-# Ponte
+<div align="center">
 
-**Il registro dell'officina.** Gestionale da telefono per officine meccaniche, elettrauti e gommisti: accettazione del veicolo, stato dei lavori con avvisi WhatsApp, conto per il cliente in PDF, fatture mensili per le ditte. Targhe italiane e di San Marino.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/ponte-logo-white.svg">
+  <img src="brand/ponte-logo.svg" alt="Ponte" width="220">
+</picture>
 
-Funziona come **web app installabile** (PWA, anche offline) e come **app Android e iOS** dallo stesso codice, tramite Capacitor.
+### Il registro dell'officina.
 
----
+Accettazione, stato dei lavori, avvisi WhatsApp, conti e fatture ditte.<br>
+Per officine meccaniche, elettrauti e gommisti. Dal telefono, anche offline.
 
-## Marchio
+[![CI](https://github.com/martinminotti/ponte/actions/workflows/ci.yml/badge.svg)](https://github.com/martinminotti/ponte/actions/workflows/ci.yml)
+[![iOS TestFlight](https://github.com/martinminotti/ponte/actions/workflows/ios-testflight.yml/badge.svg)](https://github.com/martinminotti/ponte/actions/workflows/ios-testflight.yml)
+![Piattaforme](https://img.shields.io/badge/iOS%20·%20Android%20·%20Web-1c1b19?style=flat&labelColor=ff6a13&label=app)
+![Local first](https://img.shields.io/badge/dati-sul%20dispositivo-1c1b19?style=flat&labelColor=ff6a13)
 
-Ponte prende il nome dal ponte sollevatore. Il marchio è una "p" minuscola con la pancia a forma di pneumatico, asfalto su arancio. Regole di colore, tipografia, voce e componenti: [`brand/STYLEGUIDE.md`](brand/STYLEGUIDE.md).
+<br>
 
-| File | Uso |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png">
+  <img src="docs/screenshots/hero-light.png" alt="Ponte su iPhone: elenco schede, cruscotto Oggi e nuova accettazione" width="100%">
+</picture>
+
+</div>
+
+<br>
+
+## Perché Ponte
+
+In officina il lavoro vero si fa sotto il ponte, non al computer. Eppure ogni auto che entra si porta dietro carta: il foglio di accettazione, il post-it con il telefono del cliente, il conto scritto a mano, le fatture delle ditte da rimettere insieme a fine mese.
+
+Ponte mette tutto questo in tasca. Un'auto si accetta in trenta secondi scrivendo la targa, il cliente sa a che punto è il lavoro senza telefonare, il conto parte in PDF su WhatsApp e a fine mese le ditte sono già raggruppate e pronte da fatturare.
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**30 secondi**<br>
+<sub>per accettare un veicolo. Se è già passato in officina, un tocco ricopia cliente e ditta.</sub>
+
+</td>
+<td width="33%" valign="top">
+
+**Zero telefonate**<br>
+<sub>a ogni cambio di stato Ponte propone il messaggio WhatsApp già scritto.</sub>
+
+</td>
+<td width="33%" valign="top">
+
+**Un conto al mese**<br>
+<sub>per ogni ditta, con IVA divisa per aliquota e incasso segnato su tutti i lavori insieme.</sub>
+
+</td>
+</tr>
+</table>
+
+## Funzionalità
+
+### La giornata a colpo d'occhio
+- **Oggi**: quante auto sono sul ponte e in che fase, pronte da ritirare, da incassare, da fatturare, incassato del mese rispetto al precedente.
+- **Consegne promesse** con ritardi evidenziati e **incassi settimanali** delle ultime otto settimane.
+
+### Accettazione e archivio
+- **Targa disegnata**, italiana o di San Marino, con telaio, marca, modello, chilometri e consegna prevista.
+- **Già visto**: Ponte riconosce targa e telaio e propone i dati dell'ultima visita.
+- **Foto all'arrivo** di graffi, cruscotto e chilometri, compresse sul dispositivo.
+- **Ricerca unica** per targa, telaio, cliente, ditta, P.IVA, telefono, operaio o numero scheda, con filtri e conteggi.
+
+### Lavorazione e cliente
+- **Binario a sei tappe**, da *Accettato* a *Consegnato*, con cronologia e operai assegnati.
+- **WhatsApp** con un messaggio pronto per ogni stato, modificabile, nel rispetto del consenso del cliente.
+- **Conto A4 in PDF** con logo, dati dell'officina, acconto, garanzia e metodo di pagamento. Su telefono si condivide già allegato.
+
+### Ditte e fatturazione
+- **Clienti azienda** con ragione sociale, P.IVA o COE, codice fiscale, SDI o PEC.
+- **IVA** al 22, 17, 10, 4 % o esente, importi IVA inclusa o esclusa.
+- **Fatture mensili**: i lavori di ogni ditta si raccolgono nel mese in un unico conto; fattura emessa e incasso si segnano in un colpo.
+
+### Pensato per l'uso vero
+- **Offline sempre**: l'archivio vive sul dispositivo, nessun account, nessun canone.
+- **Annulla** su eliminazioni, voci e incassi. **Backup** completo con foto, promemoria settimanale.
+- **Vetro liquido su iOS**, tema chiaro e scuro, vibrazione aptica, tasto indietro su Android.
+- **Tablet e desktop** con archivio e dettaglio affiancati.
+
+<br>
+
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/desktop-dark.png">
+  <img src="docs/screenshots/desktop-light.png" alt="Ponte su desktop: barra laterale, elenco schede e cruscotto" width="100%">
+</picture>
+
+<sub>Su tablet e computer l'elenco e il cruscotto stanno affiancati.</sub>
+
+<br><br>
+
+<img src="docs/screenshots/ios-light-scheda.png" alt="Dettaglio di una scheda" width="32%">
+&nbsp;&nbsp;
+<img src="docs/screenshots/ios-dark-accettazione.png" alt="Nuova accettazione in tema scuro" width="32%">
+
+</div>
+
+<br>
+
+## Per chi è
+
+| | |
 |---|---|
-| `brand/ponte-icon.svg` | icona dell'app (sorgente di PWA, Android, iOS) |
-| `brand/ponte-logo.svg`, `ponte-logo-white.svg` | logo completo su fondo chiaro / scuro |
-| `brand/ponte-mark*.svg`, `ponte-wordmark*.svg` | marchio e logotipo separati |
-| `brand/tokens.json` | token di colore (chiaro e scuro), tipo, spazi, raggi, ombre |
+| 🔧 **Officine meccaniche** | Tagliandi, diagnosi, attesa ricambi: ogni auto ha la sua scheda e il suo stato. |
+| ⚡ **Elettrauti** | Diagnosi, ricambi e garanzia sulla riparazione, con il conto pronto per il cliente. |
+| 🛞 **Gommisti** | Cambio stagionale veloce, misure gomme sulla scheda, storico per targa. |
+| 🏢 **Chi lavora con le ditte** | Flotte e aziende con fatturazione mensile e IVA corretta. |
 
-Rigenerare gli asset dopo una modifica al marchio:
+Pensato per l'Italia e San Marino: targhe RSM, COE, regime IVA sammarinese.
+
+## Piattaforme
+
+| | Come si usa |
+|---|---|
+| **iPhone e iPad** | App nativa, distribuita via TestFlight e App Store. |
+| **Android** | App nativa dallo stesso codice, pronta per il Play Store. |
+| **Web** | Si apre dal browser e si installa sulla schermata Home, funziona offline. |
+
+Un'unica base di codice (React, TypeScript, Capacitor) per tutte e tre.
+
+## Iniziare
 
 ```bash
-pip install fonttools brotli && python3 brand/generate.py   # SVG
-node brand/rasterize.mjs                                     # PNG per PWA e sorgenti native
-npx capacitor-assets generate --iconBackgroundColor '#FF6A13' --iconBackgroundColorDark '#1C1B19' --splashBackgroundColor '#FF6A13' --splashBackgroundColorDark '#1C1B19'
-```
-
-L'interfaccia usa sempre l'arancio Ponte; il colore scelto dall'officina in Impostazioni colora solo i documenti (conto e PDF).
-
----
-
-## Cosa fa
-
-- **Accettazione** in pochi tocchi, per cliente privato o azienda. La targa si scrive su una targa disegnata (italiana o RSM). Se il veicolo è già passato in officina compare "Già visto" e un tocco ricopia proprietario, telefono e dati ditta.
-- **Archivio** con ricerca unica per targa, telaio, cliente, ditta, partita IVA, telefono, operaio o numero scheda. Filtri con conteggio: in officina, pronte, da incassare (con totale), da fatturare, chiuse.
-- **Stato lavorazione** su un binario a sei tappe (accettato → consegnato) con cronologia. A ogni cambio di stato l'app propone di avvisare il cliente.
-- **WhatsApp**: messaggi già scritti per ogni stato, modificabili, aperti in `wa.me`. Rispetta il consenso del cliente.
-- **Lavori e conto**: voci con importo, voci frequenti con un tocco, acconto, totale, garanzia, metodo di pagamento, incasso. Conto A4 in PDF con logo, dati dell'officina e numero scheda progressivo.
-- **Condivisione nativa del PDF**: dove il telefono lo supporta, *Condividi PDF* apre il foglio di sistema e il documento arriva in WhatsApp già allegato.
-- **Aziende**: ragione sociale, P.IVA o COE, codice fiscale, SDI/PEC, aliquota IVA (22, 17, 10, 4, esente), importi IVA inclusa o esclusa.
-- **Fatture ditte**: i lavori di una ditta si raccolgono nel mese; si prepara un unico conto con IVA divisa per aliquota, si segnano fattura emessa e incasso per tutti i lavori insieme.
-- **Foto all'arrivo** (graffi, cruscotto, chilometri) salvate sulla scheda, compresse sul dispositivo.
-- **Officina**: nome, indirizzo, P.IVA, telefono, logo, colore, operai, valori predefiniti, tema chiaro/scuro/automatico.
-- **Backup** JSON (schede, impostazioni e foto) con importazione "unisci" o "sostituisci", promemoria settimanale, protezione dell'archivio dalla pulizia automatica del browser.
-- **Annulla** su eliminazione scheda, rimozione voce e incasso.
-- **Tablet e desktop**: archivio e dettaglio affiancati, barra laterale.
-
-> I documenti generati sono riepiloghi, non fatture. La fattura fiscale va emessa con un gestionale o con il portale di fatturazione elettronica. Le aliquote IVA proposte vanno verificate con un commercialista.
-
----
-
-## Perché questo stack
-
-| Scelta | Motivo |
-|---|---|
-| **React 19 + TypeScript** | Il codice tipizzato rende sicuri i calcoli di importi e IVA; ecosistema più ampio per UI di qualità. |
-| **Vite** | Build veloce, PWA tramite `vite-plugin-pwa`, output statico per qualunque hosting. |
-| **Capacitor 8** | Lo stesso build web diventa app Android/iOS vera (store, icona, splash), con plugin nativi per condivisione file, vibrazione, barra di stato, tasto indietro Android. Nessuna riscrittura, a differenza di React Native o Flutter. |
-| **Tailwind CSS 4** | Token di design in CSS (`src/styles/index.css`), tema scuro e colore dell'officina applicati a runtime. |
-| **Dexie (IndexedDB)** | Archivio locale robusto e veloce, query reattive, spazio ben superiore a `localStorage`, foto come Blob. Un solo modulo da sostituire per aggiungere un backend. |
-| **Motion, vaul, sonner, lucide** | Transizioni con fisica a molla, fogli dal basso trascinabili in stile iOS, notifiche con "Annulla", icone coerenti. |
-| **jsPDF** | PDF A4 generati sul dispositivo, anche offline. |
-
-Il router usa l'hash (`#/job/…`): funziona su ogni hosting statico senza regole di rewrite, dentro Capacitor e come file singolo.
-
----
-
-## Avvio
-
-Serve Node 20.19 o più recente (vedi `.nvmrc`).
-
-```bash
+git clone https://github.com/martinminotti/ponte.git
+cd ponte
 npm install
-npm run dev          # http://localhost:5173
+npm run dev
 ```
 
-Comandi utili:
+Apri http://localhost:5173: al primo avvio Ponte propone alcune schede di esempio per provarlo subito.
 
-```bash
-npm test             # test unitari (calcoli, IVA, mensile, WhatsApp, migrazione, backup)
-npm run lint
-npm run typecheck
-npm run build        # build di produzione in dist/ con service worker
-npm run preview      # serve dist/ su http://localhost:4173
-npm run check        # lint + typecheck + test + build (come la CI)
-```
+| Documento | Contenuto |
+|---|---|
+| [docs/sviluppo.md](docs/sviluppo.md) | Stack, struttura, modello dei dati, marchio, sicurezza, backend |
+| [docs/rilascio.md](docs/rilascio.md) | Pubblicazione web, TestFlight da GitHub Actions, Android |
+| [brand/STYLEGUIDE.md](brand/STYLEGUIDE.md) | Marchio, colori, tipografia, voce, componenti |
 
-La prima volta che si apre l'app su un dispositivo dove era installata la **bozza precedente**, l'archivio (`localStorage`, chiave `registro-officina-v1`) viene importato da solo: importi convertiti in centesimi, numero progressivo assegnato in ordine di data. Il vecchio archivio resta intatto come copia di sicurezza.
+## Dati e privacy
 
----
+I dati dei clienti restano sul dispositivo dell'officina: nessun server, nessun tracciamento, nessuna libreria caricata da CDN. Il consenso ai messaggi WhatsApp è registrato su ogni scheda. Per non perdere nulla Ponte chiede al sistema di proteggere l'archivio e ricorda il backup ogni settimana.
 
-## Pubblicazione web
+> I documenti generati sono riepiloghi per il cliente, non fatture fiscali. La fattura elettronica va emessa con il proprio gestionale o con il portale SDI. Le aliquote IVA proposte vanno verificate con il commercialista.
 
-Qualunque hosting statico in **HTTPS** (obbligatorio per installare l'app su iPhone e per il service worker).
+## In arrivo
 
-- **Netlify** o **Cloudflare Pages**: comando di build `npm run build`, cartella `dist`. Il file `public/_headers` imposta Content-Security-Policy, cache immutabile per gli asset e nessuna cache per `index.html` e `sw.js`.
-- **GitHub Pages**: pubblica la cartella `dist` (es. con l'action `actions/deploy-pages`). Il percorso base è relativo, quindi funziona anche in una sottocartella.
-
-Quando esce una nuova versione, l'app mostra "Nuova versione disponibile" con il pulsante *Aggiorna*.
-
-**Installare su iPhone**: Safari → Condividi → Aggiungi alla schermata Home. **Android**: Chrome propone "Installa app".
-
----
-
-## App Android e iOS
-
-I progetti nativi sono già generati in `android/` e `ios/`.
-
-```bash
-npm run cap:android  # build web + sync + apre Android Studio
-npm run cap:ios      # build web + sync + apre Xcode (serve un Mac)
-```
-
-Da Android Studio o Xcode si avvia sull'emulatore o sul telefono e si firma per gli store.
-
-Prima della pubblicazione:
-
-1. **Identificativo app**: `app.ponte.officina` (in `capacitor.config.ts`, Android `build.gradle`, iOS bundle id). Se il proprietario ha un dominio, cambialo prima della prima pubblicazione: dopo non si può più.
-2. **Icone e splash**: già generate dal marchio Ponte (vedi Marchio).
-3. **Permessi** già dichiarati: fotocamera (foto all'arrivo) su Android; fotocamera e libreria foto su iOS, con testi in italiano in `Info.plist`.
-
-Dentro l'app nativa: il PDF si condivide con il foglio di sistema (Capacitor Share + Filesystem), la vibrazione usa il motore aptico del telefono, il tasto indietro di Android torna alla schermata precedente.
-
----
-
-## Struttura
-
-```
-src/
-  domain/        logica pura e testata: tipi, calcoli IVA e saldo, filtri, mensile, messaggi WhatsApp, formati
-  data/          IndexedDB (Dexie), repository, migrazione dalla bozza, backup, dati di esempio
-  pdf/           generazione PDF del conto e del conto mensile
-  platform/      ponte web/nativo (condivisione, salvataggio, vibrazione), immagini, colore dell'officina
-  ui/            componenti: targa, controlli, binario stati, fogli dal basso
-  app/           shell, navigazione, layout, router, aggiornamenti
-  features/      schermate: list, form, job, doc, month, settings
-  styles/        token di design e tema
-android/, ios/   progetti nativi Capacitor
-public/          icone, intestazioni HTTP
-```
-
-### Modello dei dati
-
-Tutti gli importi sono **interi in centesimi** (niente errori di arrotondamento sui float).
-
-```ts
-Job {
-  id, number,                      // number: progressivo scheda (0001, 0002…)
-  createdAt, updatedAt, status, history: [{ s, t }],
-  plate, plateCountry: 'I' | 'RSM', vin, make, model, km, dueDate,
-  client: 'privato' | 'azienda', company: { name, vat, cf, addr, sdi },
-  owner, phone, wa,                // wa: consenso ai messaggi
-  services, tyres, request, notes, workers, photoIds,
-  items: [{ id, desc, amount }], deposit,
-  vatRate, vatIncl, billing: 'mensile' | 'singola',
-  invoiced, invoicedAt, invoiceNo,
-  paid, paidAt, paidAmount, payMethod,
-  warrantyMonths, warrantyNote, closedAt, deliveredAt
-}
-```
-
-Tabelle IndexedDB: `jobs`, `settings` (riga `main`), `photos` (Blob JPEG).
-
----
-
-## Aggiungere un backend (sincronizzazione tra dispositivi)
-
-L'app è *local-first*: tutta la persistenza passa da `src/data/repo.ts` e `src/data/db.ts`, le schermate leggono con query reattive. Per condividere l'archivio tra più telefoni dell'officina:
-
-1. Aggiungi un servizio (consigliato **Supabase**: Postgres, autenticazione, storage per le foto, regole RLS per officina).
-2. Mantieni Dexie come cache locale e sincronizza le tabelle (`updatedAt` è già su ogni scheda per risolvere i conflitti "vince il più recente"), oppure usa **Dexie Cloud**, che si innesta sullo stesso database.
-3. Aggiungi login e regole di accesso: l'archivio contiene dati personali dei clienti (GDPR).
-
----
-
-## Sicurezza e privacy
-
-- I dati restano sul dispositivo; nessuna chiamata a server esterni. Fonts e librerie sono inclusi nel build (niente CDN).
-- CSP restrittiva in `public/_headers`. Se modifichi lo script inline in `index.html` (applica il tema prima del primo disegno), ricalcola l'hash:
-  ```bash
-  python3 -c "import re,hashlib,base64;s=open('dist/index.html').read();print(base64.b64encode(hashlib.sha256(re.findall(r'<script>(.*?)</script>',s,re.S)[0].encode()).digest()).decode())"
-  ```
-- Il consenso WhatsApp del cliente è registrato sulla scheda e rispettato.
-- L'archivio locale può essere cancellato se l'utente svuota i dati del sito: per questo l'app chiede la persistenza al browser e ricorda di fare un backup ogni settimana.
-
-## Limiti noti
-
-- Senza backend non c'è sincronizzazione tra dispositivi.
-- WhatsApp usa i link `wa.me`: l'invio lo conferma l'utente. Per messaggi automatici serve WhatsApp Business API.
-- Nessuna emissione di fattura elettronica (SDI): i documenti sono riepiloghi.
+- [ ] Sincronizzazione tra più dispositivi della stessa officina
+- [ ] Accesso con ruoli per titolare e operai
+- [ ] Pubblicazione su App Store e Play Store
+- [ ] Esportazione verso la fattura elettronica
+- [ ] Promemoria revisione e cambio gomme ai clienti
 
 ## Licenza
 
 Da definire dal proprietario del repository.
+
+<br>
+
+<div align="center">
+<sub>Ponte prende il nome dal ponte sollevatore: la "p" del marchio ha la pancia a forma di pneumatico.</sub>
+</div>

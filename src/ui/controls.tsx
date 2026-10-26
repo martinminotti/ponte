@@ -51,26 +51,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   );
 });
 
-export function IconButton({
-  label,
-  children,
-  className = '',
-  variant = 'secondary',
-  ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; variant?: Variant }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      className={`press inline-grid size-11 shrink-0 place-items-center rounded-full disabled:opacity-40 ${VARIANT[variant]} ${className}`}
-      {...rest}
-    >
-      {children}
-    </button>
-  );
-}
-
 /* ---------------- segmented ---------------- */
 
 export function Segmented<T extends string | number>({

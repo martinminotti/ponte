@@ -1,9 +1,11 @@
 .DS_Store
 node_modules/
 dist/
-dist-single/
 dev-dist/
 *.log
 *.tsbuildinfo
 .vite/
 coverage/
+
+# generati da brand/rasterize.mjs (npm run brand:icons)
+assets/

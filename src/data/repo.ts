@@ -49,10 +49,6 @@ export async function createJob(input: NewJobInput): Promise<Job> {
   });
 }
 
-export async function putJob(job: Job): Promise<void> {
-  await db.jobs.put({ ...job, updatedAt: Date.now() });
-}
-
 export async function patchJob(id: string, patch: Partial<Job>): Promise<void> {
   await db.jobs.update(id, { ...patch, updatedAt: Date.now() });
 }

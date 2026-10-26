@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-pwa/client" />
 
-declare const __BUILD_SINGLE__: boolean;
+/** versione da package.json, iniettata da Vite */
+declare const __APP_VERSION__: string;
