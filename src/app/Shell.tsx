@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { Building2, CarFront, Gauge, Plus, ReceiptText, Settings2, Store, User } from 'lucide-react';
 import { motion } from 'motion/react';
 import { PonteIcon, PonteWordmark } from '@/ui/Brand';
 import { Toaster } from 'sonner';
-import { useGlass, useScrolledDown, useScrolledPast, useSettings, useThemeSync, useWide } from './hooks';
+import { overlayOpen, typing, useDesk, useGlass, useJobs, useScrolledDown, useScrolledPast, useSettings, useThemeSync, useWide } from './hooks';
+import { inFilter, toInvoice } from '@/domain/logic';
 import { Sheet } from '@/ui/Sheet';
 import { bindAndroidBack, haptic, initNative } from '@/platform/native';
 
@@ -33,6 +34,21 @@ export function ShopBadge({ align = 'right' }: { align?: 'left' | 'right' }) {
         <span className="block truncate text-[14.5px] leading-tight font-semibold text-ink">{s.shop || 'La tua officina'}</span>
         <span className="block truncate text-[12.5px] leading-tight text-ink-3">{s.shop ? 'Officina' : 'Imposta nome e logo'}</span>
       </span>
+    </Link>
+  );
+}
+
+/** Solo il logo dell'officina, per la barra laterale stretta. */
+function ShopDot() {
+  const s = useSettings();
+  return (
+    <Link
+      to="/impostazioni"
+      title={s.shop || 'La tua officina'}
+      aria-label={s.shop || 'La tua officina'}
+      className="press mx-auto grid size-11 place-items-center overflow-hidden rounded-full bg-surface-2 text-ink-2 ring-1 ring-line hover:bg-surface-3"
+    >
+      {s.logo ? <img src={s.logo} alt="" className="size-full bg-white object-contain p-1" /> : <Store size={18} />}
     </Link>
   );
 }
@@ -87,6 +103,16 @@ export function Shell() {
   const nav = useNavigate();
   const [newOpen, setNewOpen] = useState(false);
 
+  const desk = useDesk();
+  const jobs = useJobs();
+  const counts = useMemo(() => {
+    const all = jobs || [];
+    return {
+      shop: all.filter((j) => inFilter(j, 'officina')).length,
+      invoice: all.filter(toInvoice).length,
+    };
+  }, [jobs]);
+
   const glass = useGlass();
   const compact = useScrolledDown();
   const scrolled = useScrolledPast();
@@ -121,41 +147,99 @@ export function Shell() {
     setNewOpen(true);
   };
 
+  // scorciatoie da tastiera: ⌘K o / cerca, N nuova accettazione, Esc chiude la scheda aperta
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.altKey) return;
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (overlayOpen()) return;
+        focusSearch();
+        return;
+      }
+      if (mod || typing() || overlayOpen()) return;
+      if (e.key === '/') {
+        e.preventDefault();
+        focusSearch();
+      } else if (e.key.toLowerCase() === 'n' && !e.shiftKey) {
+        e.preventDefault();
+        setNewOpen(true);
+      } else if (e.key === 'Escape' && /^\/job\/[^/]+$/.test(loc.pathname)) {
+        nav('/schede');
+      }
+    };
+    const focusSearch = () => {
+      const el = document.getElementById('search-jobs') as HTMLInputElement | null;
+      if (el && el.offsetParent) {
+        el.focus();
+        el.select();
+      } else nav('/schede?cerca=1');
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [loc.pathname, nav]);
+
   return (
     <div className="min-h-dvh lg:flex">
       {/* copre l'area della barra di stato del telefono mentre si scorre */}
       {!glass && <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[45] h-[env(safe-area-inset-top,0px)] bg-bg" />}
       {glass && !wide && <div aria-hidden="true" className="edge-top transition-opacity duration-300" style={{ opacity: scrolled ? 1 : 0 }} />}
       {wide && (
-        <aside className="safe-top sticky top-0 flex h-dvh w-[248px] shrink-0 flex-col border-r border-line bg-surface px-4 pb-5">
-          <div className="flex items-center gap-2.5 pt-6 pb-7 pl-1 text-ink">
-            <PonteIcon size={34} />
-            <PonteWordmark height={22} />
-          </div>
+        <aside className="safe-top sticky top-0 z-40 flex h-dvh w-[76px] shrink-0 flex-col items-center border-r border-line bg-surface px-3 pb-4 xl:w-[248px] xl:items-stretch xl:px-4 xl:pb-5">
+          <Link to="/" aria-label="Ponte, vai a Oggi" className="flex items-center gap-2.5 pt-5 pb-6 text-ink xl:pt-6 xl:pb-7 xl:pl-1">
+            <PonteIcon size={desk ? 34 : 38} />
+            {desk && <PonteWordmark height={22} />}
+          </Link>
           <button
             type="button"
-            onClick={() => setNewOpen(true)}
-            className="press mb-5 flex h-12 items-center justify-center gap-2 rounded-[14px] bg-accent font-semibold text-on-accent shadow-[var(--shadow-accent)]"
+            onClick={openNew}
+            title="Nuova accettazione (N)"
+            aria-label="Nuova accettazione"
+            className="press group mb-5 flex size-12 items-center justify-center gap-2 rounded-[14px] bg-accent font-semibold text-on-accent shadow-[var(--shadow-accent)] hover:brightness-[1.06] xl:h-12 xl:w-auto"
           >
-            <Plus size={20} strokeWidth={2.6} /> Nuova accettazione
+            <Plus size={20} strokeWidth={2.6} />
+            {desk && (
+              <>
+                Nuova accettazione
+                <span className="ml-1 grid h-[22px] min-w-[22px] place-items-center rounded-[6px] bg-black/10 px-1.5 text-[12px] font-bold">N</span>
+              </>
+            )}
           </button>
-          <nav className="flex flex-col gap-1" aria-label="Sezioni">
-            {NAV.map(({ to, label, icon: Icon, end }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={end}
-                className={({ isActive }) =>
-                  `press flex h-11 items-center gap-3 rounded-[12px] px-3 text-[15.5px] font-medium ${isActive ? 'bg-surface-2 text-ink' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'}`
-                }
-              >
-                <Icon size={20} strokeWidth={2} /> {label}
-              </NavLink>
-            ))}
+          <nav className="flex w-full flex-col gap-1" aria-label="Sezioni">
+            {NAV.map(({ to, label, icon: Icon, end }) => {
+              const n = to === '/schede' ? counts.shop : to === '/mensile' ? counts.invoice : 0;
+              return (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  title={desk ? undefined : label}
+                  aria-label={desk ? undefined : n ? `${label}, ${n}` : label}
+                  className={({ isActive }) =>
+                    `press relative flex h-11 items-center gap-3 rounded-[12px] text-[15.5px] font-medium max-xl:justify-center xl:px-3 ${
+                      isActive ? 'bg-surface-2 text-ink' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      {isActive && <span aria-hidden="true" className="absolute top-2.5 bottom-2.5 -left-3 w-[3px] rounded-r-full bg-accent xl:-left-4" />}
+                      <Icon size={desk ? 20 : 22} strokeWidth={isActive ? 2.3 : 2} className={isActive ? 'text-accent-ink' : ''} />
+                      {desk && <span className="flex-1">{label}</span>}
+                      {n > 0 &&
+                        (desk ? (
+                          <span className="tnum rounded-full bg-surface-3 px-2 py-0.5 text-[12.5px] font-semibold text-ink-2">{n}</span>
+                        ) : (
+                          <span className="tnum absolute top-0.5 right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-accent px-1 text-[11px] font-bold text-on-accent">{n}</span>
+                        ))}
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
           </nav>
-          <div className="mt-auto border-t border-line pt-4">
-            <ShopBadge align="left" />
-          </div>
+          <div className="mt-auto w-full border-t border-line pt-4">{desk ? <ShopBadge align="left" /> : <ShopDot />}</div>
         </aside>
       )}
 
@@ -216,11 +300,19 @@ export function Shell() {
       <Toaster
         position={wide ? 'top-right' : 'top-center'}
         offset={wide ? 24 : 'calc(env(safe-area-inset-top, 0px) + 12px)'}
-        mobileOffset={{ top: 'calc(env(safe-area-inset-top, 0px) + 10px)', left: 12, right: 12 }}
+        mobileOffset={{
+          top: 'calc(env(safe-area-inset-top, 0px) + 10px)',
+          left: 12,
+          right: 12,
+        }}
         theme={dark ? 'dark' : 'light'}
         toastOptions={{
           classNames: {
-            toast: `!font-sans !text-[15px] !gap-2.5 !text-ink ${glass ? '!rounded-[22px] !border-white/30 !bg-[var(--glass-fill-thick)] backdrop-blur-2xl backdrop-saturate-150 !shadow-[var(--glass-shadow)]' : '!rounded-[16px] !border-line !bg-surface !shadow-[var(--shadow-2)]'}`,
+            toast: `!font-sans !text-[15px] !gap-2.5 !text-ink ${
+              glass
+                ? '!rounded-[22px] !border-white/30 !bg-[var(--glass-fill-thick)] backdrop-blur-2xl backdrop-saturate-150 !shadow-[var(--glass-shadow)]'
+                : '!rounded-[16px] !border-line !bg-surface !shadow-[var(--shadow-2)]'
+            }`,
             description: '!text-ink-2',
             actionButton: '!bg-accent !text-on-accent !rounded-[10px] !h-8 !px-3 !font-semibold !text-[14px]',
           },

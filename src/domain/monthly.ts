@@ -28,18 +28,14 @@ export function companies(jobs: Job[]): CompanyGroup[] {
       m.set(k, { key: k, name: custName(j), company: j.company, owner: j.owner || '', phone: j.phone || '', wa: j.wa !== false, at: j.createdAt });
     }
   }
-  return [...m.values()]
-    .map(({ at: _at, ...c }) => c)
-    .sort((a, b) => a.name.localeCompare(b.name, 'it'));
+  return [...m.values()].map(({ at: _at, ...c }) => c).sort((a, b) => a.name.localeCompare(b.name, 'it'));
 }
 
 export const jobDate = (j: Job): number => j.deliveredAt || j.closedAt || j.createdAt;
 export const eligible = (j: Job): boolean => isClosedStatus(j.status);
 
 export function monthJobs(jobs: Job[], co: string, ym: string): Job[] {
-  return jobs
-    .filter((j) => isAz(j) && compKey(j) === co && ymOf(jobDate(j)) === ym)
-    .sort((a, b) => jobDate(a) - jobDate(b));
+  return jobs.filter((j) => isAz(j) && compKey(j) === co && ymOf(jobDate(j)) === ym).sort((a, b) => jobDate(a) - jobDate(b));
 }
 
 export interface MonthTotals {

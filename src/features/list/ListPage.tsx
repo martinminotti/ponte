@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMatch, useNavigate, useSearchParams } from 'react-router';
 import { Plus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { useGlass, useJobs, useWide } from '@/app/hooks';
+import { overlayOpen, searchShortcut, typing, useGlass, useJobs, useWide } from '@/app/hooks';
 import { BrandMark } from '@/app/Shell';
 import { FILTRI, type FilterKey } from '@/domain/constants';
 import { eur } from '@/domain/format';
@@ -81,6 +81,23 @@ export function ListPage() {
   };
   const newJob = () => window.dispatchEvent(new Event('ro:new-job'));
 
+  // su schermi larghi ↑ ↓ (o J K) scorrono le schede nel pannello accanto
+  useEffect(() => {
+    if (!wide) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || typing() || overlayOpen()) return;
+      const dir = e.key === 'ArrowDown' || e.key === 'j' ? 1 : e.key === 'ArrowUp' || e.key === 'k' ? -1 : 0;
+      if (!dir || !list.length) return;
+      e.preventDefault();
+      const i = list.findIndex((j) => j.id === activeId);
+      const next = list[i < 0 ? (dir > 0 ? 0 : list.length - 1) : Math.min(list.length - 1, Math.max(0, i + dir))];
+      nav(`/job/${next.id}`, { replace: i >= 0 });
+      requestAnimationFrame(() => document.querySelector(`[data-job="${next.id}"]`)?.scrollIntoView({ block: 'nearest' }));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [wide, list, activeId, nav]);
+
   return (
     <div className={`mx-auto w-full ${wide ? 'max-w-none' : 'max-w-[680px]'} pb-safe-bar lg:pb-10`}>
       {!wide && (
@@ -97,10 +114,26 @@ export function ListPage() {
         }`}
       >
         {wide && <h1 className="w-wide mb-3 text-[26px] font-semibold tracking-[-0.01em] text-ink">Schede</h1>}
-        <SearchField ref={searchRef} value={q} onChange={setQ} />
-        <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1" role="group" aria-label="Filtra le schede">
+        <SearchField
+          ref={searchRef}
+          id="search-jobs"
+          value={q}
+          onChange={setQ}
+          shortcut={wide ? searchShortcut() : undefined}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              if (q) setQ('');
+              else e.currentTarget.blur();
+            } else if ((e.key === 'Enter' || e.key === 'ArrowDown') && list.length) {
+              e.preventDefault();
+              e.currentTarget.blur();
+              nav(`/job/${list[0].id}`);
+            }
+          }}
+        />
+        <div className={wide ? 'mt-3 flex flex-wrap gap-1.5' : 'no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1'} role="group" aria-label="Filtra le schede">
           {FILTRI.map((f) => (
-            <Chip key={f.k} on={filter === f.k} count={jobs ? counts[f.k] : undefined} onClick={() => setFilter(f.k)}>
+            <Chip key={f.k} on={filter === f.k} count={jobs ? counts[f.k] : undefined} onClick={() => setFilter(f.k)} className={wide ? '!h-8 !gap-1.5 !px-3 !text-[14px]' : ''}>
               {f.l}
             </Chip>
           ))}
@@ -165,10 +198,10 @@ export function ListPage() {
             {qq ? 'Controlla la targa o cerca per nome, telefono o partita IVA.' : 'Cambia filtro per vedere le altre schede.'}
           </EmptyState>
         ) : (
-          <ul className="mt-2 flex flex-col gap-3">
+          <ul className={`mt-2 flex flex-col ${wide ? 'gap-2' : 'gap-3'}`}>
             {list.map((j) => (
               <li key={j.id}>
-                <JobCard j={j} active={wide && j.id === activeId} />
+                <JobCard j={j} active={wide && j.id === activeId} dense={wide} />
               </li>
             ))}
           </ul>

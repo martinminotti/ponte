@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/data/db';
 import { getSettings } from '@/data/repo';
@@ -17,7 +17,7 @@ export function useJobs(): Job[] | undefined {
 
 /** Una scheda. undefined mentre carica, null se non esiste. */
 export function useJob(id: string | undefined): Job | null | undefined {
-  return useLiveQuery(async () => (id ? ((await db.jobs.get(id)) ?? null) : null), [id]);
+  return useLiveQuery(async () => (id ? (await db.jobs.get(id)) ?? null : null), [id]);
 }
 
 export function useMedia(q: string): boolean {
@@ -28,11 +28,35 @@ export function useMedia(q: string): boolean {
       return () => m.removeEventListener('change', cb);
     },
     () => window.matchMedia(q).matches,
-    () => false,
+    () => false
   );
 }
 
 export const useWide = () => useMedia('(min-width: 1024px)');
+/** Schermi da scrivania: barra laterale completa. */
+export const useDesk = () => useMedia('(min-width: 1280px)');
+
+/** Larghezza di un elemento, aggiornata al ridimensionamento. */
+export function useWidth<T extends HTMLElement>(): [(el: T | null) => void, number] {
+  const [w, setW] = useState(0);
+  const [el, setEl] = useState<T | null>(null);
+  useEffect(() => {
+    if (!el) return;
+    setW(el.getBoundingClientRect().width);
+    const ro = new ResizeObserver(([e]) => setW(e.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [el]);
+  return [useCallback((n: T | null) => setEl(n), []), w];
+}
+
+/** Il fuoco è in un campo di testo: le scorciatoie da tastiera non devono scattare. */
+export const typing = () => {
+  const a = document.activeElement as HTMLElement | null;
+  return !!a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+};
+/** C'è un foglio o una finestra aperta sopra la pagina. */
+export const overlayOpen = () => !!document.querySelector('[role="dialog"]');
 
 /** Applica tema (chiaro/scuro/sistema) e colore dell'officina all'intero documento. */
 export function useThemeSync(s: Settings): boolean {
@@ -108,3 +132,6 @@ export function useObjectUrl(blob: Blob | undefined): string | undefined {
   }, [blob]);
   return url;
 }
+
+/** Etichetta della scorciatoia di ricerca per il sistema in uso. */
+export const searchShortcut = () => (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K');

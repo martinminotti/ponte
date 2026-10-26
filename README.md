@@ -8,9 +8,11 @@
 ### Il registro dell'officina.
 
 Accettazione, stato dei lavori, avvisi WhatsApp, conti e fatture ditte.<br>
-Per officine meccaniche, elettrauti e gommisti. Dal telefono, anche offline.
+Per officine meccaniche, elettrauti e gommisti. Dal telefono, anche offline.<br>
+**[Prova la web app →](https://martinminotti.github.io/ponte/)**
 
 [![CI](https://github.com/martinminotti/ponte/actions/workflows/ci.yml/badge.svg)](https://github.com/martinminotti/ponte/actions/workflows/ci.yml)
+[![Web](https://github.com/martinminotti/ponte/actions/workflows/pages.yml/badge.svg)](https://martinminotti.github.io/ponte/)
 [![iOS TestFlight](https://github.com/martinminotti/ponte/actions/workflows/ios-testflight.yml/badge.svg)](https://github.com/martinminotti/ponte/actions/workflows/ios-testflight.yml)
 ![Piattaforme](https://img.shields.io/badge/iOS%20·%20Android%20·%20Web-1c1b19?style=flat&labelColor=ff6a13&label=app)
 ![Local first](https://img.shields.io/badge/dati-sul%20dispositivo-1c1b19?style=flat&labelColor=ff6a13)
@@ -81,7 +83,7 @@ Ponte mette tutto questo in tasca. Un'auto si accetta in trenta secondi scrivend
 - **Offline sempre**: l'archivio vive sul dispositivo, nessun account, nessun canone.
 - **Annulla** su eliminazioni, voci e incassi. **Backup** completo con foto, promemoria settimanale.
 - **Vetro liquido su iOS**, tema chiaro e scuro, vibrazione aptica, tasto indietro su Android.
-- **Tablet e desktop** con archivio e dettaglio affiancati.
+- **Tablet e desktop** con cruscotto a tutta larghezza, archivio e scheda affiancati, scorciatoie da tastiera (<kbd>⌘K</kbd> cerca, <kbd>N</kbd> nuova accettazione, <kbd>↑</kbd> <kbd>↓</kbd> scorre le schede).
 
 <br>
 
@@ -92,7 +94,7 @@ Ponte mette tutto questo in tasca. Un'auto si accetta in trenta secondi scrivend
   <img src="docs/screenshots/desktop-light.png" alt="Ponte su desktop: barra laterale, elenco schede e cruscotto" width="100%">
 </picture>
 
-<sub>Su tablet e computer l'elenco e il cruscotto stanno affiancati.</sub>
+<sub>Su computer la giornata a colpo d'occhio, a tutta larghezza.</sub>
 
 <br><br>
 

@@ -23,11 +23,7 @@ export function StatusTicks({ s }: { s: StatusKey }) {
   return (
     <span className="flex gap-[3px]" aria-hidden="true">
       {STATI.map((x, i) => (
-        <span
-          key={x.k}
-          className="h-[4px] flex-1 rounded-full"
-          style={{ background: i <= idx ? stColor(s) : 'var(--surface-3)', opacity: i <= idx ? (i === idx ? 1 : 0.55) : 1 }}
-        />
+        <span key={x.k} className="h-[4px] flex-1 rounded-full" style={{ background: i <= idx ? stColor(s) : 'var(--surface-3)', opacity: i <= idx ? (i === idx ? 1 : 0.55) : 1 }} />
       ))}
     </span>
   );
@@ -80,7 +76,9 @@ export function StatusRail({ value, onChange }: { value: StatusKey; onChange: (k
                   />
                 )}
                 <span
-                  className={`relative rounded-full transition-all ${on ? 'size-2.5 bg-white' : done ? 'size-3 group-hover:scale-125' : 'size-3 bg-surface ring-2 ring-inset ring-line-strong group-hover:ring-ink-3'}`}
+                  className={`relative rounded-full transition-all ${
+                    on ? 'size-2.5 bg-white' : done ? 'size-3 group-hover:scale-125' : 'size-3 bg-surface ring-2 ring-inset ring-line-strong group-hover:ring-ink-3'
+                  }`}
                   style={done ? { background: col } : undefined}
                 />
               </span>

@@ -17,7 +17,10 @@ import { AutoInput, Button, Field, Note, Section, Segmented, ToggleChip } from '
 import { StatusPill } from '@/ui/status';
 
 type Up = (fn: (j: Job) => Job) => Promise<void>;
-export const updater = (id: string): Up => (fn) => mutateJob(id, fn);
+export const updater =
+  (id: string): Up =>
+  (fn) =>
+    mutateJob(id, fn);
 
 /* ---------------- lavori eseguiti e totale ---------------- */
 
@@ -81,7 +84,12 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
                     />
                     <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[15px] text-ink-3">€</span>
                   </div>
-                  <button type="button" onClick={() => del(it.id)} aria-label={`Rimuovi voce ${n + 1}`} className="press grid size-10 place-items-center rounded-full text-ink-3 hover:bg-danger-soft hover:text-danger">
+                  <button
+                    type="button"
+                    onClick={() => del(it.id)}
+                    aria-label={`Rimuovi voce ${n + 1}`}
+                    className="press grid size-10 place-items-center rounded-full text-ink-3 hover:bg-danger-soft hover:text-danger"
+                  >
                     <Trash2 size={18} />
                   </button>
                 </div>
@@ -100,7 +108,7 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
         <Button variant="outline" icon={<Plus size={18} strokeWidth={2.4} />} onClick={() => add()} className="self-start">
           Aggiungi voce
         </Button>
-        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:-mx-5 sm:px-5" aria-label="Voci frequenti">
+        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:-mx-5 sm:px-5 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0" aria-label="Voci frequenti">
           {quick.map((v) => (
             <button key={v} type="button" onClick={() => add(v)} className="press h-9 shrink-0 rounded-full bg-surface-2 px-3.5 text-[14px] font-medium text-ink-2 hover:bg-surface-3 hover:text-ink">
               + {v}
@@ -127,7 +135,7 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
         {job.deposit > 0 && <Row l="Acconto versato" v={`− ${eur(job.deposit)}`} />}
         <div className="mt-2 flex items-end justify-between gap-3 border-t border-line pt-3">
           <dt className="font-semibold text-ink">{job.paid ? 'Saldato' : 'Da saldare'}</dt>
-          <dd className={`w-cond tnum text-[34px] leading-none font-bold ${job.paid ? 'text-ok' : 'text-ink'}`}>{eur(job.paid ? (job.paidAmount ?? totale(job)) : due)}</dd>
+          <dd className={`w-cond tnum text-[34px] leading-none font-bold ${job.paid ? 'text-ok' : 'text-ink'}`}>{eur(job.paid ? job.paidAmount ?? totale(job) : due)}</dd>
         </div>
       </dl>
     </Section>
@@ -263,7 +271,9 @@ export function InvoiceSection({ job, up }: { job: Job; up: Up }) {
           Segna fattura emessa
         </Button>
       )}
-      <p className="text-[13.5px] leading-snug text-ink-3">Il conto è un riepilogo per la fattura. La fattura fiscale si emette con il gestionale o il portale di fatturazione elettronica. Verifica le aliquote con il commercialista.</p>
+      <p className="text-[13.5px] leading-snug text-ink-3">
+        Il conto è un riepilogo per la fattura. La fattura fiscale si emette con il gestionale o il portale di fatturazione elettronica. Verifica le aliquote con il commercialista.
+      </p>
     </Section>
   );
 }
@@ -271,12 +281,16 @@ export function InvoiceSection({ job, up }: { job: Job; up: Up }) {
 /* ---------------- garanzia ---------------- */
 
 export function WarrantySection({ job, up }: { job: Job; up: Up }) {
-  const txt = !job.warrantyMonths
-    ? 'Nessuna garanzia sul riepilogo.'
-    : `Valida fino al ${fmtDate(scadenza(job))}${job.deliveredAt ? ', dalla consegna.' : '. Si ricalcola alla consegna.'}`;
+  const txt = !job.warrantyMonths ? 'Nessuna garanzia sul riepilogo.' : `Valida fino al ${fmtDate(scadenza(job))}${job.deliveredAt ? ', dalla consegna.' : '. Si ricalcola alla consegna.'}`;
   return (
     <Section title="Garanzia lavori">
-      <Segmented size="sm" label="Durata garanzia" value={job.warrantyMonths || 0} onChange={(m) => up((j) => ({ ...j, warrantyMonths: m }))} options={GARANZIE.map((g) => ({ v: g.m, l: g.m ? `${g.m} m` : 'No' }))} />
+      <Segmented
+        size="sm"
+        label="Durata garanzia"
+        value={job.warrantyMonths || 0}
+        onChange={(m) => up((j) => ({ ...j, warrantyMonths: m }))}
+        options={GARANZIE.map((g) => ({ v: g.m, l: g.m ? `${g.m} m` : 'No' }))}
+      />
       <p className="-mt-1 text-[14.5px] text-ink-2">{txt}</p>
       {job.warrantyMonths > 0 && (
         <Field label="Cosa copre (facoltativo)" htmlFor="wnote">

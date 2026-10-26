@@ -13,7 +13,11 @@ import { UpdatePrompt } from './UpdatePrompt';
 const FormPage = lazy(() => import('@/features/form/FormPage').then((m) => ({ default: m.FormPage })));
 const DocPage = lazy(() => import('@/features/doc/DocPage').then((m) => ({ default: m.DocPage })));
 const MonthPage = lazy(() => import('@/features/month/MonthPage').then((m) => ({ default: m.MonthPage })));
-const SettingsPage = lazy(() => import('@/features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const SettingsPage = lazy(() =>
+  import('@/features/settings/SettingsPage').then((m) => ({
+    default: m.SettingsPage,
+  }))
+);
 const L = (n: ReactNode) => <Suspense fallback={null}>{n}</Suspense>;
 
 // Hash router: funziona su qualunque hosting statico, dentro Capacitor e come file singolo.

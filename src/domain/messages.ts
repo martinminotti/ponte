@@ -18,11 +18,7 @@ export function riepilogo(j: Job): string {
     }
     t += (isAz(j) ? '\n' : '\n\n') + `Totale: ${eur(tot)}`;
     if (j.deposit > 0) t += `\nAcconto versato: ${eur(j.deposit)}`;
-    t += j.paid
-      ? `\nPagato${j.payMethod ? ` (${j.payMethod})` : ''}.`
-      : monthlyPending(j)
-        ? '\nSarà incluso nella fattura di fine mese.'
-        : `\nDa saldare: ${eur(daSaldare(j))}`;
+    t += j.paid ? `\nPagato${j.payMethod ? ` (${j.payMethod})` : ''}.` : monthlyPending(j) ? '\nSarà incluso nella fattura di fine mese.' : `\nDa saldare: ${eur(daSaldare(j))}`;
   }
   if (j.warrantyMonths > 0) {
     t += `\n\nGaranzia sui lavori: ${j.warrantyMonths} mesi, fino al ${fmtDate(scadenza(j))}.`;
@@ -42,9 +38,7 @@ export function buildMsg(j: Job, kind: StatusKey, s: Pick<Settings, 'shop'>): st
     ricambi: `${hi} per ${v} siamo in attesa dei ricambi. Appena arrivano riprendiamo i lavori.`,
     lavorazione: `${hi} sono iniziati i lavori su ${v}.`,
     pronto: `${hi} ${v} e il conto sono pronti. Puoi passare a ritirare.` + riepilogo(j),
-    consegnato:
-      `${hi}${sh ? ` grazie per aver scelto ${sh}` : ' grazie per averci scelto'}. Ecco il riepilogo dei lavori su ${v}.` +
-      riepilogo(j),
+    consegnato: `${hi}${sh ? ` grazie per aver scelto ${sh}` : ' grazie per averci scelto'}. Ecco il riepilogo dei lavori su ${v}.` + riepilogo(j),
   };
   return (T[kind] || T.accettato) + (sh ? `\n\n${sh}` : '');
 }

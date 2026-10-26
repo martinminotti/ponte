@@ -35,17 +35,7 @@ function RsmCrest({ size }: { size: number }) {
   );
 }
 
-export function Plate({
-  plate,
-  country = 'I',
-  size = 'md',
-  className = '',
-}: {
-  plate: string;
-  country?: PlateCountry;
-  size?: Size;
-  className?: string;
-}) {
+export function Plate({ plate, country = 'I', size = 'md', className = '' }: { plate: string; country?: PlateCountry; size?: Size; className?: string }) {
   const s = S[size];
   const t = fmtPlate(plate, country);
   const rsm = country === 'RSM';
@@ -94,7 +84,9 @@ export function Plate({
       >
         {t || '— — —'}
       </span>
-      {!rsm && <span aria-hidden="true" style={{ width: s.band * 0.82, background: 'linear-gradient(180deg,#1f45b5,#14318a)', margin: s.bw, marginLeft: 0, borderRadius: `0 ${s.r - 2}px ${s.r - 2}px 0` }} />}
+      {!rsm && (
+        <span aria-hidden="true" style={{ width: s.band * 0.82, background: 'linear-gradient(180deg,#1f45b5,#14318a)', margin: s.bw, marginLeft: 0, borderRadius: `0 ${s.r - 2}px ${s.r - 2}px 0` }} />
+      )}
     </span>
   );
 }

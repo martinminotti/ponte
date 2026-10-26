@@ -17,7 +17,8 @@
     "cap:android": "npm run cap:sync && cap open android",
     "cap:ios": "npm run cap:sync && cap open ios",
     "brand:svg": "python3 brand/generate.py",
-    "brand:icons": "node brand/rasterize.mjs && capacitor-assets generate --android --ios --iconBackgroundColor '#FF6A13' --iconBackgroundColorDark '#1C1B19' --splashBackgroundColor '#FF6A13' --splashBackgroundColorDark '#1C1B19'"
+    "brand:icons": "node brand/rasterize.mjs && capacitor-assets generate --android --ios --iconBackgroundColor '#FF6A13' --iconBackgroundColorDark '#1C1B19' --splashBackgroundColor '#FF6A13' --splashBackgroundColorDark '#1C1B19'",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "@capacitor/app": "^8.1.2",
@@ -54,6 +55,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "fake-indexeddb": "^6.2.6",
     "globals": "^17.13.0",
+    "prettier": "^3.9.10",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",

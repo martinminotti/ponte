@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { Building2, Check, ChevronDown, ChevronLeft, ChevronRight, Plus, ReceiptText, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Page } from '@/app/layout';
-import { useJobs, useSettings, useWide } from '@/app/hooks';
+import { useJobs, useSettings, useWide, useWidth } from '@/app/hooks';
 import { BrandMark } from '@/app/Shell';
 import { PAGAMENTI } from '@/domain/constants';
 import { eur, fmtDay, fmtPlate, monthLabel, norm, shiftMonth, ymOf } from '@/domain/format';
@@ -26,6 +26,8 @@ export function MonthPage() {
   const jobs = useJobs();
   const s = useSettings();
   const wide = useWide();
+  const [wref, pw] = useWidth<HTMLDivElement>();
+  const two = pw >= 1000;
   const nav = useNavigate();
   const cos = useMemo(() => companies(jobs || []), [jobs]);
   const [coKey, setCoKey] = useState(memo.co);
@@ -86,15 +88,210 @@ export function MonthPage() {
 
   if (jobs === undefined) return null;
 
+  const picker = co && (
+    <div className="card flex flex-col gap-1 p-2">
+      <button type="button" onClick={() => setPick(true)} className="press flex items-center gap-3 rounded-[14px] p-2.5 text-left hover:bg-surface-2">
+        <span className="grid size-11 shrink-0 place-items-center rounded-[12px] bg-accent-soft text-accent-ink">
+          <Building2 size={22} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="w-semi block truncate text-[17px] font-semibold text-ink">{co.name}</span>
+          <span className="tnum block truncate text-[14px] text-ink-3">{co.company.vat || co.company.cf || 'Ditta'}</span>
+        </span>
+        <span className="flex items-center gap-1 text-[14px] font-medium text-ink-2">
+          {cos.length > 1 && 'Cambia'} <ChevronDown size={18} />
+        </span>
+      </button>
+      <div className="flex items-center justify-between gap-2 border-t border-line px-1 pt-1">
+        <button type="button" aria-label="Mese precedente" onClick={() => changeYm(-1)} className="press grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-2">
+          <ChevronLeft size={22} />
+        </button>
+        <p className="w-wide tnum text-[16px] font-semibold text-ink">{monthLabel(ym)}</p>
+        <button type="button" aria-label="Mese successivo" onClick={() => changeYm(1)} className="press grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-2">
+          <ChevronRight size={22} />
+        </button>
+      </div>
+    </div>
+  );
+  const lavori = co && (
+    <>
+      {all.length === 0 ? (
+        <div className="card">
+          <EmptyState title={`Nessun lavoro a ${monthLabel(ym).toLowerCase()}`}>Cambia mese, oppure registra un nuovo lavoro per {co.name}.</EmptyState>
+        </div>
+      ) : (
+        <Section
+          title="Lavori del mese"
+          action={
+            <span className="tnum text-[14px] text-ink-3">
+              {chosen.length} di {all.length} nel conto
+            </span>
+          }
+        >
+          <ul className="-my-1 flex flex-col">
+            {all.map((j, i) => {
+              const el = eligible(j);
+              const on = isSel(j);
+              return (
+                <li key={j.id} className={i ? 'border-t border-line' : ''}>
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={on}
+                    disabled={!el}
+                    onClick={() => {
+                      haptic('light');
+                      setSel((x) => ({ ...x, [j.id]: !on }));
+                      setMno(null);
+                    }}
+                    className="press -mx-2 flex w-[calc(100%+16px)] items-center gap-3 rounded-[12px] px-2 py-3 text-left hover:bg-surface-2 disabled:opacity-100"
+                  >
+                    <span
+                      className={`grid size-6 shrink-0 place-items-center rounded-[7px] transition-colors ${
+                        on ? 'bg-accent text-on-accent' : el ? 'ring-2 ring-inset ring-line-strong' : 'bg-surface-3'
+                      }`}
+                    >
+                      {on && <Check size={16} strokeWidth={3} />}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="tnum block truncate text-[15.5px] font-semibold text-ink">
+                        {fmtDay(jobDate(j))} · {fmtPlate(j.plate, j.plateCountry) || 'senza targa'}
+                      </span>
+                      <span className="flex items-center gap-2 truncate text-[14px] text-ink-3">
+                        <span className="truncate">{veic(j)}</span>
+                        {!el ? <StatusPill s={j.status} size="sm" /> : j.invoiced ? <span className="shrink-0 text-ok">fatturato{j.invoiceNo ? ` n. ${j.invoiceNo}` : ''}</span> : null}
+                      </span>
+                    </span>
+                    <span className={`w-cond tnum shrink-0 text-[19px] font-bold ${on ? 'text-ink' : 'text-ink-3'}`}>{eur(totale(j))}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </Section>
+      )}
+    </>
+  );
+  const fattura = (
+    <Section title="Fattura e incasso">
+      <Field label="Numero fattura" htmlFor="m-no">
+        <Input id="m-no" autoComplete="off" placeholder="Es. 2026/118" value={no} onChange={(e) => setMno(e.target.value)} />
+      </Field>
+      {allInv ? (
+        <div className="flex items-center justify-between gap-2 rounded-[16px] bg-ok-soft p-3.5 pl-4 font-semibold text-ok">
+          <span className="flex items-center gap-2">
+            <Check size={20} strokeWidth={2.6} /> Fattura emessa
+          </span>
+          <Button size="sm" variant="ghost" className="!text-ok" onClick={() => mark((j) => ({ ...j, invoiced: false, invoicedAt: undefined }), 'Fatture annullate')}>
+            Annulla
+          </Button>
+        </div>
+      ) : (
+        <Button
+          variant="outline"
+          block
+          icon={<ReceiptText size={19} />}
+          onClick={() =>
+            mark(
+              (j, now) => ({
+                ...j,
+                invoiced: true,
+                invoicedAt: now,
+                invoiceNo: no,
+              }),
+              `${chosen.length} lavori segnati come fatturati`
+            )
+          }
+        >
+          Segna fattura emessa
+        </Button>
+      )}
+
+      <div className="h-px bg-line" />
+
+      {allPaid ? (
+        <div className="flex items-center justify-between gap-2 rounded-[16px] bg-ok-soft p-3.5 pl-4 font-semibold text-ok">
+          <span className="flex items-center gap-2">
+            <Check size={20} strokeWidth={2.6} /> Incassato
+          </span>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="!text-ok"
+            onClick={() =>
+              mark(
+                (j) => ({
+                  ...j,
+                  paid: false,
+                  paidAt: undefined,
+                  paidAmount: undefined,
+                }),
+                'Incasso annullato'
+              )
+            }
+          >
+            Annulla
+          </Button>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Metodo di pagamento">
+            {PAGAMENTI.map((p) => (
+              <ToggleChip key={p} on={mpay === p} onClick={() => setMpay(mpay === p ? '' : p)}>
+                {p}
+              </ToggleChip>
+            ))}
+          </div>
+          <Button
+            variant="primary"
+            size="lg"
+            block
+            disabled={!mpay}
+            onClick={() =>
+              mark(
+                (j, now) => ({
+                  ...j,
+                  paid: true,
+                  paidAt: now,
+                  paidAmount: daSaldare(j),
+                  payMethod: mpay,
+                }),
+                `Incassati ${eur(T.due)}`
+              )
+            }
+          >
+            Segna incassato {T.due > 0 ? eur(T.due) : ''}
+          </Button>
+        </>
+      )}
+    </Section>
+  );
+  const docCard = co && (
+    <div className="card p-4 sm:p-5">
+      <DocActions
+        build={() => buildMonthPdf(co, chosen, ym, no, s)}
+        name={monthPdfName(co, ym)}
+        waHref={co.wa ? waLink(co.phone, monthMsg(co, chosen, ym, no, s), s.prefix) : null}
+        waNote="Il documento raccoglie i lavori selezionati con data, targa e voci. Segna la fattura emessa dopo averla fatta nel gestionale."
+      />
+    </div>
+  );
+  const newBtn = co && (
+    <Button variant="ghost" block icon={<Plus size={19} strokeWidth={2.4} />} onClick={() => nav('/nuova?cl=azienda', { state: { prefill: prefillFor(co) } })}>
+      Nuovo lavoro per {co.name}
+    </Button>
+  );
+
   return (
     <Page className="pb-safe-bar lg:pb-10">
-      <div className="mx-auto max-w-[760px] px-4">
+      <div ref={wref} aria-hidden="true" className="h-0 w-full" />
+      <div className="mx-auto px-4 lg:px-8 lg:pt-4" style={{ maxWidth: two ? 1280 : 760 }}>
         {!wide && (
           <header className="pt-[calc(env(safe-area-inset-top,0px)+16px)]">
             <BrandMark />
           </header>
         )}
-        <h1 className="w-wide mt-5 text-[26px] font-semibold tracking-[-0.01em] text-ink">Fatture ditte</h1>
+        <h1 className="w-wide mt-5 text-[26px] font-semibold tracking-[-0.01em] text-ink lg:text-[34px] lg:tracking-[-0.02em]">Fatture ditte</h1>
         <p className="mt-1 max-w-[52ch] text-[15px] text-ink-2">I lavori di ogni ditta si raccolgono durante il mese: qui prepari un solo conto con tutte le voci e l'IVA divisa per aliquota.</p>
 
         {!co ? (
@@ -104,146 +301,36 @@ export function MonthPage() {
             </EmptyState>
           </div>
         ) : (
-          <div className="mt-5 flex flex-col gap-3">
-            <div className="card flex flex-col gap-1 p-2">
-              <button type="button" onClick={() => setPick(true)} className="press flex items-center gap-3 rounded-[14px] p-2.5 text-left hover:bg-surface-2">
-                <span className="grid size-11 shrink-0 place-items-center rounded-[12px] bg-accent-soft text-accent-ink">
-                  <Building2 size={22} />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="w-semi block truncate text-[17px] font-semibold text-ink">{co.name}</span>
-                  <span className="tnum block truncate text-[14px] text-ink-3">{co.company.vat || co.company.cf || 'Ditta'}</span>
-                </span>
-                <span className="flex items-center gap-1 text-[14px] font-medium text-ink-2">
-                  {cos.length > 1 && 'Cambia'} <ChevronDown size={18} />
-                </span>
-              </button>
-              <div className="flex items-center justify-between gap-2 border-t border-line px-1 pt-1">
-                <button type="button" aria-label="Mese precedente" onClick={() => changeYm(-1)} className="press grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-2">
-                  <ChevronLeft size={22} />
-                </button>
-                <p className="w-wide tnum text-[16px] font-semibold text-ink">{monthLabel(ym)}</p>
-                <button type="button" aria-label="Mese successivo" onClick={() => changeYm(1)} className="press grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-2">
-                  <ChevronRight size={22} />
-                </button>
-              </div>
-            </div>
-
-            {all.length === 0 ? (
-              <div className="card">
-                <EmptyState title={`Nessun lavoro a ${monthLabel(ym).toLowerCase()}`}>Cambia mese, oppure registra un nuovo lavoro per {co.name}.</EmptyState>
+          <div className="mt-5">
+            {two ? (
+              <div className="grid grid-cols-[minmax(0,440px)_minmax(0,1fr)] items-start gap-5">
+                <div className="flex flex-col gap-3">
+                  {picker}
+                  {lavori}
+                  {chosen.length > 0 && fattura}
+                  {chosen.length > 0 && docCard}
+                  {newBtn}
+                </div>
+                {chosen.length > 0 ? (
+                  <MonthPaper co={co} list={chosen} ym={ym} no={no} s={s} />
+                ) : (
+                  <div className="card grid min-h-[420px] place-items-center p-10 text-center text-[15px] text-ink-2">Seleziona i lavori del mese: qui compare l'anteprima del conto.</div>
+                )}
               </div>
             ) : (
-              <Section title="Lavori del mese" action={<span className="tnum text-[14px] text-ink-3">{chosen.length} di {all.length} nel conto</span>}>
-                <ul className="-my-1 flex flex-col">
-                  {all.map((j, i) => {
-                    const el = eligible(j);
-                    const on = isSel(j);
-                    return (
-                      <li key={j.id} className={i ? 'border-t border-line' : ''}>
-                        <button
-                          type="button"
-                          role="checkbox"
-                          aria-checked={on}
-                          disabled={!el}
-                          onClick={() => {
-                            haptic('light');
-                            setSel((x) => ({ ...x, [j.id]: !on }));
-                            setMno(null);
-                          }}
-                          className="press -mx-2 flex w-[calc(100%+16px)] items-center gap-3 rounded-[12px] px-2 py-3 text-left hover:bg-surface-2 disabled:opacity-100"
-                        >
-                          <span className={`grid size-6 shrink-0 place-items-center rounded-[7px] transition-colors ${on ? 'bg-accent text-on-accent' : el ? 'ring-2 ring-inset ring-line-strong' : 'bg-surface-3'}`}>
-                            {on && <Check size={16} strokeWidth={3} />}
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="tnum block truncate text-[15.5px] font-semibold text-ink">
-                              {fmtDay(jobDate(j))} · {fmtPlate(j.plate, j.plateCountry) || 'senza targa'}
-                            </span>
-                            <span className="flex items-center gap-2 truncate text-[14px] text-ink-3">
-                              <span className="truncate">{veic(j)}</span>
-                              {!el ? <StatusPill s={j.status} size="sm" /> : j.invoiced ? <span className="shrink-0 text-ok">fatturato{j.invoiceNo ? ` n. ${j.invoiceNo}` : ''}</span> : null}
-                            </span>
-                          </span>
-                          <span className={`w-cond tnum shrink-0 text-[19px] font-bold ${on ? 'text-ink' : 'text-ink-3'}`}>{eur(totale(j))}</span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </Section>
+              <div className="flex flex-col gap-3">
+                {picker}
+                {lavori}
+                {chosen.length > 0 && (
+                  <>
+                    <MonthPaper co={co} list={chosen} ym={ym} no={no} s={s} />
+                    {fattura}
+                    {docCard}
+                  </>
+                )}
+                {newBtn}
+              </div>
             )}
-
-            {chosen.length > 0 && (
-              <>
-                <MonthPaper co={co} list={chosen} ym={ym} no={no} s={s} />
-
-                <Section title="Fattura e incasso">
-                  <Field label="Numero fattura" htmlFor="m-no">
-                    <Input id="m-no" autoComplete="off" placeholder="Es. 2026/118" value={no} onChange={(e) => setMno(e.target.value)} />
-                  </Field>
-                  {allInv ? (
-                    <div className="flex items-center justify-between gap-2 rounded-[16px] bg-ok-soft p-3.5 pl-4 font-semibold text-ok">
-                      <span className="flex items-center gap-2">
-                        <Check size={20} strokeWidth={2.6} /> Fattura emessa
-                      </span>
-                      <Button size="sm" variant="ghost" className="!text-ok" onClick={() => mark((j) => ({ ...j, invoiced: false, invoicedAt: undefined }), 'Fatture annullate')}>
-                        Annulla
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button variant="outline" block icon={<ReceiptText size={19} />} onClick={() => mark((j, now) => ({ ...j, invoiced: true, invoicedAt: now, invoiceNo: no }), `${chosen.length} lavori segnati come fatturati`)}>
-                      Segna fattura emessa
-                    </Button>
-                  )}
-
-                  <div className="h-px bg-line" />
-
-                  {allPaid ? (
-                    <div className="flex items-center justify-between gap-2 rounded-[16px] bg-ok-soft p-3.5 pl-4 font-semibold text-ok">
-                      <span className="flex items-center gap-2">
-                        <Check size={20} strokeWidth={2.6} /> Incassato
-                      </span>
-                      <Button size="sm" variant="ghost" className="!text-ok" onClick={() => mark((j) => ({ ...j, paid: false, paidAt: undefined, paidAmount: undefined }), 'Incasso annullato')}>
-                        Annulla
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Metodo di pagamento">
-                        {PAGAMENTI.map((p) => (
-                          <ToggleChip key={p} on={mpay === p} onClick={() => setMpay(mpay === p ? '' : p)}>
-                            {p}
-                          </ToggleChip>
-                        ))}
-                      </div>
-                      <Button
-                        variant="primary"
-                        size="lg"
-                        block
-                        disabled={!mpay}
-                        onClick={() => mark((j, now) => ({ ...j, paid: true, paidAt: now, paidAmount: daSaldare(j), payMethod: mpay }), `Incassati ${eur(T.due)}`)}
-                      >
-                        Segna incassato {T.due > 0 ? eur(T.due) : ''}
-                      </Button>
-                    </>
-                  )}
-                </Section>
-
-                <div className="card p-4 sm:p-5">
-                  <DocActions
-                    build={() => buildMonthPdf(co, chosen, ym, no, s)}
-                    name={monthPdfName(co, ym)}
-                    waHref={co.wa ? waLink(co.phone, monthMsg(co, chosen, ym, no, s), s.prefix) : null}
-                    waNote="Il documento raccoglie i lavori selezionati con data, targa e voci. Segna la fattura emessa dopo averla fatta nel gestionale."
-                  />
-                </div>
-              </>
-            )}
-
-            <Button variant="ghost" block icon={<Plus size={19} strokeWidth={2.4} />} onClick={() => nav('/nuova?cl=azienda', { state: { prefill: prefillFor(co) } })}>
-              Nuovo lavoro per {co.name}
-            </Button>
           </div>
         )}
       </div>
@@ -260,7 +347,11 @@ export function MonthPage() {
             .filter((c) => !pq || norm(c.name + c.company.vat).includes(norm(pq)))
             .map((c) => (
               <li key={c.key}>
-                <button type="button" onClick={() => changeCo(c.key)} className={`press flex w-full items-center gap-3 rounded-[14px] p-3 text-left ${c.key === co?.key ? 'bg-accent-soft' : 'hover:bg-surface-2'}`}>
+                <button
+                  type="button"
+                  onClick={() => changeCo(c.key)}
+                  className={`press flex w-full items-center gap-3 rounded-[14px] p-3 text-left ${c.key === co?.key ? 'bg-accent-soft' : 'hover:bg-surface-2'}`}
+                >
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[16px] font-semibold text-ink">{c.name}</span>
                     <span className="tnum block truncate text-[14px] text-ink-3">{c.company.vat || c.company.cf}</span>
@@ -277,5 +368,11 @@ export function MonthPage() {
 }
 
 function prefillFor(co: CompanyGroup): Partial<Job> {
-  return { client: 'azienda', company: { ...co.company }, owner: co.owner, phone: co.phone, wa: co.wa };
+  return {
+    client: 'azienda',
+    company: { ...co.company },
+    owner: co.owner,
+    phone: co.phone,
+    wa: co.wa,
+  };
 }

@@ -427,3 +427,29 @@ select.ctl {
     scroll-behavior: auto !important;
   }
 }
+
+/* puntatore: con mouse e trackpad gli elementi cliccabili lo dichiarano */
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled),
+  [role='button'],
+  [role='checkbox'],
+  [role='radio'],
+  label[for],
+  summary {
+    cursor: pointer;
+  }
+}
+
+/* tasto della scorciatoia accanto a un comando */
+.kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  font: 600 12px/1 var(--font-sans);
+  color: var(--ink-3);
+  background: var(--surface-2);
+  box-shadow: inset 0 -1px 0 var(--line), 0 0 0 1px var(--line);
+}

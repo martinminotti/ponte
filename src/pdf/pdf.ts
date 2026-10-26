@@ -203,7 +203,11 @@ export async function buildJobPdf(j: Job, s: Settings): Promise<Blob> {
   const d = doc.d;
   const az = isAz(j);
   d.setProperties({ title: `Conto ${fmtPlate(j.plate, j.plateCountry) || veic(j)}` });
-  await doc.header(s, az ? 'CONTO PER FATTURA' : 'CONTO LAVORI', [`Scheda N. ${jobNumber(j.number)}`, fmtDate(j.deliveredAt || j.closedAt || Date.now()), ...(j.invoiceNo ? [`Fattura n. ${j.invoiceNo}`] : [])]);
+  await doc.header(s, az ? 'CONTO PER FATTURA' : 'CONTO LAVORI', [
+    `Scheda N. ${jobNumber(j.number)}`,
+    fmtDate(j.deliveredAt || j.closedAt || Date.now()),
+    ...(j.invoiceNo ? [`Fattura n. ${j.invoiceNo}`] : []),
+  ]);
 
   /* intestatario e veicolo */
   const by = doc.y;
@@ -321,7 +325,7 @@ export async function buildJobPdf(j: Job, s: Settings): Promise<Blob> {
   doc.t(j.paid ? 'Saldato' : 'Da saldare', tx, doc.y + 4.4);
   doc.font('bold', 17);
   doc.col(doc.ac);
-  doc.t(money(j.paid ? (j.paidAmount ?? tot) : due), R, doc.y + 4.6, { align: 'right' });
+  doc.t(money(j.paid ? j.paidAmount ?? tot : due), R, doc.y + 4.6, { align: 'right' });
   doc.y += 15;
 
   /* pagamento e garanzia */
@@ -438,6 +442,10 @@ export function jobPdfName(j: Job) {
   return `Conto-${jobNumber(j.number)}-${pl}.pdf`;
 }
 export function monthPdfName(co: CompanyGroup, ym: string) {
-  const nm = co.name.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'ditta';
+  const nm =
+    co.name
+      .replace(/[^A-Za-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 30) || 'ditta';
   return `Conto-${nm}-${ym}.pdf`;
 }

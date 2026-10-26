@@ -74,17 +74,7 @@ export function inFilter(j: Job, f: FilterKey): boolean {
 }
 
 export function searchHay(j: Job): string {
-  return [
-    j.plate,
-    j.vin,
-    j.owner,
-    j.phone,
-    j.make,
-    j.model,
-    String(j.number || ''),
-    (j.workers || []).join(' '),
-    j.company ? [j.company.name, j.company.vat, j.company.cf].join(' ') : '',
-  ]
+  return [j.plate, j.vin, j.owner, j.phone, j.make, j.model, String(j.number || ''), (j.workers || []).join(' '), j.company ? [j.company.name, j.company.vat, j.company.cf].join(' ') : '']
     .map(norm)
     .join(' ');
 }

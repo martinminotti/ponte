@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { AlarmClock, ArrowUpRight, CheckCircle2, ChevronRight, Plus, ReceiptText, Sparkles, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
-import { useJobs, useWide } from '@/app/hooks';
+import { searchShortcut, useDesk, useJobs, useSettings, useWide, useWidth } from '@/app/hooks';
 import { BrandMark } from '@/app/Shell';
 import { Page } from '@/app/layout';
 import { statoLabel } from '@/domain/constants';
@@ -18,17 +18,29 @@ import { StatusPill, stColor } from '@/ui/status';
 
 const monthName = (ts: number) => new Date(ts).toLocaleDateString('it-IT', { month: 'long' });
 const todayLabel = (ts: number) => {
-  const t = new Date(ts).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+  const t = new Date(ts).toLocaleDateString('it-IT', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
 /** Importo compatto per i riquadri: euro interi ("1.240 €"); i centesimi restano nelle schede. */
-const eurWhole = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0, minimumFractionDigits: 0, useGrouping: 'always' } as Intl.NumberFormatOptions);
+const eurWhole = new Intl.NumberFormat('it-IT', {
+  style: 'currency',
+  currency: 'EUR',
+  maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
+  useGrouping: 'always',
+} as Intl.NumberFormatOptions);
 const eurShort = (c: number) => eurWhole.format(Math.round(c / 100));
 
 /** La pagina "Oggi": l'officina a colpo d'occhio, con un tocco verso ogni elenco. */
 export function DashboardPage() {
   const jobs = useJobs();
   const wide = useWide();
+  const shop = useSettings().shop;
+  const desk = useDesk();
   const nav = useNavigate();
   const now = Date.now();
   const d = useMemo(() => dashboard(jobs || [], now), [jobs, now]);
@@ -42,11 +54,19 @@ export function DashboardPage() {
           <BrandMark />
         </header>
       )}
-      <div className="px-4 pt-5 lg:pt-8">
-        <p className="text-[14px] font-medium text-ink-3">{todayLabel(now)}</p>
-        <h1 className="w-wide mt-0.5 text-[34px] leading-[1.05] font-semibold tracking-[-0.02em] text-ink">
-          {greeting(now)}
-        </h1>
+      <div className="flex items-end justify-between gap-6 px-4 pt-5 lg:px-8 lg:pt-9">
+        <div className="min-w-0">
+          <p className="text-[14px] font-medium text-ink-3">{todayLabel(now)}</p>
+          <h1 className="w-wide mt-0.5 text-[34px] leading-[1.05] font-semibold tracking-[-0.02em] text-ink lg:text-[38px]">
+            {greeting(now)}
+            {desk && shop ? <span className="text-ink-3">, {shop}</span> : null}
+          </h1>
+        </div>
+        {wide && jobs.length > 0 && (
+          <div className="w-[360px] shrink-0">
+            <SearchField value="" onChange={() => {}} readOnlyTap onFocus={() => nav('/schede?cerca=1')} placeholder="Cerca targa, cliente, ditta" shortcut={searchShortcut()} />
+          </div>
+        )}
       </div>
     </>
   );
@@ -54,7 +74,7 @@ export function DashboardPage() {
   if (jobs.length === 0) {
     return (
       <Page className="pb-safe-bar lg:pb-10">
-        <div className="mx-auto max-w-[880px]">
+        <div className="mx-auto max-w-[880px] lg:max-w-[1280px]">
           {header}
           <EmptyState
             art={<Plate plate="" size="xl" />}
@@ -82,71 +102,96 @@ export function DashboardPage() {
   prevMonth.setDate(1);
   prevMonth.setMonth(prevMonth.getMonth() - 1);
 
+  const tiles = (
+    <>
+      <Tile
+        to="/schede?f=pronti"
+        icon={<CheckCircle2 size={18} strokeWidth={2.3} />}
+        tint="var(--st-pronto)"
+        label="Pronte da ritirare"
+        value={String(d.ready.length)}
+        foot={
+          d.ready.length
+            ? d.ready
+                .slice(0, 2)
+                .map((j) => fmtPlate(j.plate, j.plateCountry) || veic(j))
+                .join(', ') + (d.ready.length > 2 ? '…' : '')
+            : 'Nessuna in attesa'
+        }
+      />
+      <Tile
+        to="/schede?f=saldo"
+        icon={<Wallet size={18} strokeWidth={2.3} />}
+        tint="var(--danger)"
+        label="Da incassare"
+        value={eurShort(d.due.amount)}
+        foot={d.due.n ? `${d.due.n} ${d.due.n === 1 ? 'scheda' : 'schede'}` : 'Tutto incassato'}
+      />
+      <Tile
+        to="/mensile"
+        icon={<ReceiptText size={18} strokeWidth={2.3} />}
+        tint="var(--st-lavorazione)"
+        label="Da fatturare"
+        value={eurShort(d.invoice.amount)}
+        foot={d.invoice.companies ? `${d.invoice.companies} ${d.invoice.companies === 1 ? 'ditta' : 'ditte'}, ${d.invoice.n} lavori` : 'Nessuna fattura in sospeso'}
+      />
+      <Tile
+        icon={delta != null && delta < 0 ? <TrendingDown size={18} strokeWidth={2.3} /> : <TrendingUp size={18} strokeWidth={2.3} />}
+        tint="var(--accent-ink)"
+        label={`Incassato a ${monthName(now)}`}
+        value={eurShort(d.month.amount)}
+        foot={delta == null ? `${d.month.n} ${d.month.n === 1 ? 'pagamento' : 'pagamenti'}` : `${delta >= 0 ? '+' : '−'}${Math.abs(delta)}% su ${monthName(prevMonth.getTime())}`}
+      />
+    </>
+  );
+  const recentCard = (
+    <section className="card p-4 sm:p-5">
+      <header className="mb-1 flex items-center justify-between">
+        <h2 className="w-semi text-[17px] font-semibold text-ink">Ultime accettazioni</h2>
+        <Link to="/schede" className="press flex items-center gap-0.5 text-[14.5px] font-semibold text-accent-ink">
+          Tutte le schede ({jobs.length}) <ChevronRight size={17} />
+        </Link>
+      </header>
+      <ul className="flex flex-col">
+        {d.recent.map((j, i) => (
+          <li key={j.id} className={i ? 'border-t border-line' : ''}>
+            <JobRow j={j} meta={relDay(j.createdAt)} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+
   return (
     <Page className="pb-safe-bar lg:pb-10">
-      <div className="mx-auto max-w-[880px]">
+      <div className="mx-auto max-w-[880px] lg:max-w-[1320px]">
         {header}
 
         <div className="sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:hidden">
           <SearchField value="" onChange={() => {}} readOnlyTap onFocus={() => nav('/schede?cerca=1')} placeholder="Cerca targa, cliente, ditta" />
         </div>
 
-        <div className="mt-2 grid grid-cols-1 gap-3 px-4 md:grid-cols-2">
-          <ShopFloor d={d} onOpen={() => nav('/schede?f=officina')} />
-
-          <div className="grid min-w-0 grid-cols-2 gap-3">
-            <Tile
-              to="/schede?f=pronti"
-              icon={<CheckCircle2 size={18} strokeWidth={2.3} />}
-              tint="var(--st-pronto)"
-              label="Pronte da ritirare"
-              value={String(d.ready.length)}
-              foot={d.ready.length ? d.ready.slice(0, 2).map((j) => fmtPlate(j.plate, j.plateCountry) || veic(j)).join(', ') + (d.ready.length > 2 ? '…' : '') : 'Nessuna in attesa'}
-            />
-            <Tile
-              to="/schede?f=saldo"
-              icon={<Wallet size={18} strokeWidth={2.3} />}
-              tint="var(--danger)"
-              label="Da incassare"
-              value={eurShort(d.due.amount)}
-              foot={d.due.n ? `${d.due.n} ${d.due.n === 1 ? 'scheda' : 'schede'}` : 'Tutto incassato'}
-            />
-            <Tile
-              to="/mensile"
-              icon={<ReceiptText size={18} strokeWidth={2.3} />}
-              tint="var(--st-lavorazione)"
-              label="Da fatturare"
-              value={eurShort(d.invoice.amount)}
-              foot={d.invoice.companies ? `${d.invoice.companies} ${d.invoice.companies === 1 ? 'ditta' : 'ditte'}, ${d.invoice.n} lavori` : 'Nessuna fattura in sospeso'}
-            />
-            <Tile
-              icon={delta != null && delta < 0 ? <TrendingDown size={18} strokeWidth={2.3} /> : <TrendingUp size={18} strokeWidth={2.3} />}
-              tint="var(--accent-ink)"
-              label={`Incassato a ${monthName(now)}`}
-              value={eurShort(d.month.amount)}
-              foot={delta == null ? `${d.month.n} ${d.month.n === 1 ? 'pagamento' : 'pagamenti'}` : `${delta >= 0 ? '+' : '−'}${Math.abs(delta)}% su ${monthName(prevMonth.getTime())}`}
-            />
+        {wide ? (
+          <div className="mt-6 flex flex-col gap-4 px-8">
+            <div className="grid grid-cols-4 gap-4">{tiles}</div>
+            <div className="grid grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-4">
+              <ShopFloor d={d} onOpen={() => nav('/schede?f=officina')} />
+              <WeeklyChart weeks={d.weeks} tall />
+            </div>
+            <div className="grid grid-cols-2 items-start gap-4">
+              <Deliveries list={d.deliveries} />
+              {recentCard}
+            </div>
           </div>
-
-          <Deliveries list={d.deliveries} />
-          <WeeklyChart weeks={d.weeks} />
-
-          <section className="card p-4 sm:p-5 md:col-span-2">
-            <header className="mb-1 flex items-center justify-between">
-              <h2 className="w-semi text-[17px] font-semibold text-ink">Ultime accettazioni</h2>
-              <Link to="/schede" className="press flex items-center gap-0.5 text-[14.5px] font-semibold text-accent-ink">
-                Tutte le schede ({jobs.length}) <ChevronRight size={17} />
-              </Link>
-            </header>
-            <ul className="flex flex-col">
-              {d.recent.map((j, i) => (
-                <li key={j.id} className={i ? 'border-t border-line' : ''}>
-                  <JobRow j={j} meta={relDay(j.createdAt)} />
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
+        ) : (
+          <div className="mt-2 grid grid-cols-1 gap-3 px-4 md:grid-cols-2">
+            <ShopFloor d={d} onOpen={() => nav('/schede?f=officina')} />
+            <div className="grid min-w-0 grid-cols-2 gap-3">{tiles}</div>
+            <Deliveries list={d.deliveries} />
+            <WeeklyChart weeks={d.weeks} />
+            <div className="md:col-span-2">{recentCard}</div>
+          </div>
+        )}
       </div>
     </Page>
   );
@@ -174,7 +219,14 @@ function ShopFloor({ d, onOpen }: { d: ReturnType<typeof dashboard>; onOpen: () 
               {statoLabel(s)}
             </span>
             <span className="h-2 overflow-hidden rounded-full bg-surface-3">
-              <span className="block h-full rounded-full transition-[width] duration-500" style={{ width: `${(n / max) * 100}%`, background: stColor(s), minWidth: n ? 8 : 0 }} />
+              <span
+                className="block h-full rounded-full transition-[width] duration-500"
+                style={{
+                  width: `${(n / max) * 100}%`,
+                  background: stColor(s),
+                  minWidth: n ? 8 : 0,
+                }}
+              />
             </span>
             <span className="tnum text-right text-[15px] font-semibold text-ink">{n}</span>
           </span>
@@ -187,15 +239,21 @@ function ShopFloor({ d, onOpen }: { d: ReturnType<typeof dashboard>; onOpen: () 
 function Tile({ to, icon, tint, label, value, foot }: { to?: string; icon: ReactNode; tint: string; label: string; value: string; foot: string }) {
   const body = (
     <>
-      <span className="grid size-8 place-items-center rounded-[10px]" style={{ color: tint, background: `color-mix(in srgb, ${tint} 13%, transparent)` }}>
+      <span
+        className="grid size-8 place-items-center rounded-[10px]"
+        style={{
+          color: tint,
+          background: `color-mix(in srgb, ${tint} 13%, transparent)`,
+        }}
+      >
         {icon}
       </span>
       <span className="mt-3 text-[13.5px] leading-tight font-medium text-ink-2">{label}</span>
-      <span className="w-cond tnum mt-1 truncate text-[30px] leading-none font-bold text-ink">{value}</span>
+      <span className="w-cond tnum mt-1 truncate text-[30px] leading-none font-bold text-ink lg:text-[36px]">{value}</span>
       <span className="mt-1.5 line-clamp-1 text-[13px] text-ink-3">{foot}</span>
     </>
   );
-  const cls = 'card flex min-w-0 flex-col p-4 text-left';
+  const cls = 'card flex min-w-0 flex-col p-4 text-left lg:p-5';
   return to ? (
     <Link to={to} className={`press ${cls} hover:shadow-[var(--shadow-2)]`}>
       {body}
@@ -245,54 +303,54 @@ function Deliveries({ list }: { list: Delivery[] }) {
 }
 
 /** Colonne degli incassi settimanali: una sola serie, valore sull'ultima settimana e su quella toccata. */
-function WeeklyChart({ weeks }: { weeks: WeekBar[] }) {
+function WeeklyChart({ weeks, tall }: { weeks: WeekBar[]; tall?: boolean }) {
   const [sel, setSel] = useState<number | null>(null);
-  const W = 320;
-  const H = 150;
+  const [ref, cw] = useWidth<HTMLDivElement>();
+  const W = Math.max(280, Math.round(cw) || 320);
+  const H = tall ? 230 : 150;
   const top = 26;
   const base = H - 22;
   const max = Math.max(1, ...weeks.map((w) => w.amount));
   const band = W / weeks.length;
-  const bw = Math.min(24, band * 0.56);
+  const bw = Math.min(tall ? 40 : 24, band * 0.56);
   const shown = sel ?? weeks.length - 1;
   const total = weeks.reduce((t, w) => t + w.amount, 0);
-  const lab = (ts: number) => new Date(ts).toLocaleDateString('it-IT', { day: 'numeric', month: 'numeric' });
+  const lab = (ts: number) =>
+    new Date(ts).toLocaleDateString('it-IT', {
+      day: 'numeric',
+      month: 'numeric',
+    });
   return (
-    <section className="card p-4 sm:p-5">
+    <section className="card flex flex-col p-4 sm:p-5">
       <header className="flex items-baseline justify-between gap-3">
         <h2 className="w-semi text-[17px] font-semibold text-ink">Incassi settimanali</h2>
         <span className="tnum text-[13.5px] text-ink-3">8 settimane · {eurShort(total)}</span>
       </header>
-      <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 block w-full" role="img" aria-label="Incassi delle ultime 8 settimane">
-        <line x1="0" x2={W} y1={base + 0.5} y2={base + 0.5} stroke="var(--line)" strokeWidth="1" />
-        {weeks.map((w, i) => {
-          const h = w.amount ? Math.max(4, ((base - top) * w.amount) / max) : 0;
-          const x = i * band + (band - bw) / 2;
-          const y = base - h;
-          const on = i === shown;
-          return (
-            <g key={w.start} onClick={() => setSel(i === sel ? null : i)} onMouseEnter={() => setSel(i)} className="cursor-pointer">
-              <rect x={i * band} y={0} width={band} height={H} fill="transparent" />
-              {h > 0 && (
-                <path
-                  d={`M${x} ${base}V${y + 4}a4 4 0 0 1 4 -4h${bw - 8}a4 4 0 0 1 4 4V${base}Z`}
-                  fill="var(--accent)"
-                  opacity={on ? 1 : 0.38}
-                  style={{ transition: 'opacity .2s' }}
-                />
-              )}
-              {on && (
-                <text x={i * band + band / 2} y={Math.max(14, y - 8)} textAnchor="middle" className="tnum" fontSize="12.5" fontWeight="700" fill="var(--ink)">
-                  {w.amount ? eurShort(w.amount) : '0 €'}
+      <div ref={ref} className="mt-auto pt-3">
+        <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="block w-full" role="img" aria-label="Incassi delle ultime 8 settimane" onMouseLeave={() => setSel(null)}>
+          <line x1="0" x2={W} y1={base + 0.5} y2={base + 0.5} stroke="var(--line)" strokeWidth="1" />
+          {weeks.map((w, i) => {
+            const h = w.amount ? Math.max(4, ((base - top) * w.amount) / max) : 0;
+            const x = i * band + (band - bw) / 2;
+            const y = base - h;
+            const on = i === shown;
+            return (
+              <g key={w.start} onClick={() => setSel(i === sel ? null : i)} onMouseEnter={() => setSel(i)} className="cursor-pointer">
+                <rect x={i * band} y={0} width={band} height={H} fill="transparent" />
+                {h > 0 && <path d={`M${x} ${base}V${y + 4}a4 4 0 0 1 4 -4h${bw - 8}a4 4 0 0 1 4 4V${base}Z`} fill="var(--accent)" opacity={on ? 1 : 0.38} style={{ transition: 'opacity .2s' }} />}
+                {on && (
+                  <text x={i * band + band / 2} y={Math.max(14, y - 8)} textAnchor="middle" className="tnum" fontSize="12.5" fontWeight="700" fill="var(--ink)">
+                    {w.amount ? eurShort(w.amount) : '0 €'}
+                  </text>
+                )}
+                <text x={i * band + band / 2} y={H - 5} textAnchor="middle" fontSize="11" fill={on ? 'var(--ink)' : 'var(--ink-3)'} fontWeight={on ? 600 : 400}>
+                  {lab(w.start)}
                 </text>
-              )}
-              <text x={i * band + band / 2} y={H - 5} textAnchor="middle" fontSize="11" fill={on ? 'var(--ink)' : 'var(--ink-3)'} fontWeight={on ? 600 : 400}>
-                {lab(w.start)}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
       <table className="sr-only">
         <caption>Incassi per settimana</caption>
         <tbody>

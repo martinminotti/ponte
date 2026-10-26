@@ -37,7 +37,11 @@ export function Sheet({
             </Drawer.Close>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-2 pb-5">{children}</div>
-          {footer && <div className="border-t border-line bg-surface px-5 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] glass:rounded-b-[34px] glass:border-transparent glass:bg-transparent glass:pb-[max(12px,calc(env(safe-area-inset-bottom,0px)-6px))]">{footer}</div>}
+          {footer && (
+            <div className="border-t border-line bg-surface px-5 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] glass:rounded-b-[34px] glass:border-transparent glass:bg-transparent glass:pb-[max(12px,calc(env(safe-area-inset-bottom,0px)-6px))]">
+              {footer}
+            </div>
+          )}
           {!footer && <div className="safe-bottom glass:pb-0" />}
         </Drawer.Content>
       </Drawer.Portal>

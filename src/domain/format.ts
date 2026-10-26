@@ -19,7 +19,9 @@ export function amount(cents: number): string {
  * Accetta "12", "12,5", "1.234,50", "1234.50", "€ 30", "1.200".
  */
 export function parseAmount(v: unknown): number {
-  let s = String(v ?? '').trim().replace(/[€\s]/g, '');
+  let s = String(v ?? '')
+    .trim()
+    .replace(/[€\s]/g, '');
   if (!s) return 0;
   if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
   else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
@@ -39,8 +41,14 @@ export function normPlateText(p: string, cc: PlateCountry): string {
 }
 
 export function fmtPlate(p: string, cc: PlateCountry = 'I'): string {
-  if (cc === 'RSM') return String(p || '').toUpperCase().trim().replace(/\s+/g, ' ');
-  const s = String(p || '').toUpperCase().replace(/\s+/g, '');
+  if (cc === 'RSM')
+    return String(p || '')
+      .toUpperCase()
+      .trim()
+      .replace(/\s+/g, ' ');
+  const s = String(p || '')
+    .toUpperCase()
+    .replace(/\s+/g, '');
   const m = s.match(/^([A-Z]{2})(\d{3})([A-Z]{2})$/);
   return m ? `${m[1]} ${m[2]} ${m[3]}` : s;
 }
@@ -108,9 +116,6 @@ export function jobNumber(n: number): string {
 }
 
 export function uid(prefix = ''): string {
-  const r =
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID().replace(/-/g, '').slice(0, 16)
-      : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  const r = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID().replace(/-/g, '').slice(0, 16) : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
   return prefix + r;
 }

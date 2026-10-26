@@ -23,8 +23,7 @@ export async function saveSettings(patch: Partial<Settings>): Promise<void> {
 
 /* ---------------- schede ---------------- */
 
-export type NewJobInput = Omit<Job, 'id' | 'number' | 'createdAt' | 'updatedAt' | 'history' | 'status'> &
-  Partial<Pick<Job, 'status'>>;
+export type NewJobInput = Omit<Job, 'id' | 'number' | 'createdAt' | 'updatedAt' | 'history' | 'status'> & Partial<Pick<Job, 'status'>>;
 
 /** Crea la scheda assegnando il numero progressivo in modo atomico. */
 export async function createJob(input: NewJobInput): Promise<Job> {

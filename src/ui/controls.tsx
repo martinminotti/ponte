@@ -32,7 +32,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { variant = 'secondary', size = 'md', icon, block, className = '', children, onClick, haptics = true, type = 'button', ...rest },
-  ref,
+  ref
 ) {
   return (
     <button
@@ -42,7 +42,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         if (haptics) haptic('light');
         onClick?.(e);
       }}
-      className={`press inline-flex items-center justify-center font-semibold whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 ${VARIANT[variant]} ${SIZE[size]} ${block ? 'w-full min-w-0 overflow-hidden' : 'shrink-0'} ${className}`}
+      className={`press inline-flex items-center justify-center font-semibold whitespace-nowrap disabled:pointer-events-none disabled:opacity-40 ${VARIANT[variant]} ${SIZE[size]} ${
+        block ? 'w-full min-w-0 overflow-hidden' : 'shrink-0'
+      } ${className}`}
       {...rest}
     >
       {icon}
@@ -102,14 +104,7 @@ export function Segmented<T extends string | number>({
 
 /* ---------------- chip a scelta ---------------- */
 
-export function Chip({
-  on,
-  children,
-  onClick,
-  className = '',
-  count,
-  ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement> & { on: boolean; count?: number }) {
+export function Chip({ on, children, onClick, className = '', count, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { on: boolean; count?: number }) {
   return (
     <button
       type="button"
@@ -202,7 +197,7 @@ export function AutoInput({
         if (l.v !== l.value) l.onCommit(l.v);
       }
     },
-    [],
+    []
   );
 
   const change = (nv: string) => {

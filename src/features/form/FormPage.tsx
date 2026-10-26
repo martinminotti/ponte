@@ -14,7 +14,40 @@ import { haptic } from '@/platform/native';
 import { Button, Field, Input, Note, Segmented, Switch, TextArea, ToggleChip } from '@/ui/controls';
 import { PlateInput } from './PlateInput';
 
-const MARCHE = ['Alfa Romeo', 'Audi', 'BMW', 'Citroën', 'Dacia', 'DS', 'Fiat', 'Ford', 'Honda', 'Hyundai', 'Iveco', 'Jeep', 'Kia', 'Lancia', 'Land Rover', 'Mazda', 'Mercedes-Benz', 'Mini', 'Mitsubishi', 'Nissan', 'Opel', 'Peugeot', 'Porsche', 'Renault', 'Seat', 'Skoda', 'Smart', 'Suzuki', 'Tesla', 'Toyota', 'Volkswagen', 'Volvo'];
+const MARCHE = [
+  'Alfa Romeo',
+  'Audi',
+  'BMW',
+  'Citroën',
+  'Dacia',
+  'DS',
+  'Fiat',
+  'Ford',
+  'Honda',
+  'Hyundai',
+  'Iveco',
+  'Jeep',
+  'Kia',
+  'Lancia',
+  'Land Rover',
+  'Mazda',
+  'Mercedes-Benz',
+  'Mini',
+  'Mitsubishi',
+  'Nissan',
+  'Opel',
+  'Peugeot',
+  'Porsche',
+  'Renault',
+  'Seat',
+  'Skoda',
+  'Smart',
+  'Suzuki',
+  'Tesla',
+  'Toyota',
+  'Volkswagen',
+  'Volvo',
+];
 
 interface Draft {
   client: ClientType;
@@ -255,7 +288,16 @@ function FormInner({ job }: { job?: Job }) {
           )}
 
           <Field label="Telaio (VIN)" htmlFor="f-vin">
-            <Input id="f-vin" className="tnum tracking-[0.06em] uppercase" maxLength={17} autoCapitalize="characters" autoComplete="off" spellCheck={false} value={d.vin} onChange={(e) => set('vin', e.target.value.toUpperCase())} />
+            <Input
+              id="f-vin"
+              className="tnum tracking-[0.06em] uppercase"
+              maxLength={17}
+              autoCapitalize="characters"
+              autoComplete="off"
+              spellCheck={false}
+              value={d.vin}
+              onChange={(e) => set('vin', e.target.value.toUpperCase())}
+            />
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Marca" htmlFor="f-make">
