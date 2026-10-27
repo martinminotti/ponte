@@ -257,8 +257,8 @@ function ShopFloor({ d, onOpen }: { d: ReturnType<typeof dashboard>; onOpen: () 
       </span>
       <span className="mt-4 flex flex-col gap-2.5" aria-label="Veicoli per stato">
         {d.byStatus.map(({ s, n }) => (
-          <span key={s} className="grid grid-cols-[112px_minmax(0,1fr)_28px] items-center gap-3">
-            <span className="flex items-center gap-2 text-[0.875rem] font-medium text-ink-2">
+          <span key={s} className="grid grid-cols-[auto_minmax(48px,1fr)_auto] items-center gap-3">
+            <span className="flex min-w-[7rem] items-center gap-2 text-[0.875rem] font-medium whitespace-nowrap text-ink-2">
               <span className="size-2 shrink-0 rounded-full" style={{ background: stColor(s) }} />
               {statoLabel(s)}
             </span>

@@ -11,14 +11,16 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { UpdatePrompt } from './UpdatePrompt';
 
 // le schermate meno frequenti si caricano quando servono
-const FormPage = lazy(() => import('@/features/form/FormPage').then((m) => ({ default: m.FormPage })));
-const DocPage = lazy(() => import('@/features/doc/DocPage').then((m) => ({ default: m.DocPage })));
-const MonthPage = lazy(() => import('@/features/month/MonthPage').then((m) => ({ default: m.MonthPage })));
-const SettingsPage = lazy(() =>
-  import('@/features/settings/SettingsPage').then((m) => ({
-    default: m.SettingsPage,
-  })),
-);
+const loadForm = () => import('@/features/form/FormPage');
+const loadDoc = () => import('@/features/doc/DocPage');
+const loadMonth = () => import('@/features/month/MonthPage');
+const loadSettings = () => import('@/features/settings/SettingsPage');
+const FormPage = lazy(() => loadForm().then((m) => ({ default: m.FormPage })));
+const DocPage = lazy(() => loadDoc().then((m) => ({ default: m.DocPage })));
+const MonthPage = lazy(() => loadMonth().then((m) => ({ default: m.MonthPage })));
+const SettingsPage = lazy(() => loadSettings().then((m) => ({ default: m.SettingsPage })));
+// precaricate appena l'app è pronta: senza, la prima apertura di Fatture o Impostazioni mostrava un fotogramma vuoto
+const preload = () => [loadMonth, loadSettings, loadForm, loadDoc].forEach((f) => f().catch(() => {}));
 const L = (n: ReactNode) => <Suspense fallback={null}>{n}</Suspense>;
 
 // Hash router: funziona su qualunque hosting statico, dentro Capacitor e come file singolo.
@@ -81,6 +83,7 @@ export function App() {
         await migrateLegacy();
         requestPersistence();
         setBoot('ready');
+        setTimeout(preload, 300);
       } catch (e) {
         console.error(e);
         setBoot('error');
