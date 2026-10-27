@@ -376,6 +376,27 @@ select.ctl {
     pointer-events: none;
     background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 70%, transparent));
   }
+  /* bordo di scorrimento sotto le barre fisse in vetro (testata con ricerca, barra delle schermate):
+     sfocatura progressiva che parte dalla status bar e sfuma sotto la barra, come lo scroll edge effect di iOS 26 */
+  [data-glass='on'] .scroll-edge::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    right: 0;
+    top: calc(-1 * var(--edge-up, env(safe-area-inset-top, 0px)));
+    bottom: -20px;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    backdrop-filter: blur(16px) saturate(1.3);
+    background: linear-gradient(var(--bg) 0%, color-mix(in srgb, var(--bg) 84%, transparent) calc(100% - 34px), transparent);
+    -webkit-mask-image: linear-gradient(#000 calc(100% - 24px), transparent);
+    mask-image: linear-gradient(#000 calc(100% - 24px), transparent);
+  }
+  /* il foglio di vetro flotta staccato dal bordo: niente prolungamento pieno sotto */
+  [data-glass='on'] [data-vaul-drawer-direction='bottom']::after {
+    display: none;
+  }
   [data-glass='off'] .edge-top,
   [data-glass='off'] .edge-bottom {
     display: none;

@@ -1,19 +1,21 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { CarFront, Gauge, Plus, ReceiptText, Settings2, Store } from 'lucide-react';
 import { motion } from 'motion/react';
 import { PonteIcon, PonteWordmark } from '@/ui/Brand';
 import { SPRING, SPRING_FAST } from '@/ui/motion';
 import { Toaster } from 'sonner';
-import { overlayOpen, typing, useDesk, useGlass, useJobs, useScrolledDown, useScrolledPast, useSettings, useThemeSync, useWide } from './hooks';
+import { overlayOpen, typing, useDesk, useGlass, useJobs, useNativeBarOn, useOverlayOpen, useScrolledDown, useScrolledPast, useSettings, useThemeSync, useWide } from './hooks';
+import { configureBar, nativeBarAvailable, onBarSelect, setBarCompact, usePageActions } from '@/platform/nativeBar';
 import { inFilter, toInvoice } from '@/domain/logic';
 import { bindAndroidBack, initNative } from '@/platform/native';
 
+// symbol: SF Symbol usato dalla barra nativa di iOS
 const NAV = [
-  { to: '/', label: 'Oggi', icon: Gauge, end: true },
-  { to: '/schede', label: 'Schede', icon: CarFront, end: false },
-  { to: '/mensile', label: 'Fatture', icon: ReceiptText, end: false },
-  { to: '/impostazioni', label: 'Impostazioni', icon: Settings2, end: false },
+  { to: '/', label: 'Oggi', icon: Gauge, end: true, symbol: 'gauge.with.dots.needle.67percent' },
+  { to: '/schede', label: 'Schede', icon: CarFront, end: false, symbol: 'car.fill' },
+  { to: '/mensile', label: 'Fatture', icon: ReceiptText, end: false, symbol: 'doc.text.fill' },
+  { to: '/impostazioni', label: 'Impostazioni', icon: Settings2, end: false, symbol: 'gearshape.fill' },
 ];
 
 /** L'officina che usa l'app: logo e nome, oppure l'invito a impostarli. */
@@ -91,6 +93,32 @@ export function Shell() {
   // la barra in basso compare solo sulle schermate principali
   const top = ['/', '/schede', '/mensile', '/impostazioni'].includes(loc.pathname);
 
+  // barra nativa di iOS: sezioni sulle schermate principali, azioni della schermata altrove, nascosta sotto i fogli
+  const nativeOn = useNativeBarOn();
+  const overlay = useOverlayOpen(nativeOn);
+  const page = usePageActions();
+  const pageRef = useRef(page);
+  pageRef.current = page;
+  useEffect(() => {
+    if (!nativeBarAvailable()) return;
+    if (!nativeOn || overlay) return configureBar({ mode: 'hidden' }, dark);
+    if (top)
+      return configureBar(
+        {
+          mode: 'tabs',
+          tabs: NAV.map((n) => ({ id: n.to, label: n.label, symbol: n.symbol })),
+          selected: loc.pathname,
+          accessory: { id: 'new', label: 'Nuova accettazione', symbol: 'plus' },
+        },
+        dark,
+      );
+    if (page) return configureBar({ mode: 'actions', actions: page.map(({ onPress: _p, ...item }) => item) }, dark);
+    configureBar({ mode: 'hidden' }, dark);
+  }, [nativeOn, overlay, top, page, loc.pathname, dark]);
+  useEffect(() => {
+    if (nativeOn && top) setBarCompact(compact);
+  }, [nativeOn, top, compact]);
+
   useEffect(() => {
     initNative(dark);
   }, [dark]);
@@ -109,6 +137,19 @@ export function Shell() {
 
   // "+" apre subito il modulo: Privato o Azienda si sceglie lì, in cima
   const openNew = useCallback(() => nav('/nuova?cl=privato'), [nav]);
+  useEffect(() => {
+    if (!nativeBarAvailable()) return;
+    return onBarSelect((id) => {
+      if (id === 'new') openNew();
+      else if (id.startsWith('/')) {
+        // toccare la sezione in cui sei riporta in cima, come nelle app di sistema
+        const cur = (window.location.hash.replace(/^#/, '') || '/').split('?')[0];
+        if (id === cur) window.scrollTo({ top: 0, behavior: 'smooth' });
+        else nav(id);
+      } else pageRef.current?.find((a) => a.id === id)?.onPress();
+    });
+  }, [nav, openNew]);
+
   useEffect(() => {
     window.addEventListener('ro:new-job', openNew);
     return () => window.removeEventListener('ro:new-job', openNew);
@@ -216,7 +257,9 @@ export function Shell() {
         <Outlet />
       </div>
 
-      {!wide && top && glass && (
+      {!wide && top && nativeOn && <div aria-hidden="true" className="edge-bottom" />}
+
+      {!wide && top && glass && !nativeOn && (
         <>
           <div aria-hidden="true" className="edge-bottom" />
           <nav aria-label="Sezioni" className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
@@ -241,7 +284,7 @@ export function Shell() {
         </>
       )}
 
-      {!wide && top && !glass && (
+      {!wide && top && !glass && !nativeOn && (
         <nav aria-label="Sezioni" className="glass safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line">
           <div className="mx-auto grid h-[68px] max-w-[560px] grid-cols-5 items-center px-1">
             {NAV.map((n) => (

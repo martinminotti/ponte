@@ -5,6 +5,7 @@ import { getSettings } from '@/data/repo';
 import { DEFAULT_SETTINGS, type Job, type Settings } from '@/domain/types';
 import { applyThemeMeta } from '@/platform/brand';
 import { isAppleMobile } from '@/platform/native';
+import { nativeBarAvailable } from '@/platform/nativeBar';
 
 export function useSettings(): Settings {
   return useLiveQuery(getSettings, [], DEFAULT_SETTINGS);
@@ -135,3 +136,31 @@ export function useObjectUrl(blob: Blob | undefined): string | undefined {
 
 /** Etichetta della scorciatoia di ricerca per il sistema in uso. */
 export const searchShortcut = () => (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K');
+
+/** Barra nativa di iOS attiva: iPhone (o iPad stretto) nell'app, con il vetro liquido non disattivato. */
+export function useNativeBarOn(): boolean {
+  const wide = useWide();
+  const s = useSettings();
+  return !wide && s.glass !== 'off' && nativeBarAvailable();
+}
+
+/** C'è un foglio, una finestra o il visore foto aperto: la barra nativa (che sta sopra la pagina) si fa da parte. */
+export function useOverlayOpen(enabled: boolean): boolean {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!enabled) return;
+    let raf = 0;
+    const check = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => setOpen(!!document.querySelector('[role="dialog"]')));
+    };
+    const mo = new MutationObserver(check);
+    mo.observe(document.body, { childList: true, subtree: true });
+    check();
+    return () => {
+      mo.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [enabled]);
+  return enabled && open;
+}

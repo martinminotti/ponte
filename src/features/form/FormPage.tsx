@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
-import { History } from 'lucide-react';
+import { scan, useScanner } from '@/platform/scanner';
+import { History, ScanLine, ScanText } from 'lucide-react';
 import { toast } from 'sonner';
 import { ActionBar, Page, TopBar } from '@/app/layout';
 import { useJob, useJobs, useSettings } from '@/app/hooks';
 import { SERVIZI } from '@/domain/constants';
-import { fmtDate, normPlateText, norm } from '@/domain/format';
+import { fmtDate, fmtPlate, normPlateText, norm } from '@/domain/format';
 import { veic } from '@/domain/logic';
 import { companies } from '@/domain/monthly';
 import { EMPTY_COMPANY, type ClientType, type Company, type Job, type PlateCountry } from '@/domain/types';
@@ -145,6 +146,20 @@ function FormInner({ job }: { job?: Job }) {
   const [usedLookup, setUsedLookup] = useState(false);
   const plateRef = useRef<HTMLInputElement>(null);
   const az = d.client === 'azienda';
+
+  // targa e telaio con la fotocamera (iPhone, VisionKit)
+  const canScan = useScanner();
+  const readWithCamera = async (kind: 'plate' | 'vin') => {
+    try {
+      const v = await scan(kind, d.plateCountry);
+      if (!v) return;
+      if (kind === 'plate') set('plate', v);
+      else set('vin', v);
+      toast.success(kind === 'plate' ? `Targa letta: ${fmtPlate(v, d.plateCountry)}` : `Telaio letto: ${v}`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
 
   useEffect(() => {
     if (!editing && !d.plate) plateRef.current?.focus({ preventScroll: true });
@@ -296,6 +311,11 @@ function FormInner({ job }: { job?: Job }) {
               />
             </div>
             {errFor('plate') && <p className="text-[0.875rem] font-medium text-danger">{errFor('plate')}</p>}
+            {canScan && (
+              <Button variant="outline" size="sm" icon={<ScanLine size={18} />} onClick={() => readWithCamera('plate')}>
+                Leggi la targa con la fotocamera
+              </Button>
+            )}
           </div>
 
           {hits.length > 0 && (
@@ -316,16 +336,28 @@ function FormInner({ job }: { job?: Job }) {
           )}
 
           <Field label="Telaio (VIN)" htmlFor="f-vin">
-            <Input
-              id="f-vin"
-              className="tnum tracking-[0.06em] uppercase"
-              maxLength={17}
-              autoCapitalize="characters"
-              autoComplete="off"
-              spellCheck={false}
-              value={d.vin}
-              onChange={(e) => set('vin', e.target.value.toUpperCase())}
-            />
+            <div className="relative">
+              <Input
+                id="f-vin"
+                className={`tnum tracking-[0.06em] uppercase ${canScan ? '!pr-14' : ''}`}
+                maxLength={17}
+                autoCapitalize="characters"
+                autoComplete="off"
+                spellCheck={false}
+                value={d.vin}
+                onChange={(e) => set('vin', e.target.value.toUpperCase())}
+              />
+              {canScan && (
+                <button
+                  type="button"
+                  aria-label="Leggi il telaio con la fotocamera"
+                  onClick={() => readWithCamera('vin')}
+                  className="press absolute top-1/2 right-1.5 grid size-11 -translate-y-1/2 place-items-center rounded-[12px] text-accent-ink hover:bg-surface-3"
+                >
+                  <ScanText size={21} />
+                </button>
+              )}
+            </div>
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Marca" htmlFor="f-make">
@@ -419,7 +451,7 @@ function FormInner({ job }: { job?: Job }) {
         {err && !['plate', 'cname', 'cvat', 'owner'].includes(err.field) && <Note tone="danger">{err.msg}</Note>}
       </form>
 
-      <ActionBar>
+      <ActionBar native={[{ id: 'save', label: editing ? 'Salva modifiche' : 'Registra accettazione', symbol: '', style: 'primary', disabled: busy, onPress: () => submit() }]}>
         <Button type="submit" form="job-form" variant="primary" size="lg" block disabled={busy}>
           {editing ? 'Salva modifiche' : 'Registra accettazione'}
         </Button>

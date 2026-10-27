@@ -180,7 +180,7 @@ export function DashboardPage() {
       <div className="mx-auto max-w-[880px] lg:max-w-[1320px]">
         {header}
 
-        <div className="sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:hidden">
+        <div className="scroll-edge sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:hidden">
           <SearchField id="search-jobs" value={q} onChange={setQ} onKeyDown={onSearchKey} placeholder="Cerca targa, cliente, ditta" />
         </div>
 

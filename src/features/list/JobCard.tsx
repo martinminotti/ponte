@@ -20,7 +20,7 @@ export function JobCard({ j, active, dense }: { j: Job; active?: boolean; dense?
         dense ? 'scroll-my-28 p-3.5 hover:ring-1 hover:ring-line-strong' : 'p-4 hover:shadow-[var(--shadow-2)]'
       } ${active ? '!ring-2 !ring-accent' : ''}`}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <Plate plate={j.plate} country={j.plateCountry} size={dense ? 'sm' : 'md'} />
         <StatusPill s={j.status} size="sm" />
       </div>

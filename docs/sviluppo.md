@@ -115,3 +115,16 @@ L'app è *local-first*: tutta la persistenza passa da `src/data/repo.ts` e `src/
 1. **Supabase** (Postgres, autenticazione, storage foto, RLS per officina) con Dexie come cache locale, oppure **Dexie Cloud** sullo stesso database.
 2. `updatedAt` è già su ogni scheda per risolvere i conflitti "vince il più recente".
 3. Login e regole di accesso: l'archivio contiene dati personali dei clienti (GDPR).
+
+## Codice nativo iOS
+
+Due plugin Swift scritti per Ponte, registrati in `ios/App/App/MainViewController.swift`:
+
+| Plugin | File | Cosa fa |
+|---|---|---|
+| `NativeBar` | `NativeBarPlugin.swift` | Barra in basso in Liquid Glass vero (`UIGlassEffect`, iOS 26; materiale di sistema prima). Sezioni con *+* sulle schermate principali, azioni della schermata (scheda, modulo) altrove, nascosta sotto fogli e finestre. |
+| `PlateScanner` | `PlateScannerPlugin.swift` | Lettura di targa (IT, RSM) e telaio con la fotocamera (VisionKit `DataScannerViewController`, iOS 16+). |
+
+Lato web: `src/platform/nativeBar.ts` (la pagina dichiara azioni con `ActionBar native={…}`, la `Shell` decide il modo) e `src/platform/scanner.ts`. Sul web e su Android tutto resta in HTML.
+
+Il workflow **iOS build** compila l'app a ogni modifica in `ios/`, senza firma: gli errori Swift compaiono come annotazioni del job.

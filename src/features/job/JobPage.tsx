@@ -296,7 +296,15 @@ function JobView({ job }: { job: Job }) {
         )}
       </div>
 
-      <ActionBar maxW={two ? 1240 : 760}>
+      <ActionBar
+        maxW={two ? 1240 : 760}
+        native={[
+          { id: 'wa', label: 'Avvisa', symbol: 'message.fill', style: 'wa', onPress: () => setWa({ open: true, kind: job.status }) },
+          next
+            ? { id: 'next', label: `Segna: ${next.l}`, symbol: '', style: 'primary', onPress: () => setStatus(next.k) }
+            : { id: 'doc', label: 'Apri il conto', symbol: 'doc.text', style: 'primary', onPress: () => nav(`/job/${job.id}/conto`) },
+        ]}
+      >
         <Button variant="wa" size="lg" icon={<MessageCircle size={20} strokeWidth={2.2} />} onClick={() => setWa({ open: true, kind: job.status })} aria-label="Avvisa il cliente su WhatsApp">
           <span className="hidden min-[380px]:inline">Avvisa</span>
         </Button>

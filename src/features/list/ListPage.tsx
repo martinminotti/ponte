@@ -140,7 +140,7 @@ export function ListPage() {
 
       <div
         className={`sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:top-0 lg:pt-5 ${
-          glass && !wide ? '' : 'bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] backdrop-blur-xl backdrop-saturate-150'
+          glass && !wide ? 'scroll-edge' : 'bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] backdrop-blur-xl backdrop-saturate-150'
         }`}
       >
         {wide && <h1 className="w-wide mb-3 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink">Schede</h1>}

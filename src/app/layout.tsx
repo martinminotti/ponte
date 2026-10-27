@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { Outlet, useMatch, useNavigate } from 'react-router';
 import { CarFront, ChevronLeft } from 'lucide-react';
 import { motion } from 'motion/react';
-import { searchShortcut, useGlass, useJobs, useWide } from './hooks';
+import { searchShortcut, useGlass, useJobs, useNativeBarOn, useWide } from './hooks';
+import { useNativeActions, type NativeAction } from '@/platform/nativeBar';
 import { ListPage } from '@/features/list/ListPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 
@@ -101,7 +102,8 @@ export function TopBar({
 
   if (glass && !wide) {
     return (
-      <div className="sticky top-[env(safe-area-inset-top,0px)] z-30">
+      // la barra parte da y=0 e si allarga sotto la status bar: così occupa il suo spazio nel flusso e il contenuto inizia sotto
+      <div className="scroll-edge sticky top-0 z-30 pt-[env(safe-area-inset-top,0px)] [--edge-up:0px]">
         <div className="mx-auto flex h-[60px] max-w-[760px] items-center gap-2 px-3">
           {showBack ? (
             <button type="button" onClick={goBack} aria-label={backLabel} className="glass press grid size-11 shrink-0 place-items-center rounded-full text-ink">
@@ -118,7 +120,7 @@ export function TopBar({
   }
 
   return (
-    <div className="glass sticky top-[env(safe-area-inset-top,0px)] z-30 lg:top-0">
+    <div className="glass sticky top-0 z-30 pt-[env(safe-area-inset-top,0px)]">
       <div className="mx-auto flex h-14 items-center gap-2 px-2 sm:px-4" style={{ maxWidth: maxW }}>
         {showBack ? (
           <button type="button" onClick={goBack} className="press -ml-1 flex h-11 items-center gap-0.5 rounded-full pr-3 pl-1.5 text-[1rem] font-medium text-accent-ink hover:bg-surface-2">
@@ -166,9 +168,13 @@ export function Page({ children, className = '' }: { children: ReactNode; classN
 }
 
 /** Barra azioni in basso: fascia traslucida, oppure capsula di vetro flottante su iOS. */
-export function ActionBar({ children, maxW = 760 }: { children: ReactNode; maxW?: number }) {
+export function ActionBar({ children, maxW = 760, native }: { children: ReactNode; maxW?: number; native?: NativeAction[] }) {
   const glass = useGlass();
   const wide = useWide();
+  const nativeOn = useNativeBarOn();
+  // su iPhone le azioni passano alla barra nativa; qui resta solo la sfumatura sotto il contenuto
+  useNativeActions(nativeOn && native ? native : null);
+  if (nativeOn && native) return <div aria-hidden="true" className="edge-bottom" />;
   if (glass && !wide) {
     return (
       <>
