@@ -34,7 +34,6 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
   const add = (desc = '') => {
     const id = uid('i');
     setFocusId(id);
-    haptic('light');
     up((j) => ({ ...j, items: [...j.items, { id, desc, amount: 0 }] }));
   };
   const setItem = (id: string, patch: Partial<Job['items'][number]>) => up((j) => ({ ...j, items: j.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) }));
@@ -135,7 +134,7 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
         {job.deposit > 0 && <Row l="Acconto versato" v={`− ${eur(job.deposit)}`} />}
         <div className="mt-2 flex items-end justify-between gap-3 border-t border-line pt-3">
           <dt className="font-semibold text-ink">{job.paid ? 'Saldato' : 'Da saldare'}</dt>
-          <dd className={`w-cond tnum text-[34px] leading-none font-bold ${job.paid ? 'text-ok' : 'text-ink'}`}>{eur(job.paid ? job.paidAmount ?? totale(job) : due)}</dd>
+          <dd className={`w-cond tnum text-[34px] leading-none font-bold ${job.paid ? 'text-ok' : 'text-ink'}`}>{eur(job.paid ? (job.paidAmount ?? totale(job)) : due)}</dd>
         </div>
       </dl>
     </Section>

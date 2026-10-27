@@ -143,7 +143,6 @@ export function SettingsPage() {
                         aria-label={p.n}
                         title={p.n}
                         onClick={() => {
-                          haptic('light');
                           save({ accent: p.c });
                         }}
                         className="press grid size-11 place-items-center rounded-full text-white"

@@ -165,7 +165,7 @@ export function JobPaper({ j, s }: { j: Job; s: Settings }) {
           )}
         </Table>
       </div>
-      <Totals rows={rows} big={[j.paid ? 'Saldato' : 'Da saldare', eur(j.paid ? j.paidAmount ?? tot : due)]} />
+      <Totals rows={rows} big={[j.paid ? 'Saldato' : 'Da saldare', eur(j.paid ? (j.paidAmount ?? tot) : due)]} />
       <div className="grid gap-3 sm:grid-cols-2">
         <Box>
           <Lab>Pagamento</Lab>

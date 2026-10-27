@@ -140,7 +140,6 @@ export function MonthPage() {
                     aria-checked={on}
                     disabled={!el}
                     onClick={() => {
-                      haptic('light');
                       setSel((x) => ({ ...x, [j.id]: !on }));
                       setMno(null);
                     }}
@@ -199,7 +198,7 @@ export function MonthPage() {
                 invoicedAt: now,
                 invoiceNo: no,
               }),
-              `${chosen.length} lavori segnati come fatturati`
+              `${chosen.length} lavori segnati come fatturati`,
             )
           }
         >
@@ -226,7 +225,7 @@ export function MonthPage() {
                   paidAt: undefined,
                   paidAmount: undefined,
                 }),
-                'Incasso annullato'
+                'Incasso annullato',
               )
             }
           >
@@ -256,7 +255,7 @@ export function MonthPage() {
                   paidAmount: daSaldare(j),
                   payMethod: mpay,
                 }),
-                `Incassati ${eur(T.due)}`
+                `Incassati ${eur(T.due)}`,
               )
             }
           >

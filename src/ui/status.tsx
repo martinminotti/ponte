@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { STATI, statoIndex, statoLabel } from '@/domain/constants';
 import type { StatusKey } from '@/domain/types';
 import { haptic } from '@/platform/native';
+import { SPRING, SPRING_FAST } from './motion';
 
 export const stColor = (k: StatusKey) => `var(--st-${k})`;
 
@@ -39,13 +40,7 @@ export function StatusRail({ value, onChange }: { value: StatusKey; onChange: (k
   return (
     <div role="radiogroup" aria-label="Stato lavorazione" className="relative">
       <div className="absolute top-[19px] right-[calc(100%/12)] left-[calc(100%/12)] h-[3px] rounded-full bg-surface-3" aria-hidden="true">
-        <motion.div
-          className="h-full rounded-full"
-          style={{ background: col }}
-          initial={false}
-          animate={{ width: `${(idx / (STATI.length - 1)) * 100}%` }}
-          transition={{ type: 'spring', stiffness: 260, damping: 32 }}
-        />
+        <motion.div className="h-full rounded-full" style={{ background: col }} initial={false} animate={{ width: `${(idx / (STATI.length - 1)) * 100}%` }} transition={SPRING} />
       </div>
       <div className="relative grid grid-cols-6">
         {STATI.map((st, i) => {
@@ -72,7 +67,7 @@ export function StatusRail({ value, onChange }: { value: StatusKey; onChange: (k
                     layoutId="rail-dot"
                     className="absolute inset-0 rounded-full"
                     style={{ background: col, boxShadow: `0 0 0 5px color-mix(in srgb, ${col} 20%, transparent)` }}
-                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                    transition={SPRING_FAST}
                   />
                 )}
                 <span

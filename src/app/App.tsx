@@ -1,5 +1,6 @@
 import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { createHashRouter, RouterProvider } from 'react-router';
+import { MotionConfig } from 'motion/react';
 import { migrateLegacy } from '@/data/backup';
 import { requestPersistence } from '@/data/repo';
 import { db } from '@/data/db';
@@ -16,7 +17,7 @@ const MonthPage = lazy(() => import('@/features/month/MonthPage').then((m) => ({
 const SettingsPage = lazy(() =>
   import('@/features/settings/SettingsPage').then((m) => ({
     default: m.SettingsPage,
-  }))
+  })),
 );
 const L = (n: ReactNode) => <Suspense fallback={null}>{n}</Suspense>;
 
@@ -99,8 +100,11 @@ export function App() {
   if (boot === 'loading') return null;
   return (
     <Boundary>
-      <RouterProvider router={router} />
-      <UpdatePrompt />
+      {/* "Riduci movimento" del sistema vale anche per le animazioni a molla, non solo per il CSS */}
+      <MotionConfig reducedMotion="user">
+        <RouterProvider router={router} />
+        <UpdatePrompt />
+      </MotionConfig>
     </Boundary>
   );
 }

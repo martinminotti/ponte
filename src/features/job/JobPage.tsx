@@ -14,7 +14,7 @@ import { deleteJob, mutateJob, restoreJob } from '@/data/repo';
 import { copyText, haptic, openExternal } from '@/platform/native';
 import { Button, Section } from '@/ui/controls';
 import { Plate } from '@/ui/Plate';
-import { Sheet } from '@/ui/Sheet';
+import { ActionMenu } from '@/ui/Menu';
 import { StatusRail, stColor } from '@/ui/status';
 import { HistoryList, InvoiceSection, ItemsSection, PaymentSection, PhotosSection, VehicleHistory, WarrantySection, WorkersSection, updater } from './sections';
 import { WhatsAppSheet } from './WhatsAppSheet';
@@ -56,7 +56,6 @@ function JobView({ job }: { job: Job }) {
     open: false,
     kind: job.status,
   });
-  const [more, setMore] = useState(false);
   const [showHist, setShowHist] = useState(false);
   const [fresh, setFresh] = useState(() => !!(loc.state as { justCreated?: boolean } | null)?.justCreated);
 
@@ -85,7 +84,6 @@ function JobView({ job }: { job: Job }) {
   };
 
   const remove = async () => {
-    setMore(false);
     const snap = await deleteJob(job.id);
     nav('/', { replace: true });
     if (snap)
@@ -236,9 +234,28 @@ function JobView({ job }: { job: Job }) {
         hideBackOnWide
         title={<span className="tnum text-ink-2">Scheda N. {jobNumber(job.number)}</span>}
         right={
-          <BarButton label="Altre azioni" onClick={() => setMore(true)}>
-            <MoreHorizontal size={22} />
-          </BarButton>
+          <ActionMenu
+            title={`Scheda N. ${jobNumber(job.number)}`}
+            trigger={(open) => (
+              <BarButton label="Altre azioni" onClick={open}>
+                <MoreHorizontal size={22} />
+              </BarButton>
+            )}
+            items={[
+              { icon: <Pencil size={19} />, label: 'Modifica dati', onSelect: () => nav(`/job/${job.id}/modifica`) },
+              { icon: <FileText size={19} />, label: 'Apri il conto', onSelect: () => nav(`/job/${job.id}/conto`) },
+              {
+                icon: <Copy size={19} />,
+                label: 'Copia riepilogo',
+                onSelect: async () => {
+                  const ok = await copyText(buildMsg(job, job.status === 'consegnato' ? 'consegnato' : 'pronto', settings));
+                  toast[ok ? 'success' : 'error'](ok ? 'Riepilogo copiato' : 'Non riesco a copiare');
+                },
+              },
+              ...(canWa ? [{ icon: <MessageCircle size={19} />, label: 'Apri la chat WhatsApp', onSelect: () => openExternal(waLink(job.phone, '', settings.prefix)!) }] : []),
+              { icon: <Trash2 size={19} />, label: 'Elimina scheda', danger: true, separator: true, onSelect: remove },
+            ]}
+          />
         }
       />
 
@@ -295,49 +312,6 @@ function JobView({ job }: { job: Job }) {
       </ActionBar>
 
       <WhatsAppSheet open={wa.open} kind={wa.kind} onOpenChange={(o) => setWa((x) => ({ ...x, open: o }))} job={job} settings={settings} />
-
-      <Sheet open={more} onOpenChange={setMore} title={`Scheda N. ${jobNumber(job.number)}`}>
-        <div className="flex flex-col gap-1">
-          <MenuItem icon={<Pencil size={20} />} onClick={() => (setMore(false), nav(`/job/${job.id}/modifica`))}>
-            Modifica dati
-          </MenuItem>
-          <MenuItem icon={<FileText size={20} />} onClick={() => (setMore(false), nav(`/job/${job.id}/conto`))}>
-            Apri il conto
-          </MenuItem>
-          <MenuItem
-            icon={<Copy size={20} />}
-            onClick={async () => {
-              setMore(false);
-              const ok = await copyText(buildMsg(job, job.status === 'consegnato' ? 'consegnato' : 'pronto', settings));
-              toast[ok ? 'success' : 'error'](ok ? 'Riepilogo copiato' : 'Non riesco a copiare');
-            }}
-          >
-            Copia riepilogo
-          </MenuItem>
-          {canWa && (
-            <MenuItem icon={<MessageCircle size={20} />} onClick={() => (setMore(false), openExternal(waLink(job.phone, '', settings.prefix)!))}>
-              Apri la chat WhatsApp
-            </MenuItem>
-          )}
-          <div className="my-2 h-px bg-line" />
-          <MenuItem icon={<Trash2 size={20} />} danger onClick={remove}>
-            Elimina scheda
-          </MenuItem>
-        </div>
-      </Sheet>
     </Page>
-  );
-}
-
-function MenuItem({ icon, children, onClick, danger }: { icon: React.ReactNode; children: React.ReactNode; onClick: () => void; danger?: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`press flex h-14 items-center gap-3.5 rounded-[14px] px-3 text-left text-[16.5px] font-medium hover:bg-surface-2 ${danger ? 'text-danger' : 'text-ink'}`}
-    >
-      <span className={danger ? 'text-danger' : 'text-ink-2'}>{icon}</span>
-      {children}
-    </button>
   );
 }

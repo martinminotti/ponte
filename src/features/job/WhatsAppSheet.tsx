@@ -76,7 +76,6 @@ export function WhatsAppSheet({ open, onOpenChange, job, kind, settings }: { ope
               role="radio"
               aria-checked={k === s.k}
               onClick={() => {
-                haptic('light');
                 setK(s.k);
                 setDirty(false);
               }}

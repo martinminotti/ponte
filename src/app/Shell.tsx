@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
-import { Building2, CarFront, Gauge, Plus, ReceiptText, Settings2, Store, User } from 'lucide-react';
+import { CarFront, Gauge, Plus, ReceiptText, Settings2, Store } from 'lucide-react';
 import { motion } from 'motion/react';
 import { PonteIcon, PonteWordmark } from '@/ui/Brand';
+import { SPRING, SPRING_FAST } from '@/ui/motion';
 import { Toaster } from 'sonner';
 import { overlayOpen, typing, useDesk, useGlass, useJobs, useScrolledDown, useScrolledPast, useSettings, useThemeSync, useWide } from './hooks';
 import { inFilter, toInvoice } from '@/domain/logic';
-import { Sheet } from '@/ui/Sheet';
-import { bindAndroidBack, haptic, initNative } from '@/platform/native';
+import { bindAndroidBack, initNative } from '@/platform/native';
 
 const NAV = [
   { to: '/', label: 'Oggi', icon: Gauge, end: true },
@@ -66,34 +66,6 @@ export function BrandMark() {
   );
 }
 
-export function NewJobSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
-  const nav = useNavigate();
-  const go = (cl: 'privato' | 'azienda') => {
-    onOpenChange(false);
-    haptic('medium');
-    nav(`/nuova?cl=${cl}`);
-  };
-  const opt = (cl: 'privato' | 'azienda', Icon: typeof User, t: string, d: string) => (
-    <button type="button" onClick={() => go(cl)} className="press flex w-full items-center gap-4 rounded-[18px] bg-surface-2 p-4 text-left hover:bg-surface-3">
-      <span className="grid size-12 shrink-0 place-items-center rounded-[14px] bg-accent text-on-accent">
-        <Icon size={24} strokeWidth={2} />
-      </span>
-      <span className="min-w-0">
-        <span className="w-wide block text-[17px] font-semibold text-ink">{t}</span>
-        <span className="block text-[14.5px] text-ink-2">{d}</span>
-      </span>
-    </button>
-  );
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange} title="Nuova accettazione" description="Chi porta il veicolo?">
-      <div className="flex flex-col gap-2.5">
-        {opt('privato', User, 'Privato', 'Conto lavori, nessuna fattura')}
-        {opt('azienda', Building2, 'Azienda', 'Dati per la fattura, IVA, fattura mensile')}
-      </div>
-    </Sheet>
-  );
-}
-
 /** Contenitore dell'app: tema, barra di navigazione (in basso su telefono, laterale su schermi larghi), notifiche. */
 export function Shell() {
   const s = useSettings();
@@ -101,7 +73,6 @@ export function Shell() {
   const wide = useWide();
   const loc = useLocation();
   const nav = useNavigate();
-  const [newOpen, setNewOpen] = useState(false);
 
   const desk = useDesk();
   const jobs = useJobs();
@@ -136,16 +107,12 @@ export function Shell() {
     return () => off?.();
   }, [nav]);
 
+  // "+" apre subito il modulo: Privato o Azienda si sceglie lì, in cima
+  const openNew = useCallback(() => nav('/nuova?cl=privato'), [nav]);
   useEffect(() => {
-    const open = () => setNewOpen(true);
-    window.addEventListener('ro:new-job', open);
-    return () => window.removeEventListener('ro:new-job', open);
-  }, []);
-
-  const openNew = () => {
-    haptic('medium');
-    setNewOpen(true);
-  };
+    window.addEventListener('ro:new-job', openNew);
+    return () => window.removeEventListener('ro:new-job', openNew);
+  }, [openNew]);
 
   // scorciatoie da tastiera: ⌘K o / cerca, N nuova accettazione, Esc chiude la scheda aperta
   useEffect(() => {
@@ -164,7 +131,7 @@ export function Shell() {
         focusSearch();
       } else if (e.key.toLowerCase() === 'n' && !e.shiftKey) {
         e.preventDefault();
-        setNewOpen(true);
+        if (loc.pathname !== '/nuova') openNew();
       } else if (e.key === 'Escape' && /^\/job\/[^/]+$/.test(loc.pathname)) {
         nav('/schede');
       }
@@ -178,7 +145,7 @@ export function Shell() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [loc.pathname, nav]);
+  }, [loc.pathname, nav, openNew]);
 
   return (
     <div className="min-h-dvh lg:flex">
@@ -252,18 +219,14 @@ export function Shell() {
           <div aria-hidden="true" className="edge-bottom" />
           <nav aria-label="Sezioni" className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
             <div className="mx-auto flex max-w-[560px] items-end gap-2.5 px-3.5 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
-              <motion.div
-                layout
-                transition={{ type: 'spring', stiffness: 420, damping: 36 }}
-                className={`glass pointer-events-auto flex flex-1 items-stretch rounded-full p-1 ${compact ? 'h-[52px]' : 'h-[62px]'}`}
-              >
+              <motion.div layout transition={SPRING} className={`glass pointer-events-auto flex flex-1 items-stretch rounded-full p-1 ${compact ? 'h-[52px]' : 'h-[62px]'}`}>
                 {NAV.map((n) => (
                   <GlassTab key={n.to} {...n} compact={compact} />
                 ))}
               </motion.div>
               <motion.button
                 layout
-                transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                transition={SPRING}
                 type="button"
                 aria-label="Nuova accettazione"
                 onClick={openNew}
@@ -296,7 +259,6 @@ export function Shell() {
         </nav>
       )}
 
-      <NewJobSheet open={newOpen} onOpenChange={setNewOpen} />
       <Toaster
         position={wide ? 'top-right' : 'top-center'}
         offset={wide ? 24 : 'calc(env(safe-area-inset-top, 0px) + 12px)'}
@@ -325,14 +287,14 @@ export function Shell() {
 /** Scheda della barra in vetro: la "lente" più chiara scorre sotto la voce attiva. */
 function GlassTab({ to, label, icon: Icon, end, compact }: (typeof NAV)[number] & { compact: boolean }) {
   return (
-    <NavLink to={to} end={end} className="press relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full" onClick={() => haptic('light')}>
+    <NavLink to={to} end={end} className="press relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full">
       {({ isActive }) => (
         <>
           {isActive && (
             <motion.span
               layoutId="glass-tab-lens"
               className="absolute inset-0 rounded-full bg-[var(--glass-lens)] shadow-[inset_0_0.5px_0_rgba(255,255,255,.7),0_1px_3px_rgba(0,0,0,.08)]"
-              transition={{ type: 'spring', stiffness: 480, damping: 38 }}
+              transition={SPRING_FAST}
             />
           )}
           <Icon size={compact ? 21 : 22} strokeWidth={isActive ? 2.3 : 1.9} className={`relative ${isActive ? 'text-accent-ink' : 'text-ink'}`} />
@@ -345,7 +307,7 @@ function GlassTab({ to, label, icon: Icon, end, compact }: (typeof NAV)[number] 
 
 function TabLink({ to, label, icon: Icon, end }: (typeof NAV)[number]) {
   return (
-    <NavLink to={to} end={end} className="press flex flex-col items-center justify-center gap-1" onClick={() => haptic('light')}>
+    <NavLink to={to} end={end} className="press flex flex-col items-center justify-center gap-1">
       {({ isActive }) => (
         <>
           <span className={`grid h-8 w-14 place-items-center rounded-full transition-colors ${isActive ? 'bg-accent-soft text-accent-ink' : 'text-ink-2'}`}>

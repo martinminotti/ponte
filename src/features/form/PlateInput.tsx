@@ -5,7 +5,7 @@ import { fmtPlate } from '@/domain/format';
 /** Campo targa disegnato come una targa vera: si scrive direttamente sulla placca. */
 export const PlateInput = forwardRef<HTMLInputElement, { value: string; onChange: (v: string) => void; country: PlateCountry; id?: string; invalid?: boolean }>(function PlateInput(
   { value, onChange, country, id, invalid },
-  ref
+  ref,
 ) {
   const rsm = country === 'RSM';
   return (

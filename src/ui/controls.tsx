@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useId, useRef, useState, type ButtonHTMLAttribut
 import { motion } from 'motion/react';
 import { Check } from 'lucide-react';
 import { haptic } from '@/platform/native';
+import { SPRING_FAST } from './motion';
 
 /* ---------------- bottoni ---------------- */
 
@@ -31,8 +32,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'secondary', size = 'md', icon, block, className = '', children, onClick, haptics = true, type = 'button', ...rest },
-  ref
+  { variant = 'secondary', size = 'md', icon, block, className = '', children, onClick, haptics = false, type = 'button', ...rest },
+  ref,
 ) {
   return (
     <button
@@ -81,19 +82,12 @@ export function Segmented<T extends string | number>({
             aria-checked={on}
             onClick={() => {
               if (!on) {
-                haptic('light');
                 onChange(o.v);
               }
             }}
             className={`relative flex-1 rounded-[10px] px-2 font-semibold transition-colors ${size === 'sm' ? 'h-9 text-[14px]' : 'h-11 text-[15px]'} ${on ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
           >
-            {on && (
-              <motion.span
-                layoutId={`seg-${id}`}
-                className="absolute inset-0 rounded-[10px] bg-surface shadow-[0_1px_2px_rgba(0,0,0,.12),0_0_0_1px_var(--line)]"
-                transition={{ type: 'spring', stiffness: 520, damping: 40 }}
-              />
-            )}
+            {on && <motion.span layoutId={`seg-${id}`} className="absolute inset-0 rounded-[10px] bg-surface shadow-[0_1px_2px_rgba(0,0,0,.12),0_0_0_1px_var(--line)]" transition={SPRING_FAST} />}
             <span className="relative whitespace-nowrap">{o.l}</span>
           </button>
         );
@@ -109,10 +103,7 @@ export function Chip({ on, children, onClick, className = '', count, ...rest }: 
     <button
       type="button"
       aria-pressed={on}
-      onClick={(e) => {
-        haptic('light');
-        onClick?.(e);
-      }}
+      onClick={onClick}
       className={`press inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[15px] font-medium ${
         on ? 'bg-ink text-bg' : 'bg-surface text-ink ring-1 ring-inset ring-line hover:ring-line-strong'
       } ${className}`}
@@ -129,10 +120,7 @@ export function ToggleChip({ on, children, onClick }: { on: boolean; children: R
     <button
       type="button"
       aria-pressed={on}
-      onClick={() => {
-        haptic('light');
-        onClick();
-      }}
+      onClick={onClick}
       className={`press inline-flex h-11 items-center gap-1.5 rounded-[12px] px-3.5 text-[15px] font-medium ${
         on ? 'bg-accent-soft text-accent-ink ring-1 ring-inset ring-accent/40' : 'bg-surface-2 text-ink hover:bg-surface-3'
       }`}
@@ -197,7 +185,7 @@ export function AutoInput({
         if (l.v !== l.value) l.onCommit(l.v);
       }
     },
-    []
+    [],
   );
 
   const change = (nv: string) => {

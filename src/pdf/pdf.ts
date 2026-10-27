@@ -325,7 +325,7 @@ export async function buildJobPdf(j: Job, s: Settings): Promise<Blob> {
   doc.t(j.paid ? 'Saldato' : 'Da saldare', tx, doc.y + 4.4);
   doc.font('bold', 17);
   doc.col(doc.ac);
-  doc.t(money(j.paid ? j.paidAmount ?? tot : due), R, doc.y + 4.6, { align: 'right' });
+  doc.t(money(j.paid ? (j.paidAmount ?? tot) : due), R, doc.y + 4.6, { align: 'right' });
   doc.y += 15;
 
   /* pagamento e garanzia */

@@ -227,7 +227,7 @@ export async function seedDemo(): Promise<number> {
       number: n++,
       updatedAt: j.createdAt || now,
       demo: true,
-    })
+    }),
   );
   await db.transaction('rw', db.jobs, db.settings, async () => {
     await db.jobs.bulkAdd(jobs);

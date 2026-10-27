@@ -17,7 +17,7 @@ export function useJobs(): Job[] | undefined {
 
 /** Una scheda. undefined mentre carica, null se non esiste. */
 export function useJob(id: string | undefined): Job | null | undefined {
-  return useLiveQuery(async () => (id ? (await db.jobs.get(id)) ?? null : null), [id]);
+  return useLiveQuery(async () => (id ? ((await db.jobs.get(id)) ?? null) : null), [id]);
 }
 
 export function useMedia(q: string): boolean {
@@ -28,7 +28,7 @@ export function useMedia(q: string): boolean {
       return () => m.removeEventListener('change', cb);
     },
     () => window.matchMedia(q).matches,
-    () => false
+    () => false,
   );
 }
 

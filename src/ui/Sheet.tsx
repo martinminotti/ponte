@@ -1,23 +1,69 @@
 import type { ReactNode } from 'react';
 import { Drawer } from 'vaul';
+import * as Dialog from '@radix-ui/react-dialog';
+import { AnimatePresence, motion } from 'motion/react';
 import { X } from 'lucide-react';
+import { useWide } from '@/app/hooks';
+import { SPRING } from './motion';
 
-/** Foglio che sale dal basso (stile iOS), si chiude trascinando giù. Su schermi larghi resta centrato. */
-export function Sheet({
-  open,
-  onOpenChange,
-  title,
-  description,
-  children,
-  footer,
-}: {
+type SheetProps = {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   title: string;
   description?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
-}) {
+};
+
+/**
+ * Telefono: foglio che sale dal basso e si chiude trascinando giù (stile iOS).
+ * Schermi larghi: finestra al centro, come su Mac e iPad con tastiera; Esc o clic fuori la chiudono.
+ */
+export function Sheet(p: SheetProps) {
+  const wide = useWide();
+  return wide ? <CenterDialog {...p} /> : <BottomSheet {...p} />;
+}
+
+function CenterDialog({ open, onOpenChange, title, description, children, footer }: SheetProps) {
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <AnimatePresence>
+        {open && (
+          <Dialog.Portal forceMount>
+            <Dialog.Overlay asChild forceMount>
+              <motion.div className="fixed inset-0 z-50 bg-black/30" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} />
+            </Dialog.Overlay>
+            <div className="pointer-events-none fixed inset-0 z-50 grid place-items-center p-6">
+              <Dialog.Content asChild forceMount aria-describedby={undefined}>
+                <motion.div
+                  className="pointer-events-auto flex max-h-[min(720px,88dvh)] w-full max-w-[520px] flex-col rounded-[24px] bg-surface shadow-[0_24px_80px_-12px_rgba(0,0,0,.35),0_0_0_1px_var(--line)] outline-none"
+                  initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.97, y: 4, transition: { duration: 0.14 } }}
+                  transition={SPRING}
+                >
+                  <div className="flex items-start justify-between gap-3 px-6 pt-5 pb-2">
+                    <div className="min-w-0">
+                      <Dialog.Title className="w-wide text-[20px] font-semibold text-ink">{title}</Dialog.Title>
+                      {description && <Dialog.Description className="mt-1 text-[14.5px] text-ink-2">{description}</Dialog.Description>}
+                    </div>
+                    <Dialog.Close className="press -mr-2 grid size-9 shrink-0 place-items-center rounded-full text-ink-2 hover:bg-surface-2" aria-label="Chiudi">
+                      <X size={18} strokeWidth={2.4} />
+                    </Dialog.Close>
+                  </div>
+                  <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-2 pb-6">{children}</div>
+                  {footer && <div className="border-t border-line px-6 py-4">{footer}</div>}
+                </motion.div>
+              </Dialog.Content>
+            </div>
+          </Dialog.Portal>
+        )}
+      </AnimatePresence>
+    </Dialog.Root>
+  );
+}
+
+function BottomSheet({ open, onOpenChange, title, description, children, footer }: SheetProps) {
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} repositionInputs={false}>
       <Drawer.Portal>
