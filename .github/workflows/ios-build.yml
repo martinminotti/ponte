@@ -1,0 +1,47 @@
+name: iOS build
+
+# Compila l'app iOS (senza firma, senza caricare nulla) a ogni modifica del codice nativo.
+# Serve a scoprire subito un errore Swift, prima di lanciare TestFlight.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['ios/**', 'capacitor.config.ts', 'package-lock.json', '.github/workflows/ios-build.yml']
+
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - name: Build web e sync Capacitor
+        run: |
+          npm ci
+          npm run build
+          npx cap sync ios
+      - name: Compila
+        run: |
+          echo "::notice title=Xcode::$(xcodebuild -version | tr '\n' ' ')"
+          set -o pipefail
+          xcodebuild build \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            2>&1 | tee "$RUNNER_TEMP/build.log" || {
+              grep -E "error:|fatal|BUILD FAILED" "$RUNNER_TEMP/build.log" | sort -u | head -20 | while IFS= read -r l; do echo "::error title=Compila::${l:0:900}"; done
+              exit 1
+            }
