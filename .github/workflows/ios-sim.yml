@@ -83,6 +83,17 @@ jobs:
       - name: Scenario
         run: python3 .github/sim/drive.py "${{ steps.sim.outputs.udid }}" "$RUNNER_TEMP/out"
 
+      - name: Registri dell'app
+        if: always()
+        run: |
+          OUT="$RUNNER_TEMP/out"; mkdir -p "$OUT"
+          U="${{ steps.sim.outputs.udid }}"
+          xcrun simctl spawn "$U" log show --last 10m --style compact --predicate 'process == "App"' > "$OUT/log-app.txt" 2>&1 || true
+          tail -c 400000 "$OUT/log-app.txt" > "$OUT/log-app-tail.txt" || true
+          grep -iE "⚡️|error|exception|fatal|crash|capacitor" "$OUT/log-app.txt" | tail -300 > "$OUT/log-filtrato.txt" || true
+          mkdir -p "$OUT/crash"; cp ~/Library/Logs/DiagnosticReports/App* "$OUT/crash/" 2>/dev/null || true
+          xcrun simctl spawn "$U" launchctl list 2>/dev/null | grep -i ponte > "$OUT/processi.txt" || true
+
       - name: Pubblica i risultati su ci-sim
         if: always()
         run: |

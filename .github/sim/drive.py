@@ -111,7 +111,10 @@ W = 402  # larghezza logica dell'iPhone 17 Pro, in punti
 try:
     # ------------------------------------------------------------------ scenario
     launch(8)
-    shot("01-avvio")
+    shot_png = lambda n: sh("xcrun", "simctl", "io", UDID, "screenshot", f"{OUT}/{n}.png")
+    shot_png("01-avvio")
+    time.sleep(6)
+    shot("01b-avvio-14s")
     if has("Prova con dati di esempio"):
         tap("Prova con dati di esempio", wait=2.5)
     shot("02-oggi")
