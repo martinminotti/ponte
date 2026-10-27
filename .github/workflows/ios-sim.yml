@@ -26,14 +26,15 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
       - name: idb
         run: |
           brew tap facebook/fb
-          brew install idb-companion
+          brew trust facebook/fb || true
+          brew install facebook/fb/idb-companion
           pip install fb-idb
 
       - name: Build web e sync Capacitor
