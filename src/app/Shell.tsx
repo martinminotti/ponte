@@ -13,7 +13,7 @@ const NAV = [
   { to: '/', label: 'Oggi', icon: Gauge, end: true },
   { to: '/schede', label: 'Schede', icon: CarFront, end: false },
   { to: '/mensile', label: 'Fatture', icon: ReceiptText, end: false },
-  { to: '/impostazioni', label: 'Officina', icon: Settings2, end: false },
+  { to: '/impostazioni', label: 'Impostazioni', icon: Settings2, end: false },
 ];
 
 /** L'officina che usa l'app: logo e nome, oppure l'invito a impostarli. */

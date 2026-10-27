@@ -81,7 +81,7 @@ Tabelle IndexedDB: `jobs`, `settings` (riga `main`), `photos` (Blob JPEG).
 
 ## Vetro liquido
 
-Su iPhone e iPad (`isAppleMobile`) l'attributo `data-glass` su `<html>` attiva la barra a capsula flottante, la ricerca e le barre d'azione in vetro. L'utente può forzarlo da *Officina* → *Aspetto*; con *Riduci trasparenza* attivo nel sistema torna alle superfici piene. Le classi sono in `@layer components` di `src/styles/index.css`, quindi le utility Tailwind le possono sovrascrivere.
+Su iPhone e iPad (`isAppleMobile`) l'attributo `data-glass` su `<html>` attiva la barra a capsula flottante, la ricerca e le barre d'azione in vetro. L'utente può forzarlo da *Impostazioni* → *Aspetto*; con *Riduci trasparenza* attivo nel sistema torna alle superfici piene. Le classi sono in `@layer components` di `src/styles/index.css`, quindi le utility Tailwind le possono sovrascrivere.
 
 > Le intestazioni usano `pt-[calc(env(safe-area-inset-top,0px)+16px)]` e non `safe-top pt-4`: due utility di padding si annullerebbero a vicenda.
 

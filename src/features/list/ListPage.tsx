@@ -190,7 +190,7 @@ export function ListPage() {
         {jobs === undefined ? (
           <div className="mt-3 flex flex-col gap-3" aria-busy="true" aria-label="Apro l'archivio">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="card h-[150px] animate-pulse opacity-60" />
+              <div key={i} className="skeleton h-[150px]" />
             ))}
           </div>
         ) : jobs.length === 0 ? (

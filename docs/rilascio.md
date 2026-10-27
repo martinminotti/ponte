@@ -48,4 +48,4 @@ Da Android Studio: *Build* → *Generate Signed App Bundle* per il Play Store.
 
 - **Identificativo**: `app.ponte.officina` (in `capacitor.config.ts`, `android/app/build.gradle`, progetto iOS). Dopo la prima pubblicazione non si cambia più.
 - **Permessi** già dichiarati con testi in italiano: fotocamera e libreria foto.
-- **Versione**: `version` in `package.json` è quella mostrata in *Officina*.
+- **Versione**: `version` in `package.json` è quella mostrata in *Impostazioni*.

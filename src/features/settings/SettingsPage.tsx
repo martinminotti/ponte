@@ -91,7 +91,7 @@ export function SettingsPage() {
             <BrandMark />
           </header>
         )}
-        <h1 className="w-wide mt-5 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink lg:text-[2.125rem] lg:tracking-[-0.02em]">Officina</h1>
+        <h1 className="w-wide mt-5 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink lg:text-[2.125rem] lg:tracking-[-0.02em]">Impostazioni</h1>
         <p className="mt-1 text-[0.9375rem] text-ink-2">Le modifiche si salvano da sole.</p>
 
         <div className="mt-5 flex flex-col gap-3 xl:grid xl:grid-cols-2 xl:items-start xl:gap-4">

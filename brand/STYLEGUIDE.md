@@ -80,7 +80,7 @@ Sei tappe, sempre in quest'ordine: Accettato, In diagnosi, Attesa ricambi, In la
 
 ## Vetro liquido (iOS)
 
-Su iPhone e iPad Ponte usa il linguaggio del vetro di iOS 26; su Android e desktop resta la barra traslucida classica. L'utente può forzarlo in Officina → Aspetto → Vetro liquido.
+Su iPhone e iPad Ponte usa il linguaggio del vetro di iOS 26; su Android e desktop resta la barra traslucida classica. L'utente può forzarlo in Impostazioni → Aspetto → Vetro liquido.
 
 - **Cosa diventa vetro**: solo i comandi che galleggiano sul contenuto. Barra delle sezioni (capsula flottante con la lente che scorre sotto la voce attiva, pulsante "+" separato in vetro arancio), campo di ricerca, pulsanti tondi in alto (indietro, altre azioni), barra azioni della scheda, fogli dal basso, notifiche.
 - **Cosa non lo diventa mai**: schede, sezioni, campi dei moduli, documenti. Il contenuto resta su superfici piene; il vetro sta sopra.
@@ -100,10 +100,13 @@ La prima schermata è la giornata dell'officina, non l'elenco.
 
 ## Movimento e tatto
 
-- Le molle (`stiffness` 420–520, `damping` 34–40) muovono solo ciò che l'utente ha toccato: il pallino del binario degli stati, l'indicatore dei controlli segmentati, i fogli dal basso.
-- Le schermate entrano con una sola dissolvenza di 220ms e 8px. Nessuna animazione decorativa.
-- Ogni tocco ha una risposta: pulsanti che si comprimono al 97%, vibrazione leggera sui tocchi, media sui cambi di stato, "successo" su incasso e salvataggio.
-- `prefers-reduced-motion` spegne ogni transizione.
+- Molle a smorzamento critico (`bounce: 0`, risposta 0,25–0,35 s, in `src/ui/motion.ts`) per tutto ciò che si tocca: nessun rimbalzo su un semplice tocco. Un filo di rimbalzo (`bounce: 0.2`) solo dopo un gesto con slancio, come il rilascio di una scheda trascinata.
+- Le animazioni partono sempre dalla posizione attuale e si possono riprendere a metà.
+- Scorrimento delle schede (telefono): soglia di 10 px, poi la scheda segue il dito 1:1; ai bordi resiste; al rilascio si decide dalla velocità proiettata. Verso destra lo stato successivo (con *Annulla*), verso sinistra WhatsApp.
+- Su telefono le schermate entrano con una sola dissolvenza di 220 ms e 8 px; su desktop il pannello cambia all'istante. Nessuna animazione decorativa.
+- Fogli dal basso su telefono; su schermi larghi finestre centrate e menu che nascono dal pulsante che li apre.
+- Ogni tocco ha una risposta visiva immediata (pulsanti al 97%). La vibrazione è riservata ai momenti che contano: cambio di stato, soglia dello scorrimento, interruttori, salvataggio, incasso, errore. Mai sui tocchi ordinari.
+- *Riduci movimento* spegne transizioni CSS e molle (Motion `reducedMotion="user"`).
 
 ## Documenti
 
@@ -115,4 +118,8 @@ La prima schermata è la giornata dell'officina, non l'elenco.
 
 - Testo ≥4.5:1 sul suo fondo in entrambi i temi; ogni coppia è indicata nella nota del token.
 - Contorno di focus `accent-ink` da 2.5px con 2px di distanza, su ogni elemento interattivo (≥3:1 su ogni fondo; l'arancio pieno non basta sul cemento).
+- Tipografia in rem: segue *Dimensioni testo* di iOS (fra 88% e 135%) e la dimensione del browser.
+- Bersagli di tocco di almeno 44 pt (classe `.hit` quando il disegno è più piccolo).
+- *Aumenta contrasto*: testi secondari più scuri, bordi netti, vetro pieno. *Riduci trasparenza*: superfici piene.
+- Gli errori dei moduli compaiono all'uscita dal campo e spariscono appena corretti.
 - Gli stati non si leggono mai solo dal colore: pill con parola, binario con etichette, importi con "da incassare" o "pagato".

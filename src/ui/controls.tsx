@@ -280,3 +280,14 @@ export function EmptyState({ title, children, action, art }: { title: string; ch
     </div>
   );
 }
+
+/** Segnaposto con la forma del contenuto mentre l'archivio si apre (compare solo se l'attesa si sente). */
+export function SkeletonBlocks({ rows, className = '' }: { rows: string[]; className?: string }) {
+  return (
+    <div className={`flex flex-col gap-3 ${className}`} aria-busy="true" aria-label="Carico">
+      {rows.map((h, i) => (
+        <div key={i} className="skeleton" style={{ height: h }} />
+      ))}
+    </div>
+  );
+}

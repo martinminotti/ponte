@@ -11,7 +11,7 @@ import { eur, fmtPlate, relDay } from '@/domain/format';
 import { custName, matchJob, veic } from '@/domain/logic';
 import type { Job } from '@/domain/types';
 import { seedDemo } from '@/data/demo';
-import { Button, EmptyState } from '@/ui/controls';
+import { Button, EmptyState, SkeletonBlocks } from '@/ui/controls';
 import { Plate } from '@/ui/Plate';
 import { SearchField } from '@/ui/SearchField';
 import { StatusPill, stColor } from '@/ui/status';
@@ -58,7 +58,7 @@ export function DashboardPage() {
     }
   };
 
-  if (jobs === undefined) return null;
+  if (jobs === undefined) return <SkeletonBlocks className={wide ? 'px-8 pt-28' : 'px-4 pt-40'} rows={wide ? ['150px', '280px', '320px'] : ['56px', '260px', '150px', '150px']} />;
 
   const header = (
     <>

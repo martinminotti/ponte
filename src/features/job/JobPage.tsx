@@ -12,7 +12,7 @@ import { buildMsg } from '@/domain/messages';
 import type { Job, StatusKey } from '@/domain/types';
 import { deleteJob, mutateJob, restoreJob } from '@/data/repo';
 import { copyText, haptic, openExternal } from '@/platform/native';
-import { Button, Section } from '@/ui/controls';
+import { Button, Section, SkeletonBlocks } from '@/ui/controls';
 import { Plate } from '@/ui/Plate';
 import { ActionMenu } from '@/ui/Menu';
 import { StatusRail, stColor } from '@/ui/status';
@@ -22,7 +22,7 @@ import { WhatsAppSheet } from './WhatsAppSheet';
 export function JobPage() {
   const { id } = useParams();
   const job = useJob(id);
-  if (job === undefined) return null;
+  if (job === undefined) return <SkeletonBlocks className="mx-auto max-w-[760px] px-4 pt-[calc(env(safe-area-inset-top,0px)+72px)]" rows={['330px', '150px', '220px']} />;
   if (job === null)
     return (
       <div className="p-10 text-center">

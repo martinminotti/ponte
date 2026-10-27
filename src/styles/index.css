@@ -263,8 +263,10 @@ input[type='date']::-webkit-date-and-time-value {
 .ctl::placeholder {
   color: var(--ink-3);
 }
-.ctl:hover {
-  border-color: var(--line);
+@media (hover: hover) {
+  .ctl:hover {
+    border-color: var(--line);
+  }
 }
 .ctl:focus {
   outline: none;
@@ -467,5 +469,67 @@ select.ctl {
     width: max(100%, 44px);
     height: max(100%, 44px);
     transform: translate(-50%, -50%);
+  }
+}
+
+/* testo piccolo: un filo di spaziatura in più, come fa Apple sotto i 12 pt (le misure sono in rem) */
+@layer base {
+  [class*='text-[0.75rem]'],
+  [class*='text-[0.7812rem]'],
+  [class*='text-[0.7188rem]'] {
+    letter-spacing: 0.01em;
+  }
+  [class*='text-[0.6875rem]'],
+  [class*='text-[0.6562rem]'],
+  [class*='text-[0.625rem]'] {
+    letter-spacing: 0.02em;
+  }
+}
+
+/* segnaposto di caricamento: compare solo se l'attesa supera un istante, così i caricamenti veloci non lampeggiano */
+.skeleton {
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  opacity: 0;
+  animation:
+    skeleton-in 0.2s ease-out 0.15s forwards,
+    skeleton-pulse 1.6s ease-in-out 0.35s infinite;
+}
+@keyframes skeleton-in {
+  to {
+    opacity: 0.7;
+  }
+}
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* Aumenta contrasto: testi secondari più scuri, bordi netti, vetro e superfici pieni */
+@media (prefers-contrast: more) {
+  :root {
+    --ink-2: #3f3d39;
+    --ink-3: #4f4c47;
+    --line: #a9a59d;
+    --line-strong: #85817a;
+    --glass-fill: var(--surface);
+    --glass-fill-thick: var(--surface);
+  }
+  :root[data-theme='dark'] {
+    --ink-2: #d6d2ca;
+    --ink-3: #c2bdb4;
+    --line: #5c5852;
+    --line-strong: #7a756e;
+  }
+  .glass,
+  [data-glass='on'] .glass {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 0 0 1.5px var(--line-strong) !important;
+  }
+  .card {
+    box-shadow: 0 0 0 1px var(--line);
   }
 }
