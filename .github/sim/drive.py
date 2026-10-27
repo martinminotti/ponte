@@ -30,13 +30,31 @@ def idb(*args: str) -> str:
     return sh("idb", *args, "--udid", UDID)
 
 
+_container = None
+
+
+def web() -> dict:
+    """Elementi della pagina web scritti dall'app (UITestProbe, solo build Debug con -PonteUITest)."""
+    global _container
+    if not _container:
+        _container = sh("xcrun", "simctl", "get_app_container", UDID, BUNDLE, "data").strip()
+    try:
+        with open(os.path.join(_container, "tmp", "ui.json")) as fh:
+            return json.load(fh)
+    except (OSError, json.JSONDecodeError):
+        return {"items": []}
+
+
 def tree() -> list[dict]:
     raw = idb("ui", "describe-all", "--json")
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
         data = [json.loads(line) for line in raw.splitlines() if line.strip().startswith("{")]
-    return data if isinstance(data, list) else [data]
+    native = data if isinstance(data, list) else [data]
+    time.sleep(0.7)  # la sonda si aggiorna ogni 0,6 s
+    w = [{"AXLabel": i["label"], "type": "web:" + i["tag"], "frame": {"x": i["x"], "y": i["y"], "width": i["w"], "height": i["h"]}} for i in web().get("items", [])]
+    return native + w
 
 
 def label(e: dict) -> str:
@@ -56,6 +74,9 @@ def find(text: str, exact=True, kinds: tuple[str, ...] | None = None) -> dict | 
 def center(e: dict) -> tuple[int, int]:
     f = e["frame"]
     return int(f["x"] + f["width"] / 2), int(f["y"] + f["height"] / 2)
+
+
+NATIVE = ("Button",)
 
 
 def tap(text: str, exact=True, wait=1.0, kinds=None) -> bool:
@@ -104,7 +125,7 @@ def launch(wait=6.0):
     sh("xcrun", "simctl", "terminate", UDID, BUNDLE, check=False)
     n = len([f for f in os.listdir(OUT) if f.startswith("stdout")])
     # stdout dell'app: Capacitor ci scrive la console JavaScript (⚡️ [log] / [error])
-    sh("xcrun", "simctl", "launch", "--terminate-running-process", f"--stdout={OUT}/stdout-{n}.txt", f"--stderr={OUT}/stderr-{n}.txt", UDID, BUNDLE)
+    sh("xcrun", "simctl", "launch", "--terminate-running-process", f"--stdout={OUT}/stdout-{n}.txt", f"--stderr={OUT}/stderr-{n}.txt", UDID, BUNDLE, "-PonteUITest")
     time.sleep(wait)
 
 
@@ -130,7 +151,7 @@ try:
     swipe(W // 2, 220, W // 2, 700)
     time.sleep(0.8)
     for t in ["Schede", "Fatture", "Impostazioni", "Oggi", "Schede"]:
-        tap(t, wait=1.0)
+        tap(t, wait=1.0, kinds=NATIVE)
     swipe(W // 2, 640, W // 2, 200)
     time.sleep(0.8)
     swipe(W // 2, 200, W // 2, 700)
@@ -139,7 +160,7 @@ try:
     shot("03-schede")
 
     # ricerca nativa
-    field = find("Targa, telaio", exact=False)
+    field = find("Targa, telaio", exact=False, kinds=("web:input",))
     check(field is not None, "campo di ricerca in Schede")
     if field:
         x, y = center(field)
@@ -157,7 +178,7 @@ try:
         check(has("Peugeot 208", exact=False), "chiudendo torna l'elenco completo")
 
     # scheda: azioni native
-    tap("Volkswagen Golf 2.0 TDI", exact=False, wait=1.8)
+    tap("Volkswagen Golf 2.0 TDI", exact=False, wait=1.8, kinds=("web:a",))
     shot("07-scheda")
     check(has("Avvisa"), "scheda: «Avvisa» nella barra nativa")
     check(has("Segna: Pronto"), "scheda: «Segna: Pronto» nella barra nativa")
@@ -177,13 +198,13 @@ try:
     if tap("Avvisa", wait=1.4):
         shot("09-whatsapp")
         check(not has("Segna: Consegnato"), "con il foglio aperto la barra si fa da parte")
-        tap("Chiudi", wait=1.2)
+        tap("Chiudi", wait=1.2, kinds=("web:button",))
         shot("10-whatsapp-chiuso")
         check(has("Segna: Consegnato"), "chiuso il foglio la barra torna")
 
     # indietro e nuova accettazione
-    tap("Schede", wait=1.4)
-    tap("Nuova accettazione", wait=1.8)
+    tap("Schede", wait=1.4, kinds=("web:button",))  # indietro dalla scheda
+    tap("Nuova accettazione", wait=1.8, kinds=NATIVE)
     shot("11-nuova")
     check(has("Registra accettazione"), "modulo: «Registra accettazione» nella barra nativa")
     check(not has("Leggi la targa con la fotocamera"), "sul simulatore (senza fotocamera) il pulsante della targa non compare")
@@ -192,9 +213,9 @@ try:
     sh("xcrun", "simctl", "ui", UDID, "appearance", "dark")
     launch(6)
     shot("20-scuro-oggi")
-    tap("Schede", wait=1.2)
+    tap("Schede", wait=1.2, kinds=NATIVE)
     shot("21-scuro-schede")
-    tap("Volkswagen Golf 2.0 TDI", exact=False, wait=1.8)
+    tap("Volkswagen Golf 2.0 TDI", exact=False, wait=1.8, kinds=("web:a",))
     shot("22-scuro-scheda")
     sh("xcrun", "simctl", "ui", UDID, "appearance", "light")
 
@@ -202,7 +223,7 @@ try:
     sh("xcrun", "simctl", "ui", UDID, "content_size", "extra-extra-large")
     launch(6)
     shot("30-testo-grande-oggi")
-    tap("Schede", wait=1.2)
+    tap("Schede", wait=1.2, kinds=NATIVE)
     shot("31-testo-grande-schede")
     sh("xcrun", "simctl", "ui", UDID, "content_size", "large")
 

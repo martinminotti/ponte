@@ -384,7 +384,7 @@ select.ctl {
     z-index: -1;
     left: 0;
     right: 0;
-    top: calc(-1 * var(--edge-up, env(safe-area-inset-top, 0px)));
+    top: 0; /* mai sopra la barra: coprirebbe il titolo quando la testata non è ancora agganciata */
     bottom: -20px;
     pointer-events: none;
     -webkit-backdrop-filter: blur(16px) saturate(1.3);

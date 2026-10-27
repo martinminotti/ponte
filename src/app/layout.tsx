@@ -103,7 +103,7 @@ export function TopBar({
   if (glass && !wide) {
     return (
       // la barra parte da y=0 e si allarga sotto la status bar: così occupa il suo spazio nel flusso e il contenuto inizia sotto
-      <div className="scroll-edge sticky top-0 z-30 pt-[env(safe-area-inset-top,0px)] [--edge-up:0px]">
+      <div className="scroll-edge sticky top-0 z-30 pt-[env(safe-area-inset-top,0px)]">
         <div className="mx-auto flex h-[60px] max-w-[760px] items-center gap-2 px-3">
           {showBack ? (
             <button type="button" onClick={goBack} aria-label={backLabel} className="glass press grid size-11 shrink-0 place-items-center rounded-full text-ink">

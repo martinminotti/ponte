@@ -6,5 +6,15 @@ class MainViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(NativeBarPlugin())
         bridge?.registerPluginInstance(PlateScannerPlugin())
+        #if DEBUG
+        if UITestProbe.enabled, let wv = webView {
+            probe = UITestProbe(webView: wv)
+            probe?.start()
+        }
+        #endif
     }
+
+    #if DEBUG
+    private var probe: UITestProbe?
+    #endif
 }
