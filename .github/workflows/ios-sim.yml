@@ -73,6 +73,9 @@ jobs:
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
+          # una sessione grafica del Simulatore: senza, il servizio di accessibilità (idb ui) non vede l'app in primo piano
+          open -a Simulator --args -CurrentDeviceUDID "$UDID"
+          sleep 8
           NAME=$(xcrun simctl list devices -j | python3 -c "import json,sys;print([x['name']+' · '+k.split('.')[-1] for k,v in json.load(sys.stdin)['devices'].items() for x in v if x['udid']=='$UDID'][0])")
           echo "::notice title=Simulatore::$NAME"
           xcrun simctl status_bar "$UDID" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
@@ -88,7 +91,7 @@ jobs:
         run: |
           OUT="$RUNNER_TEMP/out"; mkdir -p "$OUT"
           U="${{ steps.sim.outputs.udid }}"
-          xcrun simctl spawn "$U" log show --last 10m --style compact --predicate 'process == "App"' > "$OUT/log-app.txt" 2>&1 || true
+          xcrun simctl spawn "$U" log show --last 10m --info --debug --style compact --predicate 'process == "App" OR process == "com.apple.WebKit.WebContent"' > "$OUT/log-app.txt" 2>&1 || true
           tail -c 400000 "$OUT/log-app.txt" > "$OUT/log-app-tail.txt" || true
           grep -iE "⚡️|error|exception|fatal|crash|capacitor" "$OUT/log-app.txt" | tail -300 > "$OUT/log-filtrato.txt" || true
           mkdir -p "$OUT/crash"; cp ~/Library/Logs/DiagnosticReports/App* "$OUT/crash/" 2>/dev/null || true

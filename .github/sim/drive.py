@@ -102,7 +102,9 @@ class Video:
 
 def launch(wait=6.0):
     sh("xcrun", "simctl", "terminate", UDID, BUNDLE, check=False)
-    sh("xcrun", "simctl", "launch", UDID, BUNDLE)
+    n = len([f for f in os.listdir(OUT) if f.startswith("stdout")])
+    # stdout dell'app: Capacitor ci scrive la console JavaScript (⚡️ [log] / [error])
+    sh("xcrun", "simctl", "launch", "--terminate-running-process", f"--stdout={OUT}/stdout-{n}.txt", f"--stderr={OUT}/stderr-{n}.txt", UDID, BUNDLE)
     time.sleep(wait)
 
 
