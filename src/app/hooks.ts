@@ -7,18 +7,30 @@ import { applyThemeMeta } from '@/platform/brand';
 import { isAppleMobile } from '@/platform/native';
 import { nativeBarAvailable } from '@/platform/nativeBar';
 
+/*
+ * Ultimo valore letto dall'archivio, tenuto in memoria. Ogni schermata che si monta parte da qui invece che dal vuoto:
+ * senza, a ogni cambio di sezione l'intestazione mostrava per un fotogramma "La tua officina" e la pagina vuota (il lampeggio).
+ */
+let lastSettings: Settings = DEFAULT_SETTINGS;
+let lastJobs: Job[] | undefined;
+
 export function useSettings(): Settings {
-  return useLiveQuery(getSettings, [], DEFAULT_SETTINGS);
+  const s = useLiveQuery(getSettings, [], lastSettings);
+  lastSettings = s;
+  return s;
 }
 
-/** Tutte le schede, dalla più recente. undefined mentre l'archivio si apre. */
+/** Tutte le schede, dalla più recente. undefined solo la prima volta, mentre l'archivio si apre. */
 export function useJobs(): Job[] | undefined {
-  return useLiveQuery(() => db.jobs.orderBy('createdAt').reverse().toArray(), []);
+  const j = useLiveQuery(() => db.jobs.orderBy('createdAt').reverse().toArray(), [], lastJobs);
+  if (j) lastJobs = j;
+  return j;
 }
 
 /** Una scheda. undefined mentre carica, null se non esiste. */
 export function useJob(id: string | undefined): Job | null | undefined {
-  return useLiveQuery(async () => (id ? ((await db.jobs.get(id)) ?? null) : null), [id]);
+  // parte dalla scheda già in memoria (aperta dall'elenco): niente fotogramma vuoto prima del contenuto
+  return useLiveQuery(async () => (id ? ((await db.jobs.get(id)) ?? null) : null), [id], id ? lastJobs?.find((j) => j.id === id) : undefined);
 }
 
 export function useMedia(q: string): boolean {
@@ -95,7 +107,10 @@ export function useScrolledDown(threshold = 48): boolean {
     const on = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        const y = window.scrollY;
+        // il rimbalzo elastico di iOS (oltre l'inizio o la fine) non conta come scorrimento
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const y = Math.min(Math.max(window.scrollY, 0), Math.max(0, max));
+        if (y === last) return;
         if (y < threshold) setDown(false);
         else if (y > last + 6) setDown(true);
         else if (y < last - 6) setDown(false);
@@ -115,7 +130,7 @@ export function useScrolledDown(threshold = 48): boolean {
 export function useScrolledPast(y = 8): boolean {
   const [past, setPast] = useState(false);
   useEffect(() => {
-    const on = () => setPast(window.scrollY > y);
+    const on = () => setPast(Math.max(0, window.scrollY) > y);
     on();
     window.addEventListener('scroll', on, { passive: true });
     return () => window.removeEventListener('scroll', on);

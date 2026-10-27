@@ -7,12 +7,14 @@ import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor
  */
 
 export type BarItem = { id: string; label: string; symbol: string; style?: 'primary' | 'wa' | 'plain'; disabled?: boolean };
-type Config = { mode: 'tabs'; tabs: BarItem[]; selected?: string; accessory?: BarItem } | { mode: 'actions'; actions: BarItem[] } | { mode: 'hidden' };
+type Config =
+  { mode: 'tabs'; tabs: BarItem[]; selected?: string; accessory?: BarItem } | { mode: 'actions'; actions: BarItem[] } | { mode: 'search'; text: string; placeholder: string } | { mode: 'hidden' };
 
 interface NativeBarPlugin {
   configure(c: Config & { dark?: boolean }): Promise<void>;
   setCompact(o: { compact: boolean }): Promise<void>;
   addListener(e: 'select', cb: (d: { id: string }) => void): Promise<PluginListenerHandle>;
+  addListener(e: 'search', cb: (d: { text: string; end: boolean }) => void): Promise<PluginListenerHandle>;
 }
 
 const NativeBar = registerPlugin<NativeBarPlugin>('NativeBar');
@@ -50,6 +52,53 @@ export function useNativeActions(actions: NativeAction[] | null) {
       emit();
     };
   }, [key]);
+}
+
+/* ---------- ricerca nativa ---------- */
+
+type Search = { active: boolean; text: string; placeholder: string; onText: ((t: string) => void) | null };
+let search: Search = { active: false, text: '', placeholder: '', onText: null };
+const searchSubs = new Set<() => void>();
+const emitSearch = () => searchSubs.forEach((f) => f());
+
+export function useNativeSearch(): Search {
+  return useSyncExternalStore(
+    (cb) => {
+      searchSubs.add(cb);
+      return () => searchSubs.delete(cb);
+    },
+    () => search,
+  );
+}
+
+/** Il campo web (sola lettura su iPhone) apre la ricerca nativa sopra la tastiera; il testo torna alla pagina mentre si scrive. */
+export function startNativeSearch(text: string, placeholder: string, onText: (t: string) => void) {
+  search = { active: true, text, placeholder, onText };
+  emitSearch();
+}
+
+/** Chiude la ricerca nativa. Il testo resta alla pagina (per tornare all'elenco filtrato), salvo chiusura esplicita. */
+export function endNativeSearch() {
+  if (!search.active) return;
+  search = { ...search, active: false };
+  emitSearch();
+}
+
+export function onBarSearch(): () => void {
+  let h: PluginListenerHandle | undefined;
+  let off = false;
+  NativeBar.addListener('search', (d) => {
+    search.text = d.text;
+    search.onText?.(d.text);
+    if (d.end) endNativeSearch();
+  }).then((x) => {
+    if (off) x.remove();
+    else h = x;
+  });
+  return () => {
+    off = true;
+    h?.remove();
+  };
 }
 
 /* ---------- ponte verso il plugin ---------- */

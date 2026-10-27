@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Outlet, useMatch, useNavigate } from 'react-router';
+import { Outlet, useLocation, useMatch, useNavigate } from 'react-router';
 import { CarFront, ChevronLeft } from 'lucide-react';
 import { motion } from 'motion/react';
 import { searchShortcut, useGlass, useJobs, useNativeBarOn, useWide } from './hooks';
@@ -159,7 +159,10 @@ export function BarButton({ label, onClick, children }: { label: string; onClick
  */
 export function Page({ children, className = '' }: { children: ReactNode; className?: string }) {
   const wide = useWide();
-  if (wide) return <div className={className}>{children}</div>;
+  const { pathname } = useLocation();
+  // fra le sezioni (Oggi, Schede, Fatture, Impostazioni) si passa all'istante, come con la barra di iOS
+  const section = ['/', '/schede', '/mensile', '/impostazioni'].includes(pathname);
+  if (wide || section) return <div className={className}>{children}</div>;
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} className={className}>
       {children}

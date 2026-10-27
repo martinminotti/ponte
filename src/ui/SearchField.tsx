@@ -1,6 +1,7 @@
 import { forwardRef, type KeyboardEvent } from 'react';
 import { Search, X } from 'lucide-react';
-import { useGlass } from '@/app/hooks';
+import { useGlass, useNativeBarOn } from '@/app/hooks';
+import { startNativeSearch, useNativeSearch } from '@/platform/nativeBar';
 
 /** Campo di ricerca: capsula di vetro su iOS, campo pieno altrove. */
 export const SearchField = forwardRef<
@@ -18,8 +19,12 @@ export const SearchField = forwardRef<
   }
 >(function SearchField({ value, onChange, placeholder = 'Targa, telaio, cliente, ditta, telefono', onFocus, readOnlyTap, autoFocus, id, shortcut, onKeyDown }, ref) {
   const glass = useGlass();
+  // su iPhone nell'app il campo apre la ricerca nativa in vetro sopra la tastiera; qui resta il riflesso del testo
+  const native = useNativeBarOn() && !readOnlyTap;
+  const ns = useNativeSearch();
+  const searching = native && ns.active;
   return (
-    <label className={`relative block ${glass ? 'glass rounded-full' : ''}`}>
+    <label className={`relative block ${glass ? 'glass rounded-full' : ''} ${searching ? 'ring-2 ring-accent/60 rounded-full' : ''}`}>
       <span className="sr-only">Cerca</span>
       <Search size={19} className="pointer-events-none absolute top-1/2 left-4 z-[1] -translate-y-1/2 text-ink-3" />
       <input
@@ -32,10 +37,18 @@ export const SearchField = forwardRef<
         spellCheck={false}
         enterKeyHint="search"
         autoFocus={autoFocus}
-        readOnly={readOnlyTap}
+        readOnly={readOnlyTap || native}
+        onClick={
+          native
+            ? (e) => {
+                e.currentTarget.blur();
+                startNativeSearch(value, placeholder, onChange);
+              }
+            : undefined
+        }
         placeholder={placeholder}
         value={value}
-        onFocus={onFocus}
+        onFocus={native ? (e) => e.currentTarget.blur() : onFocus}
         onChange={(e) => onChange(e.target.value)}
         className={`ctl relative h-[50px] pl-11 ${shortcut ? 'pr-[72px]' : 'pr-11'} [&::-webkit-search-cancel-button]:hidden ${
           glass ? '!rounded-full !border-transparent !bg-transparent !shadow-none focus:!bg-transparent' : '!rounded-[16px] !bg-surface shadow-[var(--shadow-1)]'

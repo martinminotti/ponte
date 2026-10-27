@@ -8,8 +8,9 @@ import Capacitor
 ///   NativeBar.configure({ mode: "tabs", tabs: [{ id, label, symbol }], selected, accessory: { id, symbol, label }, dark })
 ///   NativeBar.configure({ mode: "actions", actions: [{ id, label, symbol, style: "primary" | "wa" | "plain", disabled }], dark })
 ///   NativeBar.configure({ mode: "hidden" })
+///   NativeBar.configure({ mode: "search", text, placeholder, dark })  campo di ricerca nativo sopra la tastiera
 ///   NativeBar.setCompact({ compact })
-///   evento "select" { id }
+///   evento "select" { id }, evento "search" { text, end }
 @objc(NativeBarPlugin)
 public class NativeBarPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "NativeBarPlugin"
@@ -27,14 +28,18 @@ public class NativeBarPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func install() {
         guard bar == nil, let host = bridge?.viewController?.view else { return }
-        let b = GlassBar { [weak self] id in self?.notifyListeners("select", data: ["id": id]) }
+        let b = GlassBar(
+            onSelect: { [weak self] id in self?.notifyListeners("select", data: ["id": id]) },
+            onSearch: { [weak self] text, end in self?.notifyListeners("search", data: ["text": text, "end": end]) }
+        )
         b.translatesAutoresizingMaskIntoConstraints = false
         host.addSubview(b)
         NSLayoutConstraint.activate([
             b.leadingAnchor.constraint(equalTo: host.leadingAnchor),
             b.trailingAnchor.constraint(equalTo: host.trailingAnchor),
             b.bottomAnchor.constraint(equalTo: host.bottomAnchor),
-            b.topAnchor.constraint(equalTo: host.safeAreaLayoutGuide.bottomAnchor, constant: -110),
+            // copre tutta la schermata (i tocchi fuori dai controlli passano alla pagina): serve quando la ricerca sale sopra la tastiera
+            b.topAnchor.constraint(equalTo: host.topAnchor),
         ])
         bar = b
     }
@@ -46,6 +51,8 @@ public class NativeBarPlugin: CAPPlugin, CAPBridgedPlugin {
         let actions: [BarItem] = (call.options["actions"] as? [[String: Any]] ?? []).compactMap { BarItem($0) }
         let accessory = (call.options["accessory"] as? [String: Any]).flatMap { BarItem($0) }
         let selected = call.getString("selected")
+        let text = call.getString("text") ?? ""
+        let placeholder = call.getString("placeholder") ?? "Cerca"
         DispatchQueue.main.async {
             self.install()
             guard let bar = self.bar else { return call.resolve() }
@@ -54,6 +61,7 @@ public class NativeBarPlugin: CAPPlugin, CAPBridgedPlugin {
             switch mode {
             case "tabs": bar.showTabs(tabs, selected: selected, accessory: accessory)
             case "actions": bar.showActions(actions)
+            case "search": bar.showSearch(text: text, placeholder: placeholder)
             default: bar.hide()
             }
             call.resolve()
@@ -75,6 +83,14 @@ struct BarItem: Equatable {
     let symbol: String
     let style: String
     let disabled: Bool
+
+    init(id: String, label: String, symbol: String, style: String = "plain", disabled: Bool = false) {
+        self.id = id
+        self.label = label
+        self.symbol = symbol
+        self.style = style
+        self.disabled = disabled
+    }
 
     init?(_ d: [String: Any]) {
         guard let id = d["id"] as? String else { return nil }
@@ -163,8 +179,12 @@ final class PassthroughStack: UIStackView {
 
 final class GlassBar: PassthroughView {
     private let onSelect: (String) -> Void
+    private let onSearch: (String, Bool) -> Void
     private let row = PassthroughStack()
     private var rowHeight: NSLayoutConstraint!
+    private var bottomSafe: NSLayoutConstraint!
+    private var bottomKeyboard: NSLayoutConstraint!
+    private weak var searchField: UITextField?
     private var mode = "hidden"
     private var tabs: [BarItem] = []
     private var actions: [BarItem] = []
@@ -173,8 +193,9 @@ final class GlassBar: PassthroughView {
     private weak var tabsView: TabsView?
     private let tick = UISelectionFeedbackGenerator()
 
-    init(onSelect: @escaping (String) -> Void) {
+    init(onSelect: @escaping (String) -> Void, onSearch: @escaping (String, Bool) -> Void) {
         self.onSelect = onSelect
+        self.onSearch = onSearch
         super.init(frame: .zero)
         row.axis = .horizontal
         row.spacing = 10
@@ -182,10 +203,13 @@ final class GlassBar: PassthroughView {
         row.translatesAutoresizingMaskIntoConstraints = false
         addSubview(row)
         rowHeight = row.heightAnchor.constraint(equalToConstant: 62)
+        bottomSafe = row.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -4)
+        // in ricerca la riga segue la tastiera (sopra di lei quando è aperta, in basso quando si chiude)
+        bottomKeyboard = row.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor, constant: -8)
         NSLayoutConstraint.activate([
             row.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 14),
             row.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -14),
-            row.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -4),
+            bottomSafe,
             rowHeight,
         ])
         row.alpha = 0
@@ -196,11 +220,83 @@ final class GlassBar: PassthroughView {
 
     // MARK: modi
 
+    private func dock(keyboard: Bool) {
+        if keyboard {
+            bottomSafe.isActive = false
+            bottomKeyboard.isActive = true
+        } else {
+            bottomKeyboard.isActive = false
+            bottomSafe.isActive = true
+        }
+    }
+
+    private func leaveSearch() {
+        searchField?.resignFirstResponder()
+        searchField = nil
+        dock(keyboard: false)
+    }
+
+    /// Ricerca nativa: capsula di vetro con il campo, e il pulsante per chiudere. Sale con la tastiera.
+    func showSearch(text: String, placeholder: String) {
+        if mode == "search", let f = searchField {
+            if !f.isFirstResponder { f.becomeFirstResponder() }
+            return
+        }
+        mode = "search"
+        tabs = []
+        actions = []
+        accessory = nil
+        rebuild {
+            let box = Glass.view(radius: 26)
+            let field = SearchTextField()
+            field.text = text
+            field.placeholder = placeholder
+            field.font = .preferredFont(forTextStyle: .body)
+            field.adjustsFontForContentSizeCategory = true
+            field.textColor = Ponte.ink
+            field.tintColor = Ponte.accentInk
+            field.returnKeyType = .search
+            field.autocorrectionType = .no
+            field.spellCheckingType = .no
+            field.autocapitalizationType = .none
+            field.clearButtonMode = .whileEditing
+            field.enablesReturnKeyAutomatically = false
+            let icon = UIImageView(image: UIImage(systemName: "magnifyingglass", withConfiguration: UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)))
+            icon.tintColor = Ponte.ink.withAlphaComponent(0.6)
+            icon.contentMode = .center
+            icon.frame = CGRect(x: 0, y: 0, width: 40, height: 24)
+            field.leftView = icon
+            field.leftViewMode = .always
+            field.translatesAutoresizingMaskIntoConstraints = false
+            field.addAction(UIAction { [weak self, weak field] _ in self?.onSearch(field?.text ?? "", false) }, for: .editingChanged)
+            field.addAction(UIAction { [weak field] _ in field?.resignFirstResponder() }, for: .editingDidEndOnExit)
+            box.contentView.addSubview(field)
+            NSLayoutConstraint.activate([
+                field.leadingAnchor.constraint(equalTo: box.contentView.leadingAnchor, constant: 4),
+                field.trailingAnchor.constraint(equalTo: box.contentView.trailingAnchor, constant: -10),
+                field.topAnchor.constraint(equalTo: box.contentView.topAnchor),
+                field.bottomAnchor.constraint(equalTo: box.contentView.bottomAnchor),
+            ])
+            let close = GlassButton(item: BarItem(id: "search-close", label: "Chiudi la ricerca", symbol: "xmark"), tint: nil, foreground: Ponte.ink, round: true) { [weak self] in
+                self?.leaveSearch()
+                self?.onSearch("", true)
+            }
+            close.widthAnchor.constraint(equalTo: close.heightAnchor).isActive = true
+            self.row.addArrangedSubview(box)
+            self.row.addArrangedSubview(close)
+            self.rowHeight.constant = 52
+            self.dock(keyboard: true)
+            self.searchField = field
+            field.becomeFirstResponder()
+        }
+    }
+
     func showTabs(_ items: [BarItem], selected: String?, accessory acc: BarItem?) {
         if mode == "tabs", items == tabs, acc == accessory, let tv = tabsView {
             tv.select(selected, animated: true)
             return
         }
+        if mode == "search" { leaveSearch() }
         mode = "tabs"
         tabs = items
         accessory = acc
@@ -224,6 +320,7 @@ final class GlassBar: PassthroughView {
     func showActions(_ items: [BarItem]) {
         if mode == "actions", items == actions { return }
         let sameShape = mode == "actions" && items.map(\.id) == actions.map(\.id)
+        if mode == "search" { leaveSearch() }
         mode = "actions"
         actions = items
         let build = {
@@ -249,6 +346,7 @@ final class GlassBar: PassthroughView {
 
     func hide() {
         guard mode != "hidden" else { return }
+        if mode == "search" { leaveSearch() }
         mode = "hidden"
         tabs = []
         actions = []
@@ -475,5 +573,12 @@ final class GlassButton: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         glass.layer.cornerRadius = bounds.height / 2
+    }
+}
+
+/// Campo di testo con un po' di respiro attorno al testo e al pulsante per cancellare.
+final class SearchTextField: UITextField {
+    override func clearButtonRect(forBounds bounds: CGRect) -> CGRect {
+        super.clearButtonRect(forBounds: bounds).offsetBy(dx: -2, dy: 0)
     }
 }

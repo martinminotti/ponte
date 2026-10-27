@@ -54,7 +54,11 @@ export function ListPage() {
   useEffect(() => {
     const f = sp.get('f') as FilterKey | null;
     if (f && FILTRI.some((x) => x.k === f)) setFilter(f);
-    if (sp.get('cerca')) setTimeout(() => searchRef.current?.focus(), 60);
+    if (sp.get('cerca'))
+      setTimeout(() => {
+        searchRef.current?.focus();
+        searchRef.current?.click(); // su iPhone apre la ricerca nativa
+      }, 60);
     if (f || sp.get('cerca')) setSp({}, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sp]);

@@ -6,7 +6,7 @@ import { PonteIcon, PonteWordmark } from '@/ui/Brand';
 import { SPRING, SPRING_FAST } from '@/ui/motion';
 import { Toaster } from 'sonner';
 import { overlayOpen, typing, useDesk, useGlass, useJobs, useNativeBarOn, useOverlayOpen, useScrolledDown, useScrolledPast, useSettings, useThemeSync, useWide } from './hooks';
-import { configureBar, nativeBarAvailable, onBarSelect, setBarCompact, usePageActions } from '@/platform/nativeBar';
+import { configureBar, endNativeSearch, nativeBarAvailable, onBarSearch, onBarSelect, setBarCompact, useNativeSearch, usePageActions } from '@/platform/nativeBar';
 import { inFilter, toInvoice } from '@/domain/logic';
 import { bindAndroidBack, initNative } from '@/platform/native';
 
@@ -97,11 +97,13 @@ export function Shell() {
   const nativeOn = useNativeBarOn();
   const overlay = useOverlayOpen(nativeOn);
   const page = usePageActions();
+  const search = useNativeSearch();
   const pageRef = useRef(page);
   pageRef.current = page;
   useEffect(() => {
     if (!nativeBarAvailable()) return;
     if (!nativeOn || overlay) return configureBar({ mode: 'hidden' }, dark);
+    if (top && search.active) return configureBar({ mode: 'search', text: search.text, placeholder: search.placeholder }, dark);
     if (top)
       return configureBar(
         {
@@ -114,7 +116,14 @@ export function Shell() {
       );
     if (page) return configureBar({ mode: 'actions', actions: page.map(({ onPress: _p, ...item }) => item) }, dark);
     configureBar({ mode: 'hidden' }, dark);
-  }, [nativeOn, overlay, top, page, loc.pathname, dark]);
+    // il testo non entra nelle dipendenze: riconfigurare a ogni lettera azzererebbe il campo nativo
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nativeOn, overlay, top, page, loc.pathname, dark, search.active, search.placeholder]);
+  // uscendo dalle sezioni (si apre una scheda dai risultati) la ricerca si chiude; il testo resta all'elenco
+  useEffect(() => {
+    if (!top) endNativeSearch();
+  }, [top]);
+  useEffect(() => (nativeBarAvailable() ? onBarSearch() : undefined), []);
   useEffect(() => {
     if (nativeOn && top) setBarCompact(compact);
   }, [nativeOn, top, compact]);
