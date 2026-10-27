@@ -46,7 +46,15 @@ def web() -> dict:
 
 
 def tree() -> list[dict]:
-    raw = idb("ui", "describe-all", "--json")
+    raw = "[]"
+    for _ in range(8):  # appena avviata l'app il servizio di accessibilità può non vederla ancora
+        try:
+            raw = idb("ui", "describe-all", "--json")
+            break
+        except RuntimeError as e:
+            if "frontmost" not in str(e):
+                raise
+            time.sleep(2)
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
