@@ -54,7 +54,7 @@ export function DocActions({ build, name, waHref, waNote }: { build: () => Promi
       <Button variant="wa" size="lg" block icon={<MessageCircle size={20} strokeWidth={2.2} />} disabled={!waHref} onClick={() => waHref && openExternal(waHref)}>
         Messaggio su WhatsApp
       </Button>
-      <p className="text-[13.5px] leading-snug text-ink-3">
+      <p className="text-[0.8438rem] leading-snug text-ink-3">
         {waNote ||
           (share
             ? 'Con Condividi PDF scegli WhatsApp e il documento arriva già allegato. Il messaggio contiene l’avviso e il riepilogo dei lavori.'

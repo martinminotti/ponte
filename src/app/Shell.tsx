@@ -31,8 +31,8 @@ export function ShopBadge({ align = 'right' }: { align?: 'left' | 'right' }) {
         </span>
       )}
       <span className="min-w-0">
-        <span className="block truncate text-[14.5px] leading-tight font-semibold text-ink">{s.shop || 'La tua officina'}</span>
-        <span className="block truncate text-[12.5px] leading-tight text-ink-3">{s.shop ? 'Officina' : 'Imposta nome e logo'}</span>
+        <span className="block truncate text-[0.9062rem] leading-tight font-semibold text-ink">{s.shop || 'La tua officina'}</span>
+        <span className="block truncate text-[0.7812rem] leading-tight text-ink-3">{s.shop ? 'Officina' : 'Imposta nome e logo'}</span>
       </span>
     </Link>
   );
@@ -169,7 +169,7 @@ export function Shell() {
             {desk && (
               <>
                 Nuova accettazione
-                <span className="ml-1 grid h-[22px] min-w-[22px] place-items-center rounded-[6px] bg-black/10 px-1.5 text-[12px] font-bold">N</span>
+                <span className="ml-1 grid h-[22px] min-w-[22px] place-items-center rounded-[6px] bg-black/10 px-1.5 text-[0.75rem] font-bold">N</span>
               </>
             )}
           </button>
@@ -184,7 +184,7 @@ export function Shell() {
                   title={desk ? undefined : label}
                   aria-label={desk ? undefined : n ? `${label}, ${n}` : label}
                   className={({ isActive }) =>
-                    `press relative flex h-11 items-center gap-3 rounded-[12px] text-[15.5px] font-medium max-xl:justify-center xl:px-3 ${
+                    `press relative flex h-11 items-center gap-3 rounded-[12px] text-[0.9688rem] font-medium max-xl:justify-center xl:px-3 ${
                       isActive ? 'bg-surface-2 text-ink' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
                     }`
                   }
@@ -196,9 +196,11 @@ export function Shell() {
                       {desk && <span className="flex-1">{label}</span>}
                       {n > 0 &&
                         (desk ? (
-                          <span className="tnum rounded-full bg-surface-3 px-2 py-0.5 text-[12.5px] font-semibold text-ink-2">{n}</span>
+                          <span className="tnum rounded-full bg-surface-3 px-2 py-0.5 text-[0.7812rem] font-semibold text-ink-2">{n}</span>
                         ) : (
-                          <span className="tnum absolute top-0.5 right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-accent px-1 text-[11px] font-bold text-on-accent">{n}</span>
+                          <span className="tnum absolute top-0.5 right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-accent px-1 text-[0.6875rem] font-bold text-on-accent">
+                            {n}
+                          </span>
                         ))}
                     </>
                   )}
@@ -270,13 +272,13 @@ export function Shell() {
         theme={dark ? 'dark' : 'light'}
         toastOptions={{
           classNames: {
-            toast: `!font-sans !text-[15px] !gap-2.5 !text-ink ${
+            toast: `!font-sans !text-[0.9375rem] !gap-2.5 !text-ink ${
               glass
                 ? '!rounded-[22px] !border-white/30 !bg-[var(--glass-fill-thick)] backdrop-blur-2xl backdrop-saturate-150 !shadow-[var(--glass-shadow)]'
                 : '!rounded-[16px] !border-line !bg-surface !shadow-[var(--shadow-2)]'
             }`,
             description: '!text-ink-2',
-            actionButton: '!bg-accent !text-on-accent !rounded-[10px] !h-8 !px-3 !font-semibold !text-[14px]',
+            actionButton: '!bg-accent !text-on-accent !rounded-[10px] !h-8 !px-3 !font-semibold !text-[0.875rem]',
           },
         }}
       />
@@ -298,7 +300,7 @@ function GlassTab({ to, label, icon: Icon, end, compact }: (typeof NAV)[number] 
             />
           )}
           <Icon size={compact ? 21 : 22} strokeWidth={isActive ? 2.3 : 1.9} className={`relative ${isActive ? 'text-accent-ink' : 'text-ink'}`} />
-          {!compact && <span className={`relative text-[10.5px] leading-none ${isActive ? 'font-semibold text-accent-ink' : 'font-medium text-ink'}`}>{label}</span>}
+          {!compact && <span className={`relative text-[0.6562rem] leading-none ${isActive ? 'font-semibold text-accent-ink' : 'font-medium text-ink'}`}>{label}</span>}
         </>
       )}
     </NavLink>
@@ -313,7 +315,7 @@ function TabLink({ to, label, icon: Icon, end }: (typeof NAV)[number]) {
           <span className={`grid h-8 w-14 place-items-center rounded-full transition-colors ${isActive ? 'bg-accent-soft text-accent-ink' : 'text-ink-2'}`}>
             <Icon size={22} strokeWidth={isActive ? 2.3 : 1.9} />
           </span>
-          <span className={`text-[11.5px] leading-none ${isActive ? 'font-semibold text-ink' : 'font-medium text-ink-2'}`}>{label}</span>
+          <span className={`text-[0.7188rem] leading-none ${isActive ? 'font-semibold text-ink' : 'font-medium text-ink-2'}`}>{label}</span>
         </>
       )}
     </NavLink>

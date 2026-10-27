@@ -79,7 +79,7 @@ export function WhatsAppSheet({ open, onOpenChange, job, kind, settings }: { ope
                 setK(s.k);
                 setDirty(false);
               }}
-              className={`press h-9 shrink-0 rounded-full px-3.5 text-[14px] font-medium ${k === s.k ? 'bg-ink text-bg' : 'bg-surface-2 text-ink-2'}`}
+              className={`press hit h-9 shrink-0 rounded-full px-3.5 text-[0.875rem] font-medium ${k === s.k ? 'bg-ink text-bg' : 'bg-surface-2 text-ink-2'}`}
             >
               {s.l}
             </button>
@@ -94,10 +94,10 @@ export function WhatsAppSheet({ open, onOpenChange, job, kind, settings }: { ope
               setDirty(true);
             }}
             rows={10}
-            className="ctl !min-h-[220px] !rounded-[18px] !rounded-br-[6px] !bg-[color-mix(in_srgb,var(--wa)_10%,var(--surface))] text-[15.5px] leading-relaxed"
+            className="ctl !min-h-[220px] !rounded-[18px] !rounded-br-[6px] !bg-[color-mix(in_srgb,var(--wa)_10%,var(--surface))] text-[0.9688rem] leading-relaxed"
           />
         </div>
-        <p className="text-[13.5px] text-ink-3">
+        <p className="text-[0.8438rem] text-ink-3">
           {dirty ? (
             <button type="button" className="font-semibold text-accent-ink underline underline-offset-2" onClick={() => setDirty(false)}>
               Ripristina il testo originale

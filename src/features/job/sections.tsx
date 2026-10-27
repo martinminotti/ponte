@@ -45,9 +45,9 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
   };
 
   return (
-    <Section title="Lavori eseguiti" action={<span className="tnum text-[14px] text-ink-3">{job.items.length ? `${job.items.length} ${job.items.length === 1 ? 'voce' : 'voci'}` : ''}</span>}>
+    <Section title="Lavori eseguiti" action={<span className="tnum text-[0.875rem] text-ink-3">{job.items.length ? `${job.items.length} ${job.items.length === 1 ? 'voce' : 'voci'}` : ''}</span>}>
       {job.items.length === 0 ? (
-        <p className="text-[15px] text-ink-2">Aggiungi lavori e ricambi con il loro importo: il totale si calcola da solo.</p>
+        <p className="text-[0.9375rem] text-ink-2">Aggiungi lavori e ricambi con il loro importo: il totale si calcola da solo.</p>
       ) : (
         <ul className="-mt-1 flex flex-col">
           <AnimatePresence initial={false}>
@@ -79,15 +79,15 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
                       value={amountInput(it.amount)}
                       autoFocus={focusId === it.id && !!it.desc}
                       onCommit={(v) => setItem(it.id, { amount: parseAmount(v) })}
-                      className="w-cond tnum !min-h-12 !pr-3 !pl-7 text-right text-[18px] font-semibold"
+                      className="w-cond tnum !min-h-12 !pr-3 !pl-7 text-right text-[1.125rem] font-semibold"
                     />
-                    <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[15px] text-ink-3">€</span>
+                    <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[0.9375rem] text-ink-3">€</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => del(it.id)}
                     aria-label={`Rimuovi voce ${n + 1}`}
-                    className="press grid size-10 place-items-center rounded-full text-ink-3 hover:bg-danger-soft hover:text-danger"
+                    className="press hit grid size-10 place-items-center rounded-full text-ink-3 hover:bg-danger-soft hover:text-danger"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -109,7 +109,12 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
         </Button>
         <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:-mx-5 sm:px-5 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0" aria-label="Voci frequenti">
           {quick.map((v) => (
-            <button key={v} type="button" onClick={() => add(v)} className="press h-9 shrink-0 rounded-full bg-surface-2 px-3.5 text-[14px] font-medium text-ink-2 hover:bg-surface-3 hover:text-ink">
+            <button
+              key={v}
+              type="button"
+              onClick={() => add(v)}
+              className="press hit h-9 shrink-0 rounded-full bg-surface-2 px-3.5 text-[0.875rem] font-medium text-ink-2 hover:bg-surface-3 hover:text-ink"
+            >
               + {v}
             </button>
           ))}
@@ -123,7 +128,7 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
         </div>
       </Field>
 
-      <dl className="flex flex-col gap-1.5 rounded-[16px] bg-surface-2 p-4 text-[15.5px]">
+      <dl className="flex flex-col gap-1.5 rounded-[16px] bg-surface-2 p-4 text-[0.9688rem]">
         {isAz(job) && (
           <>
             <Row l="Imponibile" v={eur(c.net)} />
@@ -134,7 +139,7 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
         {job.deposit > 0 && <Row l="Acconto versato" v={`− ${eur(job.deposit)}`} />}
         <div className="mt-2 flex items-end justify-between gap-3 border-t border-line pt-3">
           <dt className="font-semibold text-ink">{job.paid ? 'Saldato' : 'Da saldare'}</dt>
-          <dd className={`w-cond tnum text-[34px] leading-none font-bold ${job.paid ? 'text-ok' : 'text-ink'}`}>{eur(job.paid ? (job.paidAmount ?? totale(job)) : due)}</dd>
+          <dd className={`w-cond tnum text-[2.125rem] leading-none font-bold ${job.paid ? 'text-ok' : 'text-ink'}`}>{eur(job.paid ? (job.paidAmount ?? totale(job)) : due)}</dd>
         </div>
       </dl>
     </Section>
@@ -172,8 +177,8 @@ export function PaymentSection({ job, up }: { job: Job; up: Up }) {
           <div className="flex items-start gap-3 rounded-[16px] bg-ok-soft p-4 text-ok">
             <CheckCircle2 size={24} className="shrink-0" />
             <div>
-              <p className="text-[16px] font-semibold">Incassati {eur(job.paidAmount ?? tot)}</p>
-              <p className="text-[14.5px] opacity-90">
+              <p className="text-[1rem] font-semibold">Incassati {eur(job.paidAmount ?? tot)}</p>
+              <p className="text-[0.9062rem] opacity-90">
                 {fmtDateTime(job.paidAt)}
                 {job.payMethod ? `, ${job.payMethod}` : ''}
               </p>
@@ -184,7 +189,7 @@ export function PaymentSection({ job, up }: { job: Job; up: Up }) {
           </Button>
         </>
       ) : tot <= 0 ? (
-        <p className="text-[15px] text-ink-2">Inserisci i lavori eseguiti per calcolare quanto incassare.</p>
+        <p className="text-[0.9375rem] text-ink-2">Inserisci i lavori eseguiti per calcolare quanto incassare.</p>
       ) : (
         <>
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Metodo di pagamento">
@@ -208,7 +213,7 @@ export function PaymentSection({ job, up }: { job: Job; up: Up }) {
             {due > 0 ? `Incassa ${eur(due)}` : 'Segna come saldato'}
             {job.payMethod ? ` · ${job.payMethod}` : ''}
           </Button>
-          {!job.payMethod && <p className="-mt-2 text-[14px] text-ink-3">Scegli prima il metodo di pagamento.</p>}
+          {!job.payMethod && <p className="-mt-2 text-[0.875rem] text-ink-3">Scegli prima il metodo di pagamento.</p>}
         </>
       )}
     </Section>
@@ -270,7 +275,7 @@ export function InvoiceSection({ job, up }: { job: Job; up: Up }) {
           Segna fattura emessa
         </Button>
       )}
-      <p className="text-[13.5px] leading-snug text-ink-3">
+      <p className="text-[0.8438rem] leading-snug text-ink-3">
         Il conto è un riepilogo per la fattura. La fattura fiscale si emette con il gestionale o il portale di fatturazione elettronica. Verifica le aliquote con il commercialista.
       </p>
     </Section>
@@ -290,7 +295,7 @@ export function WarrantySection({ job, up }: { job: Job; up: Up }) {
         onChange={(m) => up((j) => ({ ...j, warrantyMonths: m }))}
         options={GARANZIE.map((g) => ({ v: g.m, l: g.m ? `${g.m} m` : 'No' }))}
       />
-      <p className="-mt-1 text-[14.5px] text-ink-2">{txt}</p>
+      <p className="-mt-1 text-[0.9062rem] text-ink-2">{txt}</p>
       {job.warrantyMonths > 0 && (
         <Field label="Cosa copre (facoltativo)" htmlFor="wnote">
           <AutoInput id="wnote" placeholder="Es. mano d'opera e ricambi montati" value={job.warrantyNote} onCommit={(v) => up((j) => ({ ...j, warrantyNote: v }))} />
@@ -330,7 +335,7 @@ export function WorkersSection({ job, up, settings }: { job: Job; up: Up; settin
           ))}
         </div>
       ) : (
-        <p className="text-[15px] text-ink-2">Aggiungi chi lavora in officina: lo ritrovi su ogni scheda.</p>
+        <p className="text-[0.9375rem] text-ink-2">Aggiungi chi lavora in officina: lo ritrovi su ogni scheda.</p>
       )}
       <form
         className="flex gap-2"
@@ -371,18 +376,18 @@ function Viewer({ p, onClose }: { p: Photo; onClose: () => void }) {
             onClose();
             toast('Foto eliminata');
           }}
-          className="press flex h-10 items-center gap-2 rounded-full bg-white/10 px-4 text-[15px] font-medium text-white"
+          className="press hit flex h-10 items-center gap-2 rounded-full bg-white/10 px-4 text-[0.9375rem] font-medium text-white"
         >
           <Trash2 size={18} /> Elimina
         </button>
-        <button type="button" onClick={onClose} aria-label="Chiudi" className="press grid size-10 place-items-center rounded-full bg-white/10 text-white">
+        <button type="button" onClick={onClose} aria-label="Chiudi" className="press hit grid size-10 place-items-center rounded-full bg-white/10 text-white">
           <X size={22} />
         </button>
       </div>
       <div className="flex min-h-0 flex-1 items-center justify-center p-3" onClick={onClose}>
         {url && <img src={url} alt="" className="max-h-full max-w-full rounded-[10px] object-contain" />}
       </div>
-      <p className="pb-[calc(env(safe-area-inset-bottom,0px)+16px)] text-center text-[13px] text-white/60">{fmtDateTime(p.createdAt)}</p>
+      <p className="pb-[calc(env(safe-area-inset-bottom,0px)+16px)] text-center text-[0.8125rem] text-white/60">{fmtDateTime(p.createdAt)}</p>
     </motion.div>
   );
 }
@@ -409,8 +414,8 @@ export function PhotosSection({ job }: { job: Job }) {
     }
   };
   return (
-    <Section title="Foto all'arrivo" action={photos.length ? <span className="tnum text-[14px] text-ink-3">{photos.length}</span> : undefined}>
-      <p className="-mt-1 text-[14.5px] text-ink-2">Graffi, ammaccature, cruscotto e chilometri: restano sulla scheda in caso di contestazioni.</p>
+    <Section title="Foto all'arrivo" action={photos.length ? <span className="tnum text-[0.875rem] text-ink-3">{photos.length}</span> : undefined}>
+      <p className="-mt-1 text-[0.9062rem] text-ink-2">Graffi, ammaccature, cruscotto e chilometri: restano sulla scheda in caso di contestazioni.</p>
       <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
         {photos.map((p) => (
           <Thumb key={p.id} p={p} onOpen={() => setOpen(p)} />
@@ -422,7 +427,7 @@ export function PhotosSection({ job }: { job: Job }) {
           className="press flex aspect-square flex-col items-center justify-center gap-1 rounded-[14px] border-[1.5px] border-dashed border-line-strong text-ink-2 hover:border-accent hover:text-accent-ink disabled:opacity-50"
         >
           <Camera size={22} />
-          <span className="text-[12.5px] font-medium">{busy ? 'Salvo…' : 'Aggiungi'}</span>
+          <span className="text-[0.7812rem] font-medium">{busy ? 'Salvo…' : 'Aggiungi'}</span>
         </button>
       </div>
       <input ref={inp} type="file" accept="image/*" capture="environment" multiple hidden onChange={(e) => onFiles(e.target.files)} />
@@ -438,7 +443,7 @@ export function HistoryList({ job }: { job: Job }) {
   return (
     <ol className="flex flex-col gap-2.5 border-l-2 border-line pl-4">
       {h.map((x, i) => (
-        <li key={i} className="relative text-[14.5px]">
+        <li key={i} className="relative text-[0.9062rem]">
           <span className="absolute top-[7px] -left-[21px] size-2 rounded-full" style={{ background: `var(--st-${x.s})` }} />
           <span className="font-medium text-ink">{statoLabel(x.s)}</span> <span className="tnum text-ink-3">{fmtDateTime(x.t)}</span>
         </li>
@@ -451,20 +456,20 @@ export function VehicleHistory({ job, jobs }: { job: Job; jobs: Job[] }) {
   const o = jobs.filter((j) => sameVehicle(j, job));
   if (!o.length) return null;
   return (
-    <Section title="Storico del veicolo" action={<span className="tnum text-[14px] text-ink-3">{o.length}</span>}>
+    <Section title="Storico del veicolo" action={<span className="tnum text-[0.875rem] text-ink-3">{o.length}</span>}>
       <ul className="-my-1 flex flex-col">
         {o.map((j, i) => (
           <li key={j.id} className={i ? 'border-t border-line' : ''}>
             <Link to={`/job/${j.id}`} replace className="press -mx-2 flex items-center justify-between gap-3 rounded-[12px] px-2 py-3 hover:bg-surface-2">
               <span className="min-w-0">
-                <span className="block truncate text-[15.5px] font-medium text-ink">{(j.services || []).join(', ') || j.request || 'Intervento'}</span>
-                <span className="tnum block text-[14px] text-ink-3">
+                <span className="block truncate text-[0.9688rem] font-medium text-ink">{(j.services || []).join(', ') || j.request || 'Intervento'}</span>
+                <span className="tnum block text-[0.875rem] text-ink-3">
                   {fmtDate(j.createdAt)}
                   {j.km ? `, ${j.km} km` : ''}
                 </span>
               </span>
               <span className="flex shrink-0 items-center gap-2">
-                {totale(j) > 0 ? <span className="tnum text-[15px] font-semibold text-ink">{eur(totale(j))}</span> : <StatusPill s={j.status} size="sm" />}
+                {totale(j) > 0 ? <span className="tnum text-[0.9375rem] font-semibold text-ink">{eur(totale(j))}</span> : <StatusPill s={j.status} size="sm" />}
                 <ChevronRight size={18} className="text-ink-3" />
               </span>
             </Link>

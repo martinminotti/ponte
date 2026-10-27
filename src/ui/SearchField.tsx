@@ -51,7 +51,7 @@ export const SearchField = forwardRef<
           type="button"
           onClick={() => onChange('')}
           aria-label="Cancella ricerca"
-          className="press absolute top-1/2 right-2 z-[1] grid size-9 -translate-y-1/2 place-items-center rounded-full text-ink-3 hover:bg-surface-2"
+          className="press hit absolute top-1/2 right-2 z-[1] grid size-9 -translate-y-1/2 place-items-center rounded-full text-ink-3 hover:bg-surface-2"
         >
           <X size={18} />
         </button>

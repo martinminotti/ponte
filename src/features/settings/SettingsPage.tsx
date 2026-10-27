@@ -91,8 +91,8 @@ export function SettingsPage() {
             <BrandMark />
           </header>
         )}
-        <h1 className="w-wide mt-5 text-[26px] font-semibold tracking-[-0.01em] text-ink lg:text-[34px] lg:tracking-[-0.02em]">Officina</h1>
-        <p className="mt-1 text-[15px] text-ink-2">Le modifiche si salvano da sole.</p>
+        <h1 className="w-wide mt-5 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink lg:text-[2.125rem] lg:tracking-[-0.02em]">Officina</h1>
+        <p className="mt-1 text-[0.9375rem] text-ink-2">Le modifiche si salvano da sole.</p>
 
         <div className="mt-5 flex flex-col gap-3 xl:grid xl:grid-cols-2 xl:items-start xl:gap-4">
           <div className="flex flex-col gap-3 xl:gap-4">
@@ -201,17 +201,17 @@ export function SettingsPage() {
             </Section>
           </div>
           <div className="flex flex-col gap-3 xl:gap-4">
-            <Section title="Operai" action={<span className="tnum text-[14px] text-ink-3">{s.workers.length || ''}</span>}>
+            <Section title="Operai" action={<span className="tnum text-[0.875rem] text-ink-3">{s.workers.length || ''}</span>}>
               {s.workers.length > 0 ? (
                 <ul className="flex flex-wrap gap-2">
                   {s.workers.map((w, i) => (
-                    <li key={w} className="flex h-10 items-center gap-1 rounded-full bg-surface-2 pr-1 pl-4 text-[15px] font-medium text-ink">
+                    <li key={w} className="flex h-10 items-center gap-1 rounded-full bg-surface-2 pr-1 pl-4 text-[0.9375rem] font-medium text-ink">
                       {w}
                       <button
                         type="button"
                         aria-label={`Rimuovi ${w}`}
                         onClick={() => save({ workers: s.workers.filter((_, k) => k !== i) })}
-                        className="press grid size-8 place-items-center rounded-full text-ink-3 hover:bg-surface-3 hover:text-danger"
+                        className="press hit grid size-8 place-items-center rounded-full text-ink-3 hover:bg-surface-3 hover:text-danger"
                       >
                         <X size={16} />
                       </button>
@@ -219,7 +219,7 @@ export function SettingsPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-[15px] text-ink-2">Chi lavora in officina: li segni su ogni scheda e compaiono sul conto.</p>
+                <p className="text-[0.9375rem] text-ink-2">Chi lavora in officina: li segni su ogni scheda e compaiono sul conto.</p>
               )}
               <form
                 className="flex gap-2"
@@ -262,12 +262,12 @@ export function SettingsPage() {
             <Section title="Archivio e backup">
               <dl className="grid grid-cols-2 gap-3">
                 <div className="rounded-[14px] bg-surface-2 p-3.5">
-                  <dt className="text-[13px] text-ink-3">Schede</dt>
-                  <dd className="w-cond tnum text-[26px] leading-tight font-bold text-ink">{jobs.length}</dd>
+                  <dt className="text-[0.8125rem] text-ink-3">Schede</dt>
+                  <dd className="w-cond tnum text-[1.625rem] leading-tight font-bold text-ink">{jobs.length}</dd>
                 </div>
                 <div className="rounded-[14px] bg-surface-2 p-3.5">
-                  <dt className="text-[13px] text-ink-3">Ultimo backup</dt>
-                  <dd className="mt-1 text-[15px] font-semibold text-ink">{s.lastBackupAt ? fmtDateTime(s.lastBackupAt) : 'Mai'}</dd>
+                  <dt className="text-[0.8125rem] text-ink-3">Ultimo backup</dt>
+                  <dd className="mt-1 text-[0.9375rem] font-semibold text-ink">{s.lastBackupAt ? fmtDateTime(s.lastBackupAt) : 'Mai'}</dd>
                 </div>
               </dl>
               {(daysSinceBackup === null || daysSinceBackup > 7) && jobs.length > 0 && (
@@ -300,13 +300,13 @@ export function SettingsPage() {
                     setPersisted(ok);
                     toast[ok ? 'success' : 'message'](ok ? 'Archivio protetto' : 'Il browser non ha concesso la protezione. Installa l’app sulla schermata Home e riprova.');
                   }}
-                  className="press flex items-center gap-2 self-start text-[14.5px] font-semibold text-accent-ink"
+                  className="press flex items-center gap-2 self-start text-[0.9062rem] font-semibold text-accent-ink"
                 >
                   <ShieldCheck size={18} /> Proteggi l'archivio dalla pulizia automatica del browser
                 </button>
               )}
               {persisted && (
-                <p className="flex items-center gap-2 text-[14px] text-ok">
+                <p className="flex items-center gap-2 text-[0.875rem] text-ok">
                   <ShieldCheck size={17} /> Archivio protetto dalla pulizia automatica.
                 </p>
               )}
@@ -322,7 +322,7 @@ export function SettingsPage() {
               )}
             </Section>
 
-            <p className="px-1 pt-2 pb-4 text-[13px] leading-relaxed text-ink-3">
+            <p className="px-1 pt-2 pb-4 text-[0.8125rem] leading-relaxed text-ink-3">
               Ponte {__APP_VERSION__}. I documenti generati sono riepiloghi, non fatture: la fattura fiscale va emessa con il gestionale o il portale di fatturazione elettronica. Le aliquote IVA
               proposte vanno verificate con il commercialista.
             </p>
@@ -333,12 +333,12 @@ export function SettingsPage() {
       <Sheet open={!!pending} onOpenChange={(o) => !o && setPending(null)} title="Importa backup" description="Come vuoi usare il file?">
         <div className="flex flex-col gap-2.5">
           <button type="button" onClick={() => doImport('merge')} className="press rounded-[16px] bg-surface-2 p-4 text-left hover:bg-surface-3">
-            <span className="block text-[16px] font-semibold text-ink">Unisci all'archivio</span>
-            <span className="block text-[14.5px] text-ink-2">Aggiunge le schede nuove e aggiorna quelle modificate più di recente nel file.</span>
+            <span className="block text-[1rem] font-semibold text-ink">Unisci all'archivio</span>
+            <span className="block text-[0.9062rem] text-ink-2">Aggiunge le schede nuove e aggiorna quelle modificate più di recente nel file.</span>
           </button>
           <button type="button" onClick={() => doImport('replace')} className="press rounded-[16px] bg-danger-soft p-4 text-left">
-            <span className="block text-[16px] font-semibold text-danger">Sostituisci tutto</span>
-            <span className="block text-[14.5px] text-danger/80">Cancella l'archivio di questo dispositivo e carica solo il file.</span>
+            <span className="block text-[1rem] font-semibold text-danger">Sostituisci tutto</span>
+            <span className="block text-[0.9062rem] text-danger/80">Cancella l'archivio di questo dispositivo e carica solo il file.</span>
           </button>
         </div>
       </Sheet>

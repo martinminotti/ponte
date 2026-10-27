@@ -2,7 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMatch, useNavigate, useSearchParams } from 'react-router';
 import { Plus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { overlayOpen, searchShortcut, typing, useGlass, useJobs, useWide } from '@/app/hooks';
+import { overlayOpen, searchShortcut, typing, useGlass, useJobs, useSettings, useWide } from '@/app/hooks';
+import { STATI, statoIndex } from '@/domain/constants';
+import { fmtPlate } from '@/domain/format';
+import { veic, waLink, withStatus } from '@/domain/logic';
+import type { Job } from '@/domain/types';
+import { mutateJob } from '@/data/repo';
+import { haptic } from '@/platform/native';
+import { stColor } from '@/ui/status';
+import { WhatsAppSheet } from '@/features/job/WhatsAppSheet';
+import { SwipeCard, type SwipeAction } from './SwipeCard';
 import { BrandMark } from '@/app/Shell';
 import { FILTRI, type FilterKey } from '@/domain/constants';
 import { eur } from '@/domain/format';
@@ -81,6 +90,27 @@ export function ListPage() {
   };
   const newJob = () => window.dispatchEvent(new Event('ro:new-job'));
 
+  // azioni a scorrimento sulle schede (telefono): stato successivo a destra, WhatsApp a sinistra
+  const settings = useSettings();
+  const [wa, setWa] = useState<Job | null>(null);
+  const [waOpen, setWaOpen] = useState(false);
+  const nextAction = (j: Job): SwipeAction | undefined => {
+    const next = STATI[statoIndex(j.status) + 1];
+    if (!next) return undefined;
+    return {
+      label: next.short,
+      color: stColor(next.k),
+      onCommit: () => {
+        const prev = j;
+        mutateJob(j.id, (x) => withStatus(x, next.k));
+        haptic('medium');
+        toast(`${fmtPlate(j.plate, j.plateCountry) || veic(j)}: ${next.l}`, { action: { label: 'Annulla', onClick: () => mutateJob(j.id, () => prev) }, duration: 6000 });
+      },
+    };
+  };
+  const waAction = (j: Job): SwipeAction | undefined =>
+    j.wa !== false && waLink(j.phone, 'x', settings.prefix) ? { label: 'Avvisa', color: 'var(--wa)', onCommit: () => (setWa(j), setWaOpen(true)) } : undefined;
+
   // su schermi larghi ↑ ↓ (o J K) scorrono le schede nel pannello accanto
   useEffect(() => {
     if (!wide) return;
@@ -106,14 +136,14 @@ export function ListPage() {
         </header>
       )}
 
-      {!wide && <h1 className="w-wide px-4 pt-5 text-[32px] leading-none font-semibold tracking-[-0.02em] text-ink">Schede</h1>}
+      {!wide && <h1 className="w-wide px-4 pt-5 text-[2rem] leading-none font-semibold tracking-[-0.02em] text-ink">Schede</h1>}
 
       <div
         className={`sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:top-0 lg:pt-5 ${
           glass && !wide ? '' : 'bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] backdrop-blur-xl backdrop-saturate-150'
         }`}
       >
-        {wide && <h1 className="w-wide mb-3 text-[26px] font-semibold tracking-[-0.01em] text-ink">Schede</h1>}
+        {wide && <h1 className="w-wide mb-3 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink">Schede</h1>}
         <SearchField
           ref={searchRef}
           id="search-jobs"
@@ -133,7 +163,7 @@ export function ListPage() {
         />
         <div className={wide ? 'mt-3 flex flex-wrap gap-1.5' : 'no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1'} role="group" aria-label="Filtra le schede">
           {FILTRI.map((f) => (
-            <Chip key={f.k} on={filter === f.k} count={jobs ? counts[f.k] : undefined} onClick={() => setFilter(f.k)} className={wide ? '!h-8 !gap-1.5 !px-3 !text-[14px]' : ''}>
+            <Chip key={f.k} on={filter === f.k} count={jobs ? counts[f.k] : undefined} onClick={() => setFilter(f.k)} className={wide ? '!h-8 !gap-1.5 !px-3 !text-[0.875rem]' : ''}>
               {f.l}
             </Chip>
           ))}
@@ -142,7 +172,7 @@ export function ListPage() {
 
       <div className="px-4">
         {demoN > 0 && (
-          <div className="mt-2 flex items-center justify-between gap-3 rounded-[16px] bg-warn-soft px-4 py-3 text-[14.5px] font-medium text-warn">
+          <div className="mt-2 flex items-center justify-between gap-3 rounded-[16px] bg-warn-soft px-4 py-3 text-[0.9062rem] font-medium text-warn">
             <span>Stai guardando {demoN} schede di esempio.</span>
             <button type="button" onClick={removeDemo} className="press shrink-0 rounded-[10px] px-2.5 py-1.5 font-semibold underline underline-offset-2">
               Elimina esempi
@@ -152,8 +182,8 @@ export function ListPage() {
 
         {filter === 'saldo' && list.length > 0 && (
           <p className="mt-3 flex items-baseline justify-between rounded-[16px] bg-danger-soft px-4 py-3 text-danger">
-            <span className="text-[15px] font-medium">Totale da incassare</span>
-            <span className="w-cond tnum text-[24px] font-bold">{eur(dueTotal)}</span>
+            <span className="text-[0.9375rem] font-medium">Totale da incassare</span>
+            <span className="w-cond tnum text-[1.5rem] font-bold">{eur(dueTotal)}</span>
           </p>
         )}
 
@@ -201,12 +231,19 @@ export function ListPage() {
           <ul className={`mt-2 flex flex-col ${wide ? 'gap-2' : 'gap-3'}`}>
             {list.map((j) => (
               <li key={j.id}>
-                <JobCard j={j} active={wide && j.id === activeId} dense={wide} />
+                {wide ? (
+                  <JobCard j={j} active={j.id === activeId} dense />
+                ) : (
+                  <SwipeCard right={nextAction(j)} left={waAction(j)}>
+                    <JobCard j={j} />
+                  </SwipeCard>
+                )}
               </li>
             ))}
           </ul>
         )}
       </div>
+      {wa && <WhatsAppSheet open={waOpen} onOpenChange={setWaOpen} job={wa} kind={wa.status} settings={settings} />}
     </div>
   );
 }

@@ -13,7 +13,7 @@ function Shell({ s, title, meta, children }: { s: Settings; title: string; meta:
   const pa = okHex(s.accent) ? s.accent : DEFAULT_ACCENT;
   return (
     <article
-      className="print-area relative flex flex-col gap-5 overflow-hidden rounded-[6px] bg-white px-5 pt-7 pb-5 text-[13.5px] text-[#1a1f25] shadow-[0_1px_2px_rgba(0,0,0,.08),0_18px_40px_-18px_rgba(0,0,0,.35)] sm:px-8 sm:pt-9 sm:pb-7"
+      className="print-area relative flex flex-col gap-5 overflow-hidden rounded-[6px] bg-white px-5 pt-7 pb-5 text-[0.8438rem] text-[#1a1f25] shadow-[0_1px_2px_rgba(0,0,0,.08),0_18px_40px_-18px_rgba(0,0,0,.35)] sm:px-8 sm:pt-9 sm:pb-7"
       style={{ ['--pa' as string]: pa, colorScheme: 'light' }}
     >
       <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[5px]" style={{ background: pa }} />
@@ -25,17 +25,19 @@ function Shell({ s, title, meta, children }: { s: Settings; title: string; meta:
             </span>
           )}
           <div className="min-w-0">
-            <p className="w-wide text-[18px] leading-tight font-bold break-words">{s.shop || 'Officina'}</p>
-            {s.shopAddr && <p className="text-[12.5px] text-[#68707a]">{s.shopAddr}</p>}
-            {(s.shopVat || s.shopPhone) && <p className="text-[12.5px] text-[#68707a]">{[s.shopVat && `P.IVA/COE ${s.shopVat}`, s.shopPhone && `Tel. ${s.shopPhone}`].filter(Boolean).join('   ')}</p>}
+            <p className="w-wide text-[1.125rem] leading-tight font-bold break-words">{s.shop || 'Officina'}</p>
+            {s.shopAddr && <p className="text-[0.7812rem] text-[#68707a]">{s.shopAddr}</p>}
+            {(s.shopVat || s.shopPhone) && (
+              <p className="text-[0.7812rem] text-[#68707a]">{[s.shopVat && `P.IVA/COE ${s.shopVat}`, s.shopPhone && `Tel. ${s.shopPhone}`].filter(Boolean).join('   ')}</p>
+            )}
           </div>
         </div>
         <div className="text-right">
-          <p className="w-cond text-[20px] leading-none font-bold tracking-[0.03em]" style={{ color: pa }}>
+          <p className="w-cond text-[1.25rem] leading-none font-bold tracking-[0.03em]" style={{ color: pa }}>
             {title}
           </p>
           {meta.map((m) => (
-            <p key={m} className="tnum mt-1 text-[12.5px] text-[#68707a]">
+            <p key={m} className="tnum mt-1 text-[0.7812rem] text-[#68707a]">
               {m}
             </p>
           ))}
@@ -48,7 +50,7 @@ function Shell({ s, title, meta, children }: { s: Settings; title: string; meta:
 
 function Lab({ children }: { children: ReactNode }) {
   return (
-    <h4 className="mb-1 text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: 'var(--pa)' }}>
+    <h4 className="mb-1 text-[0.6875rem] font-bold tracking-[0.06em] uppercase" style={{ color: 'var(--pa)' }}>
       {children}
     </h4>
   );
@@ -69,7 +71,7 @@ function Totals({ rows, big }: { rows: [string, string][]; big: [string, string]
       ))}
       <div className="mt-1 flex items-baseline justify-between gap-3 border-t border-[#d6dbe0] pt-2.5">
         <dt className="font-semibold">{big[0]}</dt>
-        <dd className="w-cond tnum text-[28px] leading-none font-bold" style={{ color: 'var(--pa)' }}>
+        <dd className="w-cond tnum text-[1.75rem] leading-none font-bold" style={{ color: 'var(--pa)' }}>
           {big[1]}
         </dd>
       </div>
@@ -114,23 +116,23 @@ export function JobPaper({ j, s }: { j: Job; s: Settings }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <Box>
           <Lab>{az ? 'Intestatario fattura' : 'Cliente'}</Lab>
-          <p className="w-semi text-[16px] font-semibold">{custName(j) || '—'}</p>
+          <p className="w-semi text-[1rem] font-semibold">{custName(j) || '—'}</p>
           {az &&
             [j.company.vat && `P.IVA/COE ${j.company.vat}`, j.company.cf && `C.F. ${j.company.cf}`, j.company.addr, j.company.sdi && `SDI/PEC ${j.company.sdi}`, j.owner && `Rif. ${j.owner}`]
               .filter(Boolean)
               .map((x) => (
-                <p key={x as string} className="text-[12.5px] text-[#68707a]">
+                <p key={x as string} className="text-[0.7812rem] text-[#68707a]">
                   {x}
                 </p>
               ))}
-          {j.phone && <p className="text-[12.5px] text-[#68707a]">Tel. {j.phone}</p>}
+          {j.phone && <p className="text-[0.7812rem] text-[#68707a]">Tel. {j.phone}</p>}
         </Box>
         <Box>
           <Lab>Veicolo</Lab>
           <Plate plate={j.plate} country={j.plateCountry} size="sm" />
-          <p className="w-semi mt-1 text-[16px] font-semibold">{veic(j)}</p>
-          {j.vin && <p className="tnum text-[12.5px] text-[#68707a]">Telaio {j.vin}</p>}
-          <p className="text-[12.5px] text-[#68707a]">
+          <p className="w-semi mt-1 text-[1rem] font-semibold">{veic(j)}</p>
+          {j.vin && <p className="tnum text-[0.7812rem] text-[#68707a]">Telaio {j.vin}</p>}
+          <p className="text-[0.7812rem] text-[#68707a]">
             {j.km ? `${j.km} km, ` : ''}entrata {fmtDate(j.createdAt)}
           </p>
         </Box>
@@ -147,7 +149,7 @@ export function JobPaper({ j, s }: { j: Job; s: Settings }) {
         </div>
       )}
       <div>
-        {az && <p className="mb-1.5 text-[12.5px] text-[#68707a] italic">Importi delle voci IVA {j.vatIncl === false ? 'esclusa' : 'inclusa'}</p>}
+        {az && <p className="mb-1.5 text-[0.7812rem] text-[#68707a] italic">Importi delle voci IVA {j.vatIncl === false ? 'esclusa' : 'inclusa'}</p>}
         <Table>
           {items.length ? (
             items.map((i, n) => (
@@ -169,23 +171,23 @@ export function JobPaper({ j, s }: { j: Job; s: Settings }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <Box>
           <Lab>Pagamento</Lab>
-          <p className="w-semi text-[16px] font-semibold">{j.paid ? 'Saldato' : monthlyPending(j) ? 'Fattura di fine mese' : due > 0 ? 'Da saldare' : 'Nessun importo'}</p>
-          <p className="text-[12.5px] text-[#68707a]">
+          <p className="w-semi text-[1rem] font-semibold">{j.paid ? 'Saldato' : monthlyPending(j) ? 'Fattura di fine mese' : due > 0 ? 'Da saldare' : 'Nessun importo'}</p>
+          <p className="text-[0.7812rem] text-[#68707a]">
             {j.paid ? `${fmtDate(j.paidAt)}${j.payMethod ? `, ${j.payMethod}` : ''}` : monthlyPending(j) ? 'Incluso nella fattura mensile' : j.payMethod ? `Metodo: ${j.payMethod}` : ''}
           </p>
         </Box>
         <Box>
           <Lab>Garanzia lavori</Lab>
-          <p className="w-semi text-[16px] font-semibold">{j.warrantyMonths > 0 ? `${j.warrantyMonths} mesi` : 'Nessuna'}</p>
+          <p className="w-semi text-[1rem] font-semibold">{j.warrantyMonths > 0 ? `${j.warrantyMonths} mesi` : 'Nessuna'}</p>
           {j.warrantyMonths > 0 && (
-            <p className="text-[12.5px] text-[#68707a]">
+            <p className="text-[0.7812rem] text-[#68707a]">
               Fino al {fmtDate(scadenza(j))}
               {j.warrantyNote ? `, ${j.warrantyNote}` : ''}
             </p>
           )}
         </Box>
       </div>
-      <p className="border-t border-[#d6dbe0] pt-3 text-center text-[11.5px] text-[#68707a]">
+      <p className="border-t border-[#d6dbe0] pt-3 text-center text-[0.7188rem] text-[#68707a]">
         {az ? 'Riepilogo per la fatturazione, non è una fattura.' : 'Riepilogo lavori, non valido ai fini fiscali.'}
       </p>
     </Shell>
@@ -205,9 +207,9 @@ export function MonthPaper({ co, list, ym, no, s }: { co: CompanyGroup; list: Jo
     <Shell s={s} title="CONTO MENSILE" meta={[monthLabel(ym), `${list.length} ${list.length === 1 ? 'lavoro' : 'lavori'}`, ...(no ? [`Fattura n. ${no}`] : [])]}>
       <Box>
         <Lab>Intestatario fattura</Lab>
-        <p className="w-semi text-[16px] font-semibold">{co.name}</p>
+        <p className="w-semi text-[1rem] font-semibold">{co.name}</p>
         {[c.vat && `P.IVA/COE ${c.vat}`, c.cf && `C.F. ${c.cf}`, c.addr, c.sdi && `SDI/PEC ${c.sdi}`].filter(Boolean).map((x) => (
-          <p key={x as string} className="text-[12.5px] text-[#68707a]">
+          <p key={x as string} className="text-[0.7812rem] text-[#68707a]">
             {x}
           </p>
         ))}
@@ -218,7 +220,7 @@ export function MonthPaper({ co, list, ym, no, s }: { co: CompanyGroup; list: Jo
         ))}
       </Table>
       <Totals rows={rows} big={[T.due > 0 ? 'Da saldare' : 'Saldato', eur(T.due > 0 ? T.due : T.gross)]} />
-      <p className="border-t border-[#d6dbe0] pt-3 text-center text-[11.5px] text-[#68707a]">Riepilogo per la fatturazione, non è una fattura.</p>
+      <p className="border-t border-[#d6dbe0] pt-3 text-center text-[0.7188rem] text-[#68707a]">Riepilogo per la fatturazione, non è una fattura.</p>
     </Shell>
   );
 }
@@ -246,7 +248,7 @@ function JobRows({ j }: { j: Job }) {
           </td>
         </tr>
       )}
-      <tr className="text-[12.5px] text-[#68707a] italic">
+      <tr className="text-[0.7812rem] text-[#68707a] italic">
         <td>
           Totale lavoro con IVA {calc(j).rate}%{j.vatIncl === false ? ' (voci sopra IVA esclusa)' : ''}
         </td>

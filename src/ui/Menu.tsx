@@ -34,7 +34,7 @@ export function ActionMenu({ title, items, trigger }: { title: string; items: Me
                   {it.separator && <DM.Separator className="mx-2 my-1.5 h-px bg-line" />}
                   <DM.Item
                     onSelect={it.onSelect}
-                    className={`flex h-10 cursor-pointer items-center gap-3 rounded-[10px] px-3 text-[15px] font-medium outline-none select-none data-[highlighted]:bg-surface-2 ${it.danger ? 'text-danger' : 'text-ink'}`}
+                    className={`flex h-10 cursor-pointer items-center gap-3 rounded-[10px] px-3 text-[0.9375rem] font-medium outline-none select-none data-[highlighted]:bg-surface-2 ${it.danger ? 'text-danger' : 'text-ink'}`}
                   >
                     <span className={it.danger ? 'text-danger' : 'text-ink-2'}>{it.icon}</span>
                     {it.label}
@@ -62,7 +62,7 @@ export function ActionMenu({ title, items, trigger }: { title: string; items: Me
                   setOpen(false);
                   it.onSelect();
                 }}
-                className={`press flex h-14 w-full items-center gap-3.5 rounded-[14px] px-3 text-left text-[16.5px] font-medium hover:bg-surface-2 ${it.danger ? 'text-danger' : 'text-ink'}`}
+                className={`press flex h-14 w-full items-center gap-3.5 rounded-[14px] px-3 text-left text-[1.0312rem] font-medium hover:bg-surface-2 ${it.danger ? 'text-danger' : 'text-ink'}`}
               >
                 <span className={it.danger ? 'text-danger' : 'text-ink-2'}>{it.icon}</span>
                 {it.label}

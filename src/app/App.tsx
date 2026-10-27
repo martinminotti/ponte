@@ -58,12 +58,12 @@ class Boundary extends Component<{ children: ReactNode }, { err: Error | null }>
     return (
       <div className="grid min-h-dvh place-items-center p-8 text-center">
         <div className="max-w-[40ch]">
-          <p className="w-wide text-[20px] font-semibold text-ink">Qualcosa si è inceppato</p>
-          <p className="mt-2 text-[15px] text-ink-2">I dati sono al sicuro nell'archivio del dispositivo. Ricarica l'app per continuare.</p>
+          <p className="w-wide text-[1.25rem] font-semibold text-ink">Qualcosa si è inceppato</p>
+          <p className="mt-2 text-[0.9375rem] text-ink-2">I dati sono al sicuro nell'archivio del dispositivo. Ricarica l'app per continuare.</p>
           <button type="button" onClick={() => location.reload()} className="press mt-6 h-12 rounded-[14px] bg-accent px-5 font-semibold text-on-accent">
             Ricarica
           </button>
-          <p className="mt-4 text-[12.5px] text-ink-3">{this.state.err.message}</p>
+          <p className="mt-4 text-[0.7812rem] text-ink-3">{this.state.err.message}</p>
         </div>
       </div>
     );
@@ -92,8 +92,8 @@ export function App() {
     return (
       <div className="grid min-h-dvh place-items-center p-8 text-center">
         <div className="max-w-[40ch]">
-          <p className="w-wide text-[20px] font-semibold text-ink">Non riesco ad aprire l'archivio</p>
-          <p className="mt-2 text-[15px] text-ink-2">Il browser blocca l'archivio locale (navigazione privata o spazio pieno). Apri l'app in una finestra normale e riprova.</p>
+          <p className="w-wide text-[1.25rem] font-semibold text-ink">Non riesco ad aprire l'archivio</p>
+          <p className="mt-2 text-[0.9375rem] text-ink-2">Il browser blocca l'archivio locale (navigazione privata o spazio pieno). Apri l'app in una finestra normale e riprova.</p>
         </div>
       </div>
     );

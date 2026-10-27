@@ -18,9 +18,9 @@ const VARIANT: Record<Variant, string> = {
   danger: 'bg-danger-soft text-danger hover:brightness-[0.98]',
 };
 const SIZE: Record<Size, string> = {
-  sm: 'h-10 px-3.5 text-[15px] gap-1.5 rounded-[12px]',
-  md: 'h-12 px-4 text-[16px] gap-2 rounded-[14px]',
-  lg: 'h-14 px-5 text-[17px] gap-2.5 rounded-[16px]',
+  sm: 'h-10 px-3.5 text-[0.9375rem] gap-1.5 rounded-[12px]',
+  md: 'h-12 px-4 text-[1rem] gap-2 rounded-[14px]',
+  lg: 'h-14 px-5 text-[1.0625rem] gap-2.5 rounded-[16px]',
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -85,7 +85,7 @@ export function Segmented<T extends string | number>({
                 onChange(o.v);
               }
             }}
-            className={`relative flex-1 rounded-[10px] px-2 font-semibold transition-colors ${size === 'sm' ? 'h-9 text-[14px]' : 'h-11 text-[15px]'} ${on ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
+            className={`relative flex-1 rounded-[10px] px-2 font-semibold transition-colors ${size === 'sm' ? 'h-9 text-[0.875rem]' : 'h-11 text-[0.9375rem]'} ${on ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}
           >
             {on && <motion.span layoutId={`seg-${id}`} className="absolute inset-0 rounded-[10px] bg-surface shadow-[0_1px_2px_rgba(0,0,0,.12),0_0_0_1px_var(--line)]" transition={SPRING_FAST} />}
             <span className="relative whitespace-nowrap">{o.l}</span>
@@ -104,13 +104,13 @@ export function Chip({ on, children, onClick, className = '', count, ...rest }: 
       type="button"
       aria-pressed={on}
       onClick={onClick}
-      className={`press inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[15px] font-medium ${
+      className={`press inline-flex h-11 shrink-0 items-center gap-2 rounded-full px-4 text-[0.9375rem] font-medium ${
         on ? 'bg-ink text-bg' : 'bg-surface text-ink ring-1 ring-inset ring-line hover:ring-line-strong'
       } ${className}`}
       {...rest}
     >
       {children}
-      {count != null && <span className={`tnum text-[14px] font-semibold ${on ? 'opacity-70' : 'text-ink-3'}`}>{count}</span>}
+      {count != null && <span className={`tnum text-[0.875rem] font-semibold ${on ? 'opacity-70' : 'text-ink-3'}`}>{count}</span>}
     </button>
   );
 }
@@ -121,7 +121,7 @@ export function ToggleChip({ on, children, onClick }: { on: boolean; children: R
       type="button"
       aria-pressed={on}
       onClick={onClick}
-      className={`press inline-flex h-11 items-center gap-1.5 rounded-[12px] px-3.5 text-[15px] font-medium ${
+      className={`press inline-flex h-11 items-center gap-1.5 rounded-[12px] px-3.5 text-[0.9375rem] font-medium ${
         on ? 'bg-accent-soft text-accent-ink ring-1 ring-inset ring-accent/40' : 'bg-surface-2 text-ink hover:bg-surface-3'
       }`}
     >
@@ -136,11 +136,11 @@ export function ToggleChip({ on, children, onClick }: { on: boolean; children: R
 export function Field({ label, hint, htmlFor, children, error }: { label: ReactNode; hint?: ReactNode; htmlFor?: string; children: ReactNode; error?: string }) {
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="text-[14px] font-medium text-ink-2">
+      <label htmlFor={htmlFor} className="text-[0.875rem] font-medium text-ink-2">
         {label}
       </label>
       {children}
-      {error ? <p className="text-[14px] font-medium text-danger">{error}</p> : hint ? <p className="text-[13.5px] leading-snug text-ink-3">{hint}</p> : null}
+      {error ? <p className="text-[0.875rem] font-medium text-danger">{error}</p> : hint ? <p className="text-[0.8438rem] leading-snug text-ink-3">{hint}</p> : null}
     </div>
   );
 }
@@ -217,8 +217,8 @@ export function Switch({ checked, onChange, label, description }: { checked: boo
   return (
     <label htmlFor={id} className="flex cursor-pointer items-center justify-between gap-4 py-1">
       <span className="min-w-0">
-        <span className="block text-[16px] font-medium text-ink">{label}</span>
-        {description && <span className="block text-[14px] leading-snug text-ink-3">{description}</span>}
+        <span className="block text-[1rem] font-medium text-ink">{label}</span>
+        {description && <span className="block text-[0.875rem] leading-snug text-ink-3">{description}</span>}
       </span>
       <span className="relative inline-flex shrink-0">
         <input
@@ -246,7 +246,7 @@ export function Section({ title, action, children, className = '', id, tone }: {
     <section id={id} className={`card p-4 sm:p-5 ${tone === 'accent' ? 'ring-2 ring-accent/50' : ''} ${className}`}>
       {(title || action) && (
         <header className="mb-3.5 flex min-h-8 items-center justify-between gap-3">
-          {title && <h3 className="w-semi text-[17px] font-semibold tracking-[-0.005em] text-ink">{title}</h3>}
+          {title && <h3 className="w-semi text-[1.0625rem] font-semibold tracking-[-0.005em] text-ink">{title}</h3>}
           {action}
         </header>
       )}
@@ -263,7 +263,7 @@ export function Note({ children, tone = 'neutral', icon }: { children: ReactNode
     danger: 'bg-danger-soft text-danger',
   }[tone];
   return (
-    <div className={`flex items-start gap-2.5 rounded-[14px] px-3.5 py-3 text-[14.5px] leading-snug font-medium ${c}`}>
+    <div className={`flex items-start gap-2.5 rounded-[14px] px-3.5 py-3 text-[0.9062rem] leading-snug font-medium ${c}`}>
       {icon && <span className="mt-px shrink-0">{icon}</span>}
       <div className="min-w-0">{children}</div>
     </div>
@@ -274,8 +274,8 @@ export function EmptyState({ title, children, action, art }: { title: string; ch
   return (
     <div className="flex flex-col items-center px-6 py-12 text-center">
       {art}
-      <h3 className="w-wide mt-5 text-[19px] font-semibold text-ink">{title}</h3>
-      {children && <p className="mt-2 max-w-[34ch] text-[15px] leading-relaxed text-ink-2">{children}</p>}
+      <h3 className="w-wide mt-5 text-[1.1875rem] font-semibold text-ink">{title}</h3>
+      {children && <p className="mt-2 max-w-[34ch] text-[0.9375rem] leading-relaxed text-ink-2">{children}</p>}
       {action && <div className="mt-6 flex flex-wrap justify-center gap-2.5">{action}</div>}
     </div>
   );

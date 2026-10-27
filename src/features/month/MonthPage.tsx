@@ -95,10 +95,10 @@ export function MonthPage() {
           <Building2 size={22} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="w-semi block truncate text-[17px] font-semibold text-ink">{co.name}</span>
-          <span className="tnum block truncate text-[14px] text-ink-3">{co.company.vat || co.company.cf || 'Ditta'}</span>
+          <span className="w-semi block truncate text-[1.0625rem] font-semibold text-ink">{co.name}</span>
+          <span className="tnum block truncate text-[0.875rem] text-ink-3">{co.company.vat || co.company.cf || 'Ditta'}</span>
         </span>
-        <span className="flex items-center gap-1 text-[14px] font-medium text-ink-2">
+        <span className="flex items-center gap-1 text-[0.875rem] font-medium text-ink-2">
           {cos.length > 1 && 'Cambia'} <ChevronDown size={18} />
         </span>
       </button>
@@ -106,7 +106,7 @@ export function MonthPage() {
         <button type="button" aria-label="Mese precedente" onClick={() => changeYm(-1)} className="press grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-2">
           <ChevronLeft size={22} />
         </button>
-        <p className="w-wide tnum text-[16px] font-semibold text-ink">{monthLabel(ym)}</p>
+        <p className="w-wide tnum text-[1rem] font-semibold text-ink">{monthLabel(ym)}</p>
         <button type="button" aria-label="Mese successivo" onClick={() => changeYm(1)} className="press grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-2">
           <ChevronRight size={22} />
         </button>
@@ -123,7 +123,7 @@ export function MonthPage() {
         <Section
           title="Lavori del mese"
           action={
-            <span className="tnum text-[14px] text-ink-3">
+            <span className="tnum text-[0.875rem] text-ink-3">
               {chosen.length} di {all.length} nel conto
             </span>
           }
@@ -153,15 +153,15 @@ export function MonthPage() {
                       {on && <Check size={16} strokeWidth={3} />}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="tnum block truncate text-[15.5px] font-semibold text-ink">
+                      <span className="tnum block truncate text-[0.9688rem] font-semibold text-ink">
                         {fmtDay(jobDate(j))} · {fmtPlate(j.plate, j.plateCountry) || 'senza targa'}
                       </span>
-                      <span className="flex items-center gap-2 truncate text-[14px] text-ink-3">
+                      <span className="flex items-center gap-2 truncate text-[0.875rem] text-ink-3">
                         <span className="truncate">{veic(j)}</span>
                         {!el ? <StatusPill s={j.status} size="sm" /> : j.invoiced ? <span className="shrink-0 text-ok">fatturato{j.invoiceNo ? ` n. ${j.invoiceNo}` : ''}</span> : null}
                       </span>
                     </span>
-                    <span className={`w-cond tnum shrink-0 text-[19px] font-bold ${on ? 'text-ink' : 'text-ink-3'}`}>{eur(totale(j))}</span>
+                    <span className={`w-cond tnum shrink-0 text-[1.1875rem] font-bold ${on ? 'text-ink' : 'text-ink-3'}`}>{eur(totale(j))}</span>
                   </button>
                 </li>
               );
@@ -290,8 +290,8 @@ export function MonthPage() {
             <BrandMark />
           </header>
         )}
-        <h1 className="w-wide mt-5 text-[26px] font-semibold tracking-[-0.01em] text-ink lg:text-[34px] lg:tracking-[-0.02em]">Fatture ditte</h1>
-        <p className="mt-1 max-w-[52ch] text-[15px] text-ink-2">I lavori di ogni ditta si raccolgono durante il mese: qui prepari un solo conto con tutte le voci e l'IVA divisa per aliquota.</p>
+        <h1 className="w-wide mt-5 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink lg:text-[2.125rem] lg:tracking-[-0.02em]">Fatture ditte</h1>
+        <p className="mt-1 max-w-[52ch] text-[0.9375rem] text-ink-2">I lavori di ogni ditta si raccolgono durante il mese: qui prepari un solo conto con tutte le voci e l'IVA divisa per aliquota.</p>
 
         {!co ? (
           <div className="card mt-5">
@@ -313,7 +313,7 @@ export function MonthPage() {
                 {chosen.length > 0 ? (
                   <MonthPaper co={co} list={chosen} ym={ym} no={no} s={s} />
                 ) : (
-                  <div className="card grid min-h-[420px] place-items-center p-10 text-center text-[15px] text-ink-2">Seleziona i lavori del mese: qui compare l'anteprima del conto.</div>
+                  <div className="card grid min-h-[420px] place-items-center p-10 text-center text-[0.9375rem] text-ink-2">Seleziona i lavori del mese: qui compare l'anteprima del conto.</div>
                 )}
               </div>
             ) : (
@@ -352,10 +352,10 @@ export function MonthPage() {
                   className={`press flex w-full items-center gap-3 rounded-[14px] p-3 text-left ${c.key === co?.key ? 'bg-accent-soft' : 'hover:bg-surface-2'}`}
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[16px] font-semibold text-ink">{c.name}</span>
-                    <span className="tnum block truncate text-[14px] text-ink-3">{c.company.vat || c.company.cf}</span>
+                    <span className="block truncate text-[1rem] font-semibold text-ink">{c.name}</span>
+                    <span className="tnum block truncate text-[0.875rem] text-ink-3">{c.company.vat || c.company.cf}</span>
                   </span>
-                  {pending[c.key] ? <span className="tnum rounded-full bg-warn-soft px-2.5 py-1 text-[13px] font-semibold text-warn">{pending[c.key]} da fatturare</span> : null}
+                  {pending[c.key] ? <span className="tnum rounded-full bg-warn-soft px-2.5 py-1 text-[0.8125rem] font-semibold text-warn">{pending[c.key]} da fatturare</span> : null}
                   {c.key === co?.key && <Check size={20} className="text-accent-ink" />}
                 </button>
               </li>

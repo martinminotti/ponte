@@ -42,9 +42,9 @@ export function PanePlaceholder() {
         <span className="grid size-16 place-items-center rounded-[20px] bg-surface text-ink-3 shadow-[var(--shadow-1)] ring-1 ring-line">
           <CarFront size={30} strokeWidth={1.8} />
         </span>
-        <h2 className="w-wide mt-5 text-[20px] font-semibold text-ink">Scegli una scheda</h2>
-        <p className="mt-1.5 text-[15px] leading-relaxed text-ink-2">Il dettaglio del veicolo, i lavori e il conto si aprono qui, accanto all'elenco.</p>
-        <dl className="mt-6 grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2.5 text-left text-[14px] text-ink-2">
+        <h2 className="w-wide mt-5 text-[1.25rem] font-semibold text-ink">Scegli una scheda</h2>
+        <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-ink-2">Il dettaglio del veicolo, i lavori e il conto si aprono qui, accanto all'elenco.</p>
+        <dl className="mt-6 grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2.5 text-left text-[0.875rem] text-ink-2">
           <dt className="flex justify-end gap-1">
             <span className="kbd">{searchShortcut()}</span>
           </dt>
@@ -110,7 +110,7 @@ export function TopBar({
           ) : (
             <span className="size-11" />
           )}
-          <div className="min-w-0 flex-1 truncate text-center text-[16px] font-semibold text-ink">{title}</div>
+          <div className="min-w-0 flex-1 truncate text-center text-[1rem] font-semibold text-ink">{title}</div>
           <div className="flex min-w-11 items-center justify-end gap-1">{right}</div>
         </div>
       </div>
@@ -121,14 +121,14 @@ export function TopBar({
     <div className="glass sticky top-[env(safe-area-inset-top,0px)] z-30 lg:top-0">
       <div className="mx-auto flex h-14 items-center gap-2 px-2 sm:px-4" style={{ maxWidth: maxW }}>
         {showBack ? (
-          <button type="button" onClick={goBack} className="press -ml-1 flex h-11 items-center gap-0.5 rounded-full pr-3 pl-1.5 text-[16px] font-medium text-accent-ink hover:bg-surface-2">
+          <button type="button" onClick={goBack} className="press -ml-1 flex h-11 items-center gap-0.5 rounded-full pr-3 pl-1.5 text-[1rem] font-medium text-accent-ink hover:bg-surface-2">
             <ChevronLeft size={26} strokeWidth={2.2} />
             {backLabel}
           </button>
         ) : (
           <span className="w-2" />
         )}
-        <div className="min-w-0 flex-1 truncate text-center text-[16px] font-semibold text-ink">{title}</div>
+        <div className="min-w-0 flex-1 truncate text-center text-[1rem] font-semibold text-ink">{title}</div>
         <div className="flex min-w-[64px] items-center justify-end gap-1">{right}</div>
       </div>
     </div>
@@ -151,8 +151,13 @@ export function BarButton({ label, onClick, children }: { label: string; onClick
   );
 }
 
-/** Ingresso morbido delle schermate: una sola transizione, breve. */
+/**
+ * Ingresso morbido delle schermate su telefono: una sola transizione, breve.
+ * Su schermi larghi il pannello cambia all'istante: scorrendo le schede con ↑ ↓ ogni attesa si sentirebbe.
+ */
 export function Page({ children, className = '' }: { children: ReactNode; className?: string }) {
+  const wide = useWide();
+  if (wide) return <div className={className}>{children}</div>;
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} className={className}>
       {children}

@@ -91,7 +91,7 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
     <fieldset className="card flex min-w-0 flex-col gap-4 p-4 sm:p-5">
       <legend className="sr-only">{title}</legend>
-      <h3 aria-hidden="true" className="w-semi -mb-0.5 text-[17px] font-semibold text-ink">
+      <h3 aria-hidden="true" className="w-semi -mb-0.5 text-[1.0625rem] font-semibold text-ink">
         {title}
       </h3>
       {children}
@@ -108,6 +108,21 @@ export function FormPage() {
   return <FormInner key={id || 'new'} job={existing || undefined} />;
 }
 
+/** Regole del modulo, campo per campo. Il primo errore è quello che riceve il fuoco al salvataggio. */
+function validate(d: Draft): Record<string, string> {
+  const e: Record<string, string> = {};
+  const plate = normPlateText(d.plate, d.plateCountry);
+  const vin = d.vin.toUpperCase().replace(/\s+/g, '');
+  if (!plate && !vin) e.plate = 'Inserisci la targa o il telaio.';
+  if (d.client === 'azienda') {
+    const vat = d.company.vat.replace(/\s+/g, '');
+    if (!d.company.name.trim()) e.cname = 'Inserisci la ragione sociale.';
+    if (!vat && !d.company.cf.trim()) e.cvat = 'Inserisci la partita IVA (o il COE) oppure il codice fiscale.';
+    else if (/^\d+$/.test(vat) && vat.length !== 11) e.cvat = `La partita IVA italiana ha 11 cifre (qui ${vat.length}).`;
+  } else if (!d.owner.trim()) e.owner = 'Inserisci il nome del proprietario.';
+  return e;
+}
+
 function FormInner({ job }: { job?: Job }) {
   const nav = useNavigate();
   const [sp] = useSearchParams();
@@ -122,6 +137,9 @@ function FormInner({ job }: { job?: Job }) {
     const pre = (loc.state as { prefill?: Partial<Job> } | null)?.prefill || {};
     return fromJob({ client: (sp.get('cl') as ClientType) || 'privato', plate: sp.get('plate') || '', ...pre });
   });
+  // errori per campo: si mostrano quando esci dal campo (o al salvataggio) e spariscono appena correggi
+  const [errs, setErrs] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Set<string>>(() => new Set());
   const [err, setErr] = useState<{ field: string; msg: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [usedLookup, setUsedLookup] = useState(false);
@@ -137,8 +155,19 @@ function FormInner({ job }: { job?: Job }) {
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => {
     setD((x) => ({ ...x, [k]: v }));
     if (err) setErr(null);
+    revalidate({ ...d, [k]: v } as Draft);
   };
-  const setCo = (k: keyof Company, v: string) => setD((x) => ({ ...x, company: { ...x.company, [k]: v } }));
+  const setCo = (k: keyof Company, v: string) => {
+    setD((x) => ({ ...x, company: { ...x.company, [k]: v } }));
+    revalidate({ ...d, company: { ...d.company, [k]: v } });
+  };
+  const revalidate = (next: Draft, also?: string) => {
+    const all = validate(next);
+    const seen = also ? new Set(touched).add(also) : touched;
+    if (also) setTouched(seen);
+    setErrs(Object.fromEntries(Object.entries(all).filter(([f]) => seen.has(f))));
+  };
+  const blurCheck = (f: string) => () => revalidate(d, f);
 
   /* veicolo già visto: targa (stesso paese) o telaio */
   const hits = useMemo(() => {
@@ -181,16 +210,15 @@ function FormInner({ job }: { job?: Job }) {
     const plate = normPlateText(d.plate, d.plateCountry);
     const vin = d.vin.toUpperCase().replace(/\s+/g, '');
     const company = az ? { ...d.company, vat: d.company.vat.replace(/\s+/g, ''), cf: d.company.cf.toUpperCase().replace(/\s+/g, ''), name: d.company.name.trim() } : { ...EMPTY_COMPANY };
-    const fail = (field: string, msg: string) => {
+    const all = validate(d);
+    const first = Object.keys(all)[0];
+    if (first) {
       haptic('warning');
-      setErr({ field, msg });
-      document.getElementById(`f-${field}`)?.focus();
-    };
-    if (!plate && !vin) return fail('plate', 'Inserisci la targa o il telaio.');
-    if (az) {
-      if (!company.name) return fail('cname', 'Inserisci la ragione sociale.');
-      if (!company.vat && !company.cf) return fail('cvat', 'Inserisci la partita IVA (o il COE) oppure il codice fiscale.');
-    } else if (!d.owner.trim()) return fail('owner', 'Inserisci il nome del proprietario.');
+      setTouched(new Set(Object.keys(all)));
+      setErrs(all);
+      document.getElementById(`f-${first}`)?.focus();
+      return;
+    }
 
     const fields = {
       ...d,
@@ -236,7 +264,7 @@ function FormInner({ job }: { job?: Job }) {
     }
   };
 
-  const errFor = (f: string) => (err?.field === f ? err.msg : undefined);
+  const errFor = (f: string) => errs[f] || (err?.field === f ? err.msg : undefined);
 
   return (
     <Page className="pb-28">
@@ -254,7 +282,7 @@ function FormInner({ job }: { job?: Job }) {
 
         <Group title="Veicolo">
           <div className="flex flex-col items-center gap-3">
-            <PlateInput ref={plateRef} id="f-plate" value={d.plate} onChange={(v) => set('plate', v)} country={d.plateCountry} invalid={!!errFor('plate')} />
+            <PlateInput ref={plateRef} id="f-plate" value={d.plate} onChange={(v) => set('plate', v)} country={d.plateCountry} invalid={!!errFor('plate')} onBlur={blurCheck('plate')} />
             <div className="w-full max-w-[420px]">
               <Segmented
                 size="sm"
@@ -267,14 +295,14 @@ function FormInner({ job }: { job?: Job }) {
                 ]}
               />
             </div>
-            {errFor('plate') && <p className="text-[14px] font-medium text-danger">{errFor('plate')}</p>}
+            {errFor('plate') && <p className="text-[0.875rem] font-medium text-danger">{errFor('plate')}</p>}
           </div>
 
           {hits.length > 0 && (
             <div className="flex items-center justify-between gap-3 rounded-[16px] bg-accent-soft p-3.5 pl-4">
               <div className="flex min-w-0 items-start gap-3">
                 <History size={20} className="mt-0.5 shrink-0 text-accent-ink" />
-                <div className="min-w-0 text-[14.5px] leading-snug">
+                <div className="min-w-0 text-[0.9062rem] leading-snug">
                   <p className="font-semibold text-ink">Già visto in officina</p>
                   <p className="truncate text-ink-2">
                     {veic(hits[0])}, {hits[0].owner || hits[0].company?.name} · {hits.length === 1 ? `1 intervento, ${fmtDate(hits[0].createdAt)}` : `${hits.length} interventi`}
@@ -333,7 +361,7 @@ function FormInner({ job }: { job?: Job }) {
         {az && (
           <Group title="Dati per la fattura">
             <Field label="Ragione sociale" htmlFor="f-cname" error={errFor('cname')}>
-              <Input id="f-cname" list="ditte" autoComplete="off" value={d.company.name} onChange={(e) => pickCompany(e.target.value)} />
+              <Input id="f-cname" list="ditte" autoComplete="off" onBlur={blurCheck('cname')} value={d.company.name} onChange={(e) => pickCompany(e.target.value)} />
             </Field>
             <datalist id="ditte">
               {cos.map((c) => (
@@ -342,7 +370,7 @@ function FormInner({ job }: { job?: Job }) {
             </datalist>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Partita IVA o COE" htmlFor="f-cvat" error={errFor('cvat')}>
-                <Input id="f-cvat" className="tnum" autoComplete="off" value={d.company.vat} onChange={(e) => setCo('vat', e.target.value)} />
+                <Input id="f-cvat" className="tnum" autoComplete="off" onBlur={blurCheck('cvat')} value={d.company.vat} onChange={(e) => setCo('vat', e.target.value)} />
               </Field>
               <Field label="Codice fiscale" htmlFor="f-ccf">
                 <Input id="f-ccf" className="tnum uppercase" autoCapitalize="characters" autoComplete="off" value={d.company.cf} onChange={(e) => setCo('cf', e.target.value)} />
@@ -359,7 +387,7 @@ function FormInner({ job }: { job?: Job }) {
 
         <Group title={az ? 'Referente' : 'Proprietario'}>
           <Field label={az ? 'Chi porta il veicolo (facoltativo)' : 'Nome e cognome'} htmlFor="f-owner" error={errFor('owner')}>
-            <Input id="f-owner" autoComplete="off" autoCapitalize="words" value={d.owner} onChange={(e) => set('owner', e.target.value)} />
+            <Input id="f-owner" autoComplete="off" autoCapitalize="words" onBlur={blurCheck('owner')} value={d.owner} onChange={(e) => set('owner', e.target.value)} />
           </Field>
           <Field label="Telefono WhatsApp" htmlFor="f-phone" hint={`Senza prefisso si usa +${settings.prefix || '39'}. Per un altro paese scrivi il numero con il + davanti.`}>
             <Input id="f-phone" type="tel" inputMode="tel" autoComplete="off" placeholder="333 123 4567" value={d.phone} onChange={(e) => set('phone', e.target.value)} />

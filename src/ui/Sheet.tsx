@@ -44,10 +44,10 @@ function CenterDialog({ open, onOpenChange, title, description, children, footer
                 >
                   <div className="flex items-start justify-between gap-3 px-6 pt-5 pb-2">
                     <div className="min-w-0">
-                      <Dialog.Title className="w-wide text-[20px] font-semibold text-ink">{title}</Dialog.Title>
-                      {description && <Dialog.Description className="mt-1 text-[14.5px] text-ink-2">{description}</Dialog.Description>}
+                      <Dialog.Title className="w-wide text-[1.25rem] font-semibold text-ink">{title}</Dialog.Title>
+                      {description && <Dialog.Description className="mt-1 text-[0.9062rem] text-ink-2">{description}</Dialog.Description>}
                     </div>
-                    <Dialog.Close className="press -mr-2 grid size-9 shrink-0 place-items-center rounded-full text-ink-2 hover:bg-surface-2" aria-label="Chiudi">
+                    <Dialog.Close className="press hit -mr-2 grid size-9 shrink-0 place-items-center rounded-full text-ink-2 hover:bg-surface-2" aria-label="Chiudi">
                       <X size={18} strokeWidth={2.4} />
                     </Dialog.Close>
                   </div>
@@ -75,10 +75,10 @@ function BottomSheet({ open, onOpenChange, title, description, children, footer 
           <div className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-line-strong" aria-hidden="true" />
           <div className="flex items-start justify-between gap-3 px-5 pt-3 pb-2">
             <div className="min-w-0">
-              <Drawer.Title className="w-wide text-[20px] font-semibold text-ink">{title}</Drawer.Title>
-              {description && <Drawer.Description className="mt-1 text-[14.5px] text-ink-2">{description}</Drawer.Description>}
+              <Drawer.Title className="w-wide text-[1.25rem] font-semibold text-ink">{title}</Drawer.Title>
+              {description && <Drawer.Description className="mt-1 text-[0.9062rem] text-ink-2">{description}</Drawer.Description>}
             </div>
-            <Drawer.Close className="press -mt-0.5 -mr-1 grid size-9 shrink-0 place-items-center rounded-full bg-surface-2 text-ink-2" aria-label="Chiudi">
+            <Drawer.Close className="press hit -mt-0.5 -mr-1 grid size-9 shrink-0 place-items-center rounded-full bg-surface-2 text-ink-2" aria-label="Chiudi">
               <X size={18} strokeWidth={2.4} />
             </Drawer.Close>
           </div>

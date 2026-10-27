@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { AlarmClock, ArrowUpRight, CheckCircle2, ChevronRight, Plus, ReceiptText, Sparkles, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
@@ -8,7 +8,7 @@ import { Page } from '@/app/layout';
 import { statoLabel } from '@/domain/constants';
 import { dashboard, greeting, type Delivery, type WeekBar } from '@/domain/dashboard';
 import { eur, fmtPlate, relDay } from '@/domain/format';
-import { custName, veic } from '@/domain/logic';
+import { custName, matchJob, veic } from '@/domain/logic';
 import type { Job } from '@/domain/types';
 import { seedDemo } from '@/data/demo';
 import { Button, EmptyState } from '@/ui/controls';
@@ -44,6 +44,19 @@ export function DashboardPage() {
   const nav = useNavigate();
   const now = Date.now();
   const d = useMemo(() => dashboard(jobs || [], now), [jobs, now]);
+  // la ricerca di Oggi cerca qui, senza portarti altrove: i risultati prendono il posto del cruscotto
+  const [q, setQ] = useState('');
+  const qq = q.trim();
+  const found = useMemo(() => (qq ? (jobs || []).filter((j) => matchJob(j, qq)) : []), [jobs, qq]);
+  const onSearchKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      if (q) setQ('');
+      else e.currentTarget.blur();
+    } else if (e.key === 'Enter' && found.length) {
+      e.currentTarget.blur();
+      nav(`/job/${found[0].id}`);
+    }
+  };
 
   if (jobs === undefined) return null;
 
@@ -56,15 +69,15 @@ export function DashboardPage() {
       )}
       <div className="flex items-end justify-between gap-6 px-4 pt-5 lg:px-8 lg:pt-9">
         <div className="min-w-0">
-          <p className="text-[14px] font-medium text-ink-3">{todayLabel(now)}</p>
-          <h1 className="w-wide mt-0.5 text-[34px] leading-[1.05] font-semibold tracking-[-0.02em] text-ink lg:text-[38px]">
+          <p className="text-[0.875rem] font-medium text-ink-3">{todayLabel(now)}</p>
+          <h1 className="w-wide mt-0.5 text-[2.125rem] leading-[1.05] font-semibold tracking-[-0.02em] text-ink lg:text-[2.375rem]">
             {greeting(now)}
             {desk && shop ? <span className="text-ink-3">, {shop}</span> : null}
           </h1>
         </div>
         {wide && jobs.length > 0 && (
           <div className="w-[360px] shrink-0">
-            <SearchField value="" onChange={() => {}} readOnlyTap onFocus={() => nav('/schede?cerca=1')} placeholder="Cerca targa, cliente, ditta" shortcut={searchShortcut()} />
+            <SearchField id="search-jobs" value={q} onChange={setQ} onKeyDown={onSearchKey} placeholder="Cerca targa, cliente, ditta" shortcut={searchShortcut()} />
           </div>
         )}
       </div>
@@ -147,8 +160,8 @@ export function DashboardPage() {
   const recentCard = (
     <section className="card p-4 sm:p-5">
       <header className="mb-1 flex items-center justify-between">
-        <h2 className="w-semi text-[17px] font-semibold text-ink">Ultime accettazioni</h2>
-        <Link to="/schede" className="press flex items-center gap-0.5 text-[14.5px] font-semibold text-accent-ink">
+        <h2 className="w-semi text-[1.0625rem] font-semibold text-ink">Ultime accettazioni</h2>
+        <Link to="/schede" className="press flex items-center gap-0.5 text-[0.9062rem] font-semibold text-accent-ink">
           Tutte le schede ({jobs.length}) <ChevronRight size={17} />
         </Link>
       </header>
@@ -168,10 +181,12 @@ export function DashboardPage() {
         {header}
 
         <div className="sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:hidden">
-          <SearchField value="" onChange={() => {}} readOnlyTap onFocus={() => nav('/schede?cerca=1')} placeholder="Cerca targa, cliente, ditta" />
+          <SearchField id="search-jobs" value={q} onChange={setQ} onKeyDown={onSearchKey} placeholder="Cerca targa, cliente, ditta" />
         </div>
 
-        {wide ? (
+        {qq ? (
+          <SearchResults q={qq} list={found} wide={wide} />
+        ) : wide ? (
           <div className="mt-6 flex flex-col gap-4 px-8">
             <div className="grid grid-cols-4 gap-4">{tiles}</div>
             <div className="grid grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-4">
@@ -199,22 +214,51 @@ export function DashboardPage() {
 
 /* ---------------- pezzi ---------------- */
 
+function SearchResults({ q, list, wide }: { q: string; list: Job[]; wide: boolean }) {
+  const nav = useNavigate();
+  const looksPlate = /^[a-z0-9 ]{4,10}$/i.test(q) && /\d/.test(q);
+  return (
+    <section className={`card mt-3 p-4 sm:p-5 ${wide ? 'mx-8' : 'mx-4'}`} aria-live="polite">
+      <header className="mb-1 flex items-baseline justify-between gap-3">
+        <h2 className="w-semi text-[1.0625rem] font-semibold text-ink">{list.length ? `${list.length} ${list.length === 1 ? 'scheda' : 'schede'}` : `Nessun risultato per “${q}”`}</h2>
+        {list.length > 0 && wide && <span className="text-[0.8125rem] text-ink-3">Invio apre la prima</span>}
+      </header>
+      {list.length === 0 ? (
+        <div className="flex flex-wrap items-center gap-3 py-3">
+          <p className="text-[0.9375rem] text-ink-2">Controlla la targa o cerca per nome, telefono o partita IVA.</p>
+          <Button variant="outline" size="sm" icon={<Plus size={17} strokeWidth={2.4} />} onClick={() => nav(`/nuova?cl=privato${looksPlate ? `&plate=${encodeURIComponent(q.toUpperCase())}` : ''}`)}>
+            {looksPlate ? `Accetta ${q.toUpperCase()}` : 'Nuova accettazione'}
+          </Button>
+        </div>
+      ) : (
+        <ul className={`flex flex-col ${wide ? 'lg:grid lg:grid-cols-2 lg:gap-x-6' : ''}`}>
+          {list.slice(0, 30).map((j, i) => (
+            <li key={j.id} className={i && !(wide && i < 2) ? 'border-t border-line' : ''}>
+              <JobRow j={j} meta={relDay(j.createdAt)} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function ShopFloor({ d, onOpen }: { d: ReturnType<typeof dashboard>; onOpen: () => void }) {
   const max = Math.max(1, ...d.byStatus.map((x) => x.n));
   return (
     <button type="button" onClick={onOpen} className="press card group flex flex-col p-5 text-left hover:shadow-[var(--shadow-2)]">
       <span className="flex items-center justify-between">
-        <span className="text-[15px] font-semibold text-ink-2">In officina ora</span>
+        <span className="text-[0.9375rem] font-semibold text-ink-2">In officina ora</span>
         <ArrowUpRight size={18} className="text-ink-3 transition-colors group-hover:text-ink" />
       </span>
       <span className="mt-1 flex items-baseline gap-2.5">
-        <span className="w-cond tnum text-[64px] leading-[0.95] font-bold tracking-[-0.01em] text-ink">{d.inShop}</span>
-        <span className="text-[16px] text-ink-2">{d.inShop === 1 ? 'veicolo' : 'veicoli'}</span>
+        <span className="w-cond tnum text-[4rem] leading-[0.95] font-bold tracking-[-0.01em] text-ink">{d.inShop}</span>
+        <span className="text-[1rem] text-ink-2">{d.inShop === 1 ? 'veicolo' : 'veicoli'}</span>
       </span>
       <span className="mt-4 flex flex-col gap-2.5" aria-label="Veicoli per stato">
         {d.byStatus.map(({ s, n }) => (
           <span key={s} className="grid grid-cols-[112px_minmax(0,1fr)_28px] items-center gap-3">
-            <span className="flex items-center gap-2 text-[14px] font-medium text-ink-2">
+            <span className="flex items-center gap-2 text-[0.875rem] font-medium text-ink-2">
               <span className="size-2 shrink-0 rounded-full" style={{ background: stColor(s) }} />
               {statoLabel(s)}
             </span>
@@ -228,7 +272,7 @@ function ShopFloor({ d, onOpen }: { d: ReturnType<typeof dashboard>; onOpen: () 
                 }}
               />
             </span>
-            <span className="tnum text-right text-[15px] font-semibold text-ink">{n}</span>
+            <span className="tnum text-right text-[0.9375rem] font-semibold text-ink">{n}</span>
           </span>
         ))}
       </span>
@@ -248,9 +292,9 @@ function Tile({ to, icon, tint, label, value, foot }: { to?: string; icon: React
       >
         {icon}
       </span>
-      <span className="mt-3 text-[13.5px] leading-tight font-medium text-ink-2">{label}</span>
-      <span className="w-cond tnum mt-1 truncate text-[30px] leading-none font-bold text-ink lg:text-[36px]">{value}</span>
-      <span className="mt-1.5 line-clamp-1 text-[13px] text-ink-3">{foot}</span>
+      <span className="mt-3 text-[0.8438rem] leading-tight font-medium text-ink-2">{label}</span>
+      <span className="w-cond tnum mt-1 truncate text-[1.875rem] leading-none font-bold text-ink lg:text-[2.25rem]">{value}</span>
+      <span className="mt-1.5 line-clamp-1 text-[0.8125rem] text-ink-3">{foot}</span>
     </>
   );
   const cls = 'card flex min-w-0 flex-col p-4 text-left lg:p-5';
@@ -268,12 +312,12 @@ function JobRow({ j, meta }: { j: Job; meta: ReactNode }) {
     <Link to={`/job/${j.id}`} className="press -mx-2 flex items-center gap-3 rounded-[14px] px-2 py-3 hover:bg-surface-2">
       <Plate plate={j.plate} country={j.plateCountry} size="sm" />
       <span className="min-w-0 flex-1">
-        <span className="w-semi block truncate text-[15.5px] font-semibold text-ink">{veic(j)}</span>
-        <span className="block truncate text-[13.5px] text-ink-3">{custName(j) || 'Cliente non indicato'}</span>
+        <span className="w-semi block truncate text-[0.9688rem] font-semibold text-ink">{veic(j)}</span>
+        <span className="block truncate text-[0.8438rem] text-ink-3">{custName(j) || 'Cliente non indicato'}</span>
       </span>
       <span className="flex shrink-0 flex-col items-end gap-1">
         <StatusPill s={j.status} size="sm" short />
-        <span className="text-[12.5px] whitespace-nowrap text-ink-3">{meta}</span>
+        <span className="text-[0.7812rem] whitespace-nowrap text-ink-3">{meta}</span>
       </span>
     </Link>
   );
@@ -285,10 +329,10 @@ function Deliveries({ list }: { list: Delivery[] }) {
     <section className="card p-4 sm:p-5">
       <header className="mb-1 flex items-center gap-2">
         <AlarmClock size={18} className="text-ink-3" />
-        <h2 className="w-semi text-[17px] font-semibold text-ink">Consegne promesse</h2>
+        <h2 className="w-semi text-[1.0625rem] font-semibold text-ink">Consegne promesse</h2>
       </header>
       {list.length === 0 ? (
-        <p className="py-3 text-[15px] text-ink-2">Nessuna consegna prevista per oggi o domani.</p>
+        <p className="py-3 text-[0.9375rem] text-ink-2">Nessuna consegna prevista per oggi o domani.</p>
       ) : (
         <ul className="flex flex-col">
           {list.slice(0, 5).map(({ job, days }, i) => (
@@ -323,8 +367,8 @@ function WeeklyChart({ weeks, tall }: { weeks: WeekBar[]; tall?: boolean }) {
   return (
     <section className="card flex flex-col p-4 sm:p-5">
       <header className="flex items-baseline justify-between gap-3">
-        <h2 className="w-semi text-[17px] font-semibold text-ink">Incassi settimanali</h2>
-        <span className="tnum text-[13.5px] text-ink-3">8 settimane · {eurShort(total)}</span>
+        <h2 className="w-semi text-[1.0625rem] font-semibold text-ink">Incassi settimanali</h2>
+        <span className="tnum text-[0.8438rem] text-ink-3">8 settimane · {eurShort(total)}</span>
       </header>
       <div ref={ref} className="mt-auto pt-3">
         <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="block w-full" role="img" aria-label="Incassi delle ultime 8 settimane" onMouseLeave={() => setSel(null)}>

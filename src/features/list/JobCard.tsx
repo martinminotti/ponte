@@ -10,7 +10,7 @@ export function JobCard({ j, active, dense }: { j: Job; active?: boolean; dense?
   const due = isDue(j);
   const tot = totale(j);
   const name = custName(j);
-  const amt = dense ? 'text-[18px]' : 'text-[21px]';
+  const amt = dense ? 'text-[1.125rem]' : 'text-[1.3125rem]';
   return (
     <Link
       to={`/job/${j.id}`}
@@ -27,8 +27,8 @@ export function JobCard({ j, active, dense }: { j: Job; active?: boolean; dense?
 
       <div className={`${dense ? 'mt-2.5' : 'mt-3.5'} flex items-end justify-between gap-3`}>
         <div className="min-w-0">
-          <p className={`w-semi truncate leading-tight font-semibold text-ink ${dense ? 'text-[16px]' : 'text-[18px]'}`}>{veic(j)}</p>
-          <p className={`mt-0.5 flex items-center gap-1.5 truncate text-ink-2 ${dense ? 'text-[14px]' : 'text-[15px]'}`}>
+          <p className={`w-semi truncate leading-tight font-semibold text-ink ${dense ? 'text-[1rem]' : 'text-[1.125rem]'}`}>{veic(j)}</p>
+          <p className={`mt-0.5 flex items-center gap-1.5 truncate text-ink-2 ${dense ? 'text-[0.875rem]' : 'text-[0.9375rem]'}`}>
             {isAz(j) && <Building2 size={15} className="shrink-0 text-ink-3" aria-label="Azienda" />}
             <span className="truncate">{name || 'Cliente non indicato'}</span>
           </p>
@@ -36,17 +36,17 @@ export function JobCard({ j, active, dense }: { j: Job; active?: boolean; dense?
         <div className="shrink-0 text-right">
           {due ? (
             <>
-              <p className="text-[12.5px] font-medium text-danger">da incassare</p>
+              <p className="text-[0.7812rem] font-medium text-danger">da incassare</p>
               <p className={`w-cond tnum ${amt} leading-none font-bold text-danger`}>{eur(daSaldare(j))}</p>
             </>
           ) : j.paid ? (
             <>
-              <p className="text-[12.5px] font-medium text-ok">pagato</p>
+              <p className="text-[0.7812rem] font-medium text-ok">pagato</p>
               <p className={`w-cond tnum ${amt} leading-none font-bold text-ink`}>{eur(tot)}</p>
             </>
           ) : tot > 0 ? (
             <>
-              <p className="text-[12.5px] font-medium text-ink-3">{toInvoice(j) ? 'da fatturare' : 'totale'}</p>
+              <p className="text-[0.7812rem] font-medium text-ink-3">{toInvoice(j) ? 'da fatturare' : 'totale'}</p>
               <p className={`w-cond tnum ${amt} leading-none font-bold text-ink`}>{eur(tot)}</p>
             </>
           ) : null}
@@ -57,7 +57,7 @@ export function JobCard({ j, active, dense }: { j: Job; active?: boolean; dense?
         <div className="flex-1">
           <StatusTicks s={j.status} />
         </div>
-        <p className="tnum shrink-0 text-[13px] text-ink-3">
+        <p className="tnum shrink-0 text-[0.8125rem] text-ink-3">
           N. {jobNumber(j.number)} <span aria-hidden="true">·</span> {relDay(j.createdAt)}
         </p>
       </div>

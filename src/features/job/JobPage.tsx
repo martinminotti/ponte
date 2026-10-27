@@ -26,7 +26,7 @@ export function JobPage() {
   if (job === null)
     return (
       <div className="p-10 text-center">
-        <p className="w-wide text-[18px] font-semibold text-ink">Scheda non trovata</p>
+        <p className="w-wide text-[1.125rem] font-semibold text-ink">Scheda non trovata</p>
         <p className="mt-1 text-ink-2">Potrebbe essere stata eliminata.</p>
         <Link to="/" className="mt-5 inline-block font-semibold text-accent-ink underline underline-offset-2">
           Torna alle schede
@@ -40,8 +40,8 @@ function Fact({ k, v, mono }: { k: string; v?: string; mono?: boolean }) {
   if (!v) return null;
   return (
     <div className="min-w-0">
-      <dt className="text-[13px] text-ink-3">{k}</dt>
-      <dd className={`mt-0.5 text-[15.5px] break-words text-ink ${mono ? 'tnum tracking-[0.04em]' : ''}`}>{v}</dd>
+      <dt className="text-[0.8125rem] text-ink-3">{k}</dt>
+      <dd className={`mt-0.5 text-[0.9688rem] break-words text-ink ${mono ? 'tnum tracking-[0.04em]' : ''}`}>{v}</dd>
     </div>
   );
 }
@@ -107,9 +107,9 @@ function JobView({ job }: { job: Job }) {
       <div className="relative px-4 pt-6 pb-5 sm:px-6">
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1" style={{ background: stColor(job.status) }} />
         <Plate plate={job.plate} country={job.plateCountry} size="lg" />
-        <h1 className="w-wide mt-4 text-[26px] leading-[1.1] font-semibold tracking-[-0.015em] text-ink sm:text-[30px]">{veic(job)}</h1>
+        <h1 className="w-wide mt-4 text-[1.625rem] leading-[1.1] font-semibold tracking-[-0.015em] text-ink sm:text-[1.875rem]">{veic(job)}</h1>
         <div className="mt-2 flex items-center justify-between gap-3">
-          <p className="flex min-w-0 items-center gap-1.5 text-[16px] text-ink-2">
+          <p className="flex min-w-0 items-center gap-1.5 text-[1rem] text-ink-2">
             {az && <Building2 size={17} className="shrink-0" />}
             <span className="truncate">{custName(job) || 'Cliente non indicato'}</span>
           </p>
@@ -153,7 +153,7 @@ function JobView({ job }: { job: Job }) {
             <dt className="sr-only">Tipo di lavoro</dt>
             <dd className="flex flex-wrap gap-1.5">
               {job.services.map((s) => (
-                <span key={s} className="rounded-[8px] bg-surface px-2.5 py-1 text-[13.5px] font-medium text-ink-2 ring-1 ring-line">
+                <span key={s} className="rounded-[8px] bg-surface px-2.5 py-1 text-[0.8438rem] font-medium text-ink-2 ring-1 ring-line">
                   {s}
                 </span>
               ))}
@@ -165,20 +165,20 @@ function JobView({ job }: { job: Job }) {
         <div className="flex flex-col gap-3 border-t border-line px-4 py-4 sm:px-6">
           {job.request && (
             <div>
-              <p className="text-[13px] text-ink-3">Lavori richiesti</p>
-              <p className="mt-0.5 text-[15.5px] whitespace-pre-wrap text-ink">{job.request}</p>
+              <p className="text-[0.8125rem] text-ink-3">Lavori richiesti</p>
+              <p className="mt-0.5 text-[0.9688rem] whitespace-pre-wrap text-ink">{job.request}</p>
             </div>
           )}
           {job.notes && (
             <div>
-              <p className="text-[13px] text-ink-3">Note all'arrivo</p>
-              <p className="mt-0.5 text-[15.5px] whitespace-pre-wrap text-ink">{job.notes}</p>
+              <p className="text-[0.8125rem] text-ink-3">Note all'arrivo</p>
+              <p className="mt-0.5 text-[0.9688rem] whitespace-pre-wrap text-ink">{job.notes}</p>
             </div>
           )}
         </div>
       )}
       <div className="border-t border-line px-2 py-1.5 sm:px-4">
-        <Link to={`/job/${job.id}/modifica`} className="press inline-flex h-11 items-center gap-2 rounded-[12px] px-3 text-[15px] font-semibold text-accent-ink hover:bg-surface-2">
+        <Link to={`/job/${job.id}/modifica`} className="press inline-flex h-11 items-center gap-2 rounded-[12px] px-3 text-[0.9375rem] font-semibold text-accent-ink hover:bg-surface-2">
           <Pencil size={17} /> Modifica dati
         </Link>
       </div>
@@ -189,7 +189,7 @@ function JobView({ job }: { job: Job }) {
       {fresh && canWa && (
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
           <div className="flex items-center justify-between gap-3 rounded-[20px] bg-[color-mix(in_srgb,var(--wa)_12%,var(--surface))] p-4">
-            <p className="text-[15px] leading-snug text-ink">
+            <p className="text-[0.9375rem] leading-snug text-ink">
               <span className="font-semibold">Accettazione registrata.</span> Avvisa il cliente che hai preso in carico il veicolo.
             </p>
             <Button
@@ -210,7 +210,7 @@ function JobView({ job }: { job: Job }) {
   const status = (
     <Section title="Stato lavorazione">
       <StatusRail value={job.status} onChange={setStatus} />
-      <button type="button" onClick={() => setShowHist((v) => !v)} aria-expanded={showHist} className="press -mb-1 flex items-center gap-1 self-start text-[14.5px] font-medium text-ink-2">
+      <button type="button" onClick={() => setShowHist((v) => !v)} aria-expanded={showHist} className="press -mb-1 flex items-center gap-1 self-start text-[0.9062rem] font-medium text-ink-2">
         Cronologia <ChevronDown size={17} className={`transition-transform ${showHist ? 'rotate-180' : ''}`} />
       </button>
       {showHist && <HistoryList job={job} />}
@@ -218,7 +218,7 @@ function JobView({ job }: { job: Job }) {
   );
   const conto = (
     <Section title="Conto per il cliente">
-      <p className="-mt-1 text-[15px] text-ink-2">Il documento A4 con lavori, totale, pagamento e garanzia. Da salvare in PDF, stampare o mandare su WhatsApp.</p>
+      <p className="-mt-1 text-[0.9375rem] text-ink-2">Il documento A4 con lavori, totale, pagamento e garanzia. Da salvare in PDF, stampare o mandare su WhatsApp.</p>
       <Button variant="outline" size="lg" block icon={<FileText size={20} />} onClick={() => nav(`/job/${job.id}/conto`)}>
         Apri il conto
       </Button>
