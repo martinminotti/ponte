@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMatch, useNavigate, useSearchParams } from 'react-router';
 import { Plus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { overlayOpen, searchShortcut, typing, useGlass, useJobs, useSettings, useWide } from '@/app/hooks';
+import { overlayOpen, searchShortcut, typing, useGlass, useJobs, useNativeBarOn, useSettings, useWide } from '@/app/hooks';
+import { useNativeSearch } from '@/platform/nativeBar';
 import { STATI, statoIndex } from '@/domain/constants';
 import { fmtPlate } from '@/domain/format';
 import { veic, waLink, withStatus } from '@/domain/logic';
@@ -94,6 +95,8 @@ export function ListPage() {
     toast(`${n} schede di esempio eliminate`);
   };
   const newJob = () => window.dispatchEvent(new Event('ro:new-job'));
+  const ns = useNativeSearch();
+  const searching = useNativeBarOn() && ns.active;
 
   // azioni a scorrimento sulle schede (telefono): stato successivo a destra, WhatsApp a sinistra
   const settings = useSettings();
@@ -135,48 +138,53 @@ export function ListPage() {
 
   return (
     <div className={`mx-auto w-full ${wide ? 'max-w-none' : 'max-w-[680px]'} pb-safe-bar lg:pb-10`}>
-      {!wide && (
+      {/* ricerca nativa di iOS agganciata in alto: la testata si fa da parte e i risultati partono sotto il campo */}
+      {searching && <div aria-hidden="true" className="h-[calc(env(safe-area-inset-top,0px)+64px)]" />}
+
+      {!wide && !searching && (
         <header className="px-4 pt-[calc(env(safe-area-inset-top,0px)+16px)]">
           <BrandMark />
         </header>
       )}
 
-      {!wide && <h1 className="w-wide px-4 pt-5 text-[2rem] leading-none font-semibold tracking-[-0.02em] text-ink">Schede</h1>}
+      {!wide && !searching && <h1 className="w-wide px-4 pt-5 text-[2rem] leading-none font-semibold tracking-[-0.02em] text-ink">Schede</h1>}
 
-      <div
-        className={`sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:top-0 lg:pt-5 ${
-          glass && !wide ? 'scroll-edge' : 'bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] backdrop-blur-xl backdrop-saturate-150'
-        }`}
-      >
-        {wide && <h1 className="w-wide mb-3 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink">Schede</h1>}
-        <SearchField
-          ref={searchRef}
-          id="search-jobs"
-          value={q}
-          onChange={setQ}
-          shortcut={wide ? searchShortcut() : undefined}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              if (q) setQ('');
-              else e.currentTarget.blur();
-            } else if ((e.key === 'Enter' || e.key === 'ArrowDown') && list.length) {
-              e.preventDefault();
-              e.currentTarget.blur();
-              nav(`/job/${list[0].id}`);
-            }
-          }}
-        />
-        <div className={wide ? 'mt-3 flex flex-wrap gap-1.5' : 'no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1'} role="group" aria-label="Filtra le schede">
-          {FILTRI.map((f) => (
-            <Chip key={f.k} on={filter === f.k} count={jobs ? counts[f.k] : undefined} onClick={() => setFilter(f.k)} className={wide ? '!h-8 !gap-1.5 !px-3 !text-[0.875rem]' : ''}>
-              {f.l}
-            </Chip>
-          ))}
+      {!searching && (
+        <div
+          className={`sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:top-0 lg:pt-5 ${
+            glass && !wide ? 'scroll-edge' : 'bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] backdrop-blur-xl backdrop-saturate-150'
+          }`}
+        >
+          {wide && <h1 className="w-wide mb-3 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink">Schede</h1>}
+          <SearchField
+            ref={searchRef}
+            id="search-jobs"
+            value={q}
+            onChange={setQ}
+            shortcut={wide ? searchShortcut() : undefined}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                if (q) setQ('');
+                else e.currentTarget.blur();
+              } else if ((e.key === 'Enter' || e.key === 'ArrowDown') && list.length) {
+                e.preventDefault();
+                e.currentTarget.blur();
+                nav(`/job/${list[0].id}`);
+              }
+            }}
+          />
+          <div className={wide ? 'mt-3 flex flex-wrap gap-1.5' : 'no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1'} role="group" aria-label="Filtra le schede">
+            {FILTRI.map((f) => (
+              <Chip key={f.k} on={filter === f.k} count={jobs ? counts[f.k] : undefined} onClick={() => setFilter(f.k)} className={wide ? '!h-8 !gap-1.5 !px-3 !text-[0.875rem]' : ''}>
+                {f.l}
+              </Chip>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="px-4">
-        {demoN > 0 && (
+        {demoN > 0 && !searching && (
           <div className="mt-2 flex items-center justify-between gap-3 rounded-[16px] bg-warn-soft px-4 py-3 text-[0.9062rem] font-medium text-warn">
             <span>Stai guardando {demoN} schede di esempio.</span>
             <button type="button" onClick={removeDemo} className="press shrink-0 rounded-[10px] px-2.5 py-1.5 font-semibold underline underline-offset-2">

@@ -18,6 +18,7 @@ public class NativeBarPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "configure", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setCompact", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "blurSearch", returnType: CAPPluginReturnPromise),
     ]
 
     private var bar: GlassBar?
@@ -64,6 +65,13 @@ public class NativeBarPlugin: CAPPlugin, CAPBridgedPlugin {
             case "search": bar.showSearch(text: text, placeholder: placeholder)
             default: bar.hide()
             }
+            call.resolve()
+        }
+    }
+
+    @objc public func blurSearch(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            self.bar?.blurSearch()
             call.resolve()
         }
     }
@@ -185,6 +193,7 @@ final class GlassBar: PassthroughView {
     private var bottomSafe: NSLayoutConstraint!
     private var bottomKeyboard: NSLayoutConstraint!
     private weak var searchField: UITextField?
+    private var topSearch: UIView?
     private var mode = "hidden"
     private var tabs: [BarItem] = []
     private var actions: [BarItem] = []
@@ -231,12 +240,23 @@ final class GlassBar: PassthroughView {
     }
 
     private func leaveSearch() {
+        guard let bar = topSearch else { return }
         searchField?.resignFirstResponder()
         searchField = nil
-        dock(keyboard: false)
+        topSearch = nil
+        UIView.animate(withDuration: 0.22, delay: 0, options: [.beginFromCurrentState, .curveEaseIn]) {
+            bar.alpha = 0
+            bar.transform = CGAffineTransform(translationX: 0, y: -10)
+        } completion: { _ in bar.removeFromSuperview() }
     }
 
-    /// Ricerca nativa: capsula di vetro con il campo, e il pulsante per chiudere. Sale con la tastiera.
+    /// Chiude la tastiera lasciando la ricerca agganciata in alto (si scorrono i risultati).
+    func blurSearch() {
+        searchField?.resignFirstResponder()
+    }
+
+    /// Ricerca nativa in alto, come nelle app di sistema: il campo di iOS si aggancia sotto la status bar
+    /// al posto della testata della pagina, con «Annulla». La barra in basso si fa da parte.
     func showSearch(text: String, placeholder: String) {
         if mode == "search", let f = searchField {
             if !f.isFirstResponder { f.becomeFirstResponder() }
@@ -246,49 +266,86 @@ final class GlassBar: PassthroughView {
         tabs = []
         actions = []
         accessory = nil
-        rebuild {
-            let box = Glass.view(radius: 26)
-            let field = SearchTextField()
-            field.text = text
-            field.placeholder = placeholder
-            field.font = .preferredFont(forTextStyle: .body)
-            field.adjustsFontForContentSizeCategory = true
-            field.textColor = Ponte.ink
-            field.tintColor = Ponte.accentInk
-            field.returnKeyType = .search
-            field.autocorrectionType = .no
-            field.spellCheckingType = .no
-            field.autocapitalizationType = .none
-            field.clearButtonMode = .whileEditing
-            field.enablesReturnKeyAutomatically = false
-            let icon = UIImageView(image: UIImage(systemName: "magnifyingglass", withConfiguration: UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)))
-            icon.tintColor = Ponte.ink.withAlphaComponent(0.6)
-            icon.contentMode = .center
-            icon.frame = CGRect(x: 0, y: 0, width: 40, height: 24)
-            field.leftView = icon
-            field.leftViewMode = .always
-            field.translatesAutoresizingMaskIntoConstraints = false
-            field.addAction(UIAction { [weak self, weak field] _ in self?.onSearch(field?.text ?? "", false) }, for: .editingChanged)
-            field.addAction(UIAction { [weak field] _ in field?.resignFirstResponder() }, for: .editingDidEndOnExit)
-            box.contentView.addSubview(field)
-            NSLayoutConstraint.activate([
-                field.leadingAnchor.constraint(equalTo: box.contentView.leadingAnchor, constant: 4),
-                field.trailingAnchor.constraint(equalTo: box.contentView.trailingAnchor, constant: -10),
-                field.topAnchor.constraint(equalTo: box.contentView.topAnchor),
-                field.bottomAnchor.constraint(equalTo: box.contentView.bottomAnchor),
-            ])
-            let close = GlassButton(item: BarItem(id: "search-close", label: "Chiudi la ricerca", symbol: "xmark"), tint: nil, foreground: Ponte.ink, round: true) { [weak self] in
-                self?.leaveSearch()
-                self?.onSearch("", true)
+        // via la riga in basso (sezioni o azioni)
+        UIView.animate(withDuration: 0.2, delay: 0, options: [.beginFromCurrentState]) {
+            self.row.alpha = 0
+            self.row.transform = CGAffineTransform(translationX: 0, y: 24).scaledBy(x: 0.96, y: 0.96)
+        } completion: { _ in
+            if self.mode == "search" {
+                self.row.isHidden = true
+                self.row.arrangedSubviews.forEach { $0.removeFromSuperview() }
             }
-            close.widthAnchor.constraint(equalTo: close.heightAnchor).isActive = true
-            self.row.addArrangedSubview(box)
-            self.row.addArrangedSubview(close)
-            self.rowHeight.constant = 52
-            self.dock(keyboard: true)
-            self.searchField = field
-            field.becomeFirstResponder()
         }
+
+        let bar = PassthroughView()
+        bar.translatesAutoresizingMaskIntoConstraints = false
+        let box = Glass.view(radius: 24)
+        box.translatesAutoresizingMaskIntoConstraints = false
+        let field = UISearchTextField()
+        field.text = text
+        field.placeholder = placeholder
+        field.font = .preferredFont(forTextStyle: .body)
+        field.adjustsFontForContentSizeCategory = true
+        field.textColor = Ponte.ink
+        field.tintColor = Ponte.accentInk
+        field.backgroundColor = .clear
+        field.borderStyle = .none
+        field.returnKeyType = .search
+        field.autocorrectionType = .no
+        field.spellCheckingType = .no
+        field.autocapitalizationType = .none
+        field.enablesReturnKeyAutomatically = false
+        field.translatesAutoresizingMaskIntoConstraints = false
+        field.addAction(UIAction { [weak self, weak field] _ in self?.onSearch(field?.text ?? "", false) }, for: .editingChanged)
+        field.addAction(UIAction { [weak field] _ in field?.resignFirstResponder() }, for: .editingDidEndOnExit)
+        box.contentView.addSubview(field)
+
+        let cancel = UIButton(type: .system)
+        var cfg = UIButton.Configuration.plain()
+        var t = AttributedString("Annulla")
+        t.font = .preferredFont(forTextStyle: .body)
+        cfg.attributedTitle = t
+        cfg.baseForegroundColor = Ponte.accentInk
+        cfg.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 6, bottom: 0, trailing: 2)
+        cancel.configuration = cfg
+        cancel.setContentHuggingPriority(.required, for: .horizontal)
+        cancel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        cancel.translatesAutoresizingMaskIntoConstraints = false
+        cancel.addAction(UIAction { [weak self] _ in
+            self?.leaveSearch()
+            self?.onSearch("", true)
+        }, for: .touchUpInside)
+
+        bar.addSubview(box)
+        bar.addSubview(cancel)
+        addSubview(bar)
+        NSLayoutConstraint.activate([
+            bar.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 6),
+            bar.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            bar.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -12),
+            bar.heightAnchor.constraint(equalToConstant: 48),
+            box.leadingAnchor.constraint(equalTo: bar.leadingAnchor),
+            box.topAnchor.constraint(equalTo: bar.topAnchor),
+            box.bottomAnchor.constraint(equalTo: bar.bottomAnchor),
+            cancel.leadingAnchor.constraint(equalTo: box.trailingAnchor, constant: 6),
+            cancel.trailingAnchor.constraint(equalTo: bar.trailingAnchor),
+            cancel.centerYAnchor.constraint(equalTo: bar.centerYAnchor),
+            cancel.heightAnchor.constraint(equalToConstant: 44),
+            field.leadingAnchor.constraint(equalTo: box.contentView.leadingAnchor, constant: 8),
+            field.trailingAnchor.constraint(equalTo: box.contentView.trailingAnchor, constant: -8),
+            field.centerYAnchor.constraint(equalTo: box.contentView.centerYAnchor),
+            field.heightAnchor.constraint(equalToConstant: 40),
+        ])
+        topSearch = bar
+        searchField = field
+        bar.alpha = 0
+        bar.transform = CGAffineTransform(translationX: 0, y: 14)
+        layoutIfNeeded()
+        UIView.animate(withDuration: 0.38, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: [.beginFromCurrentState, .allowUserInteraction]) {
+            bar.alpha = 1
+            bar.transform = .identity
+        }
+        field.becomeFirstResponder()
     }
 
     func showTabs(_ items: [BarItem], selected: String?, accessory acc: BarItem?) {

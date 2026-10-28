@@ -2,7 +2,8 @@ import { useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { AlarmClock, ArrowUpRight, CheckCircle2, ChevronRight, Plus, ReceiptText, Sparkles, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
-import { searchShortcut, useDesk, useJobs, useSettings, useWide, useWidth } from '@/app/hooks';
+import { searchShortcut, useDesk, useJobs, useNativeBarOn, useSettings, useWide, useWidth } from '@/app/hooks';
+import { useNativeSearch } from '@/platform/nativeBar';
 import { BrandMark } from '@/app/Shell';
 import { Page } from '@/app/layout';
 import { statoLabel } from '@/domain/constants';
@@ -46,6 +47,8 @@ export function DashboardPage() {
   const d = useMemo(() => dashboard(jobs || [], now), [jobs, now]);
   // la ricerca di Oggi cerca qui, senza portarti altrove: i risultati prendono il posto del cruscotto
   const [q, setQ] = useState('');
+  const ns = useNativeSearch();
+  const searching = useNativeBarOn() && ns.active;
   const qq = q.trim();
   const found = useMemo(() => (qq ? (jobs || []).filter((j) => matchJob(j, qq)) : []), [jobs, qq]);
   const onSearchKey = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -178,11 +181,17 @@ export function DashboardPage() {
   return (
     <Page className="pb-safe-bar lg:pb-10">
       <div className="mx-auto max-w-[880px] lg:max-w-[1320px]">
-        {header}
-
-        <div className="scroll-edge sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:hidden">
-          <SearchField id="search-jobs" value={q} onChange={setQ} onKeyDown={onSearchKey} placeholder="Cerca targa, cliente, ditta" />
-        </div>
+        {searching ? (
+          // ricerca nativa di iOS agganciata in alto: testata via, risultati subito sotto il campo
+          <div aria-hidden="true" className="h-[calc(env(safe-area-inset-top,0px)+56px)]" />
+        ) : (
+          <>
+            {header}
+            <div className="scroll-edge sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:hidden">
+              <SearchField id="search-jobs" value={q} onChange={setQ} onKeyDown={onSearchKey} placeholder="Cerca targa, cliente, ditta" />
+            </div>
+          </>
+        )}
 
         {qq ? (
           <SearchResults q={qq} list={found} wide={wide} />

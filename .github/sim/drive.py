@@ -191,13 +191,14 @@ try:
         idb("ui", "tap", str(x), str(y))
         time.sleep(1.6)
         shot("04-ricerca-aperta")
-        check(has("Chiudi la ricerca"), "ricerca nativa aperta sopra la tastiera")
+        check(has("Annulla", kinds=NATIVE), "ricerca nativa agganciata in alto, con Annulla")
+        check(not has("Oggi", kinds=NATIVE), "durante la ricerca la barra in basso si fa da parte")
         idb("ui", "text", "golf")
         time.sleep(1.2)
         shot("05-ricerca-golf")
         check(has("Volkswagen Golf 2.0 TDI", exact=False), "risultato «Volkswagen Golf» mentre scrivo")
         check(not has("Peugeot 208", exact=False), "le altre schede spariscono")
-        tap("Chiudi la ricerca", wait=1.2)
+        tap("Annulla", wait=1.2, kinds=NATIVE)
         shot("06-ricerca-chiusa")
         check(has("Peugeot 208", exact=False), "chiudendo torna l'elenco completo")
 
@@ -250,7 +251,7 @@ try:
     shot("20-scuro-oggi")
     tap("Schede", wait=1.2, kinds=NATIVE)
     shot("21-scuro-schede")
-    tap("Volkswagen Golf 2.0 TDI", exact=False, wait=1.8, kinds=("web:a",))
+    tap("Peugeot 208", exact=False, wait=1.8, kinds=("web:a",))  # la Golf è già consegnata e archiviata
     shot("22-scuro-scheda")
     sh("xcrun", "simctl", "ui", UDID, "appearance", "light")
 

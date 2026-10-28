@@ -13,6 +13,7 @@ type Config =
 interface NativeBarPlugin {
   configure(c: Config & { dark?: boolean }): Promise<void>;
   setCompact(o: { compact: boolean }): Promise<void>;
+  blurSearch(): Promise<void>;
   addListener(e: 'select', cb: (d: { id: string }) => void): Promise<PluginListenerHandle>;
   addListener(e: 'search', cb: (d: { text: string; end: boolean }) => void): Promise<PluginListenerHandle>;
 }
@@ -75,6 +76,12 @@ export function useNativeSearch(): Search {
 export function startNativeSearch(text: string, placeholder: string, onText: (t: string) => void) {
   search = { active: true, text, placeholder, onText };
   emitSearch();
+  window.scrollTo({ top: 0 });
+}
+
+/** Scorrendo i risultati la tastiera si chiude; il campo resta agganciato in alto. */
+export function blurNativeSearch() {
+  if (search.active) NativeBar.blurSearch().catch(() => {});
 }
 
 /** Chiude la ricerca nativa. Il testo resta alla pagina (per tornare all'elenco filtrato), salvo chiusura esplicita. */

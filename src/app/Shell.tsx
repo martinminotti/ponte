@@ -6,7 +6,7 @@ import { PonteIcon, PonteWordmark } from '@/ui/Brand';
 import { SPRING, SPRING_FAST } from '@/ui/motion';
 import { Toaster } from 'sonner';
 import { overlayOpen, typing, useDesk, useGlass, useJobs, useNativeBarOn, useOverlayOpen, useScrolledDown, useScrolledPast, useSettings, useThemeSync, useWide } from './hooks';
-import { configureBar, endNativeSearch, nativeBarAvailable, onBarSearch, onBarSelect, setBarCompact, useNativeSearch, usePageActions } from '@/platform/nativeBar';
+import { blurNativeSearch, configureBar, endNativeSearch, nativeBarAvailable, onBarSearch, onBarSelect, setBarCompact, useNativeSearch, usePageActions } from '@/platform/nativeBar';
 import { inFilter, toInvoice } from '@/domain/logic';
 import { bindAndroidBack, haptic, initNative } from '@/platform/native';
 import { NewJobFlow } from '@/features/new/NewJobFlow';
@@ -130,6 +130,22 @@ export function Shell() {
     if (!top) endNativeSearch();
   }, [top]);
   useEffect(() => (nativeBarAvailable() ? onBarSearch() : undefined), []);
+  useEffect(() => {
+    if (!search.active) return;
+    let done = false;
+    const onMove = () => {
+      if (done) return;
+      done = true;
+      blurNativeSearch();
+    };
+    const reset = () => (done = false);
+    window.addEventListener('touchmove', onMove, { passive: true });
+    window.addEventListener('touchend', reset, { passive: true });
+    return () => {
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', reset);
+    };
+  }, [search.active]);
   useEffect(() => {
     if (nativeOn && top) setBarCompact(compact);
   }, [nativeOn, top, compact]);
