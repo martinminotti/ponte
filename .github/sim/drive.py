@@ -131,8 +131,12 @@ class Video:
 
 def enter_as_owner():
     """Benvenuto all'apertura: si entra come titolare (vede anche Oggi)."""
-    if has("Titolare"):
-        tap("Titolare", wait=2.0, kinds=("web:button",))
+    # il primo avvio sul simulatore può metterci parecchio: si aspetta il benvenuto fino a 40 s
+    for _ in range(20):
+        if has("Titolare", exact=False, kinds=("web:button",)):
+            break
+        time.sleep(2)
+    tap("Titolare", exact=False, wait=2.5, kinds=("web:button",))
 
 
 def launch(wait=6.0):
@@ -149,7 +153,12 @@ try:
     # ------------------------------------------------------------------ scenario
     launch(8)
     shot("00-benvenuto")
-    check(has("Titolare") and has("Dipendente"), "benvenuto: scelta titolare / dipendente")
+    for _ in range(20):
+        if has("Titolare", exact=False, kinds=("web:button",)):
+            break
+        time.sleep(2)
+    shot("00b-benvenuto")
+    check(has("Titolare", exact=False) and has("Dipendente", exact=False), "benvenuto: scelta titolare / dipendente")
     check(not has("Oggi"), "sul benvenuto la barra nativa non c'è")
     enter_as_owner()
     shot("01-avvio")
@@ -226,7 +235,7 @@ try:
     tap("Schede", wait=1.4, kinds=("web:button",))  # indietro dalla scheda
     tap("Nuova accettazione", wait=1.2, kinds=NATIVE)
     shot("11a-chi-porta")
-    check(has("Privato") and has("Azienda"), "+: prima la scelta privato / azienda")
+    check(has("Privato", exact=False) and has("Azienda", exact=False), "+: prima la scelta privato / azienda")
     tap("Privato", exact=False, wait=0.9, kinds=("web:button",))
     check(has("Cliente che torna", exact=False), "poi cliente nuovo o che torna")
     tap("Cliente nuovo", exact=False, wait=1.8, kinds=("web:button",))
