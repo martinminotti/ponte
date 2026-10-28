@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Job, Settings } from '@/domain/types';
 import { eur, fmtDate, fmtPlate, jobNumber, monthLabel } from '@/domain/format';
-import { calc, custName, daSaldare, isAz, monthlyPending, scadenza, totale, veic } from '@/domain/logic';
+import { calc, custName, daSaldare, isAz, itemText, monthlyPending, scadenza, totale, veic } from '@/domain/logic';
 import { jobDate, monthTotals, rateKeys, type CompanyGroup } from '@/domain/monthly';
 import { okHex } from '@/platform/brand';
 import { DEFAULT_ACCENT } from '@/domain/types';
@@ -154,7 +154,7 @@ export function JobPaper({ j, s }: { j: Job; s: Settings }) {
           {items.length ? (
             items.map((i, n) => (
               <tr key={i.id} className={n % 2 ? 'bg-[#f7f8fa]' : ''}>
-                <td>{i.desc || 'Voce'}</td>
+                <td>{itemText(i)}</td>
                 <td>{eur(i.amount)}</td>
               </tr>
             ))
@@ -237,7 +237,7 @@ function JobRows({ j }: { j: Job }) {
       {items.length ? (
         items.map((i) => (
           <tr key={i.id}>
-            <td>{i.desc || 'Voce'}</td>
+            <td>{itemText(i)}</td>
             <td>{eur(i.amount)}</td>
           </tr>
         ))

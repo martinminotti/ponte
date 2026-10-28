@@ -26,9 +26,9 @@ import { SearchField } from '@/ui/SearchField';
 const FK = 'ro:filter';
 const readFilter = (): FilterKey => {
   try {
-    return (sessionStorage.getItem(FK) as FilterKey) || 'tutti';
+    return (sessionStorage.getItem(FK) as FilterKey) || 'attive';
   } catch {
-    return 'tutti';
+    return 'attive';
   }
 };
 
@@ -78,7 +78,8 @@ export function ListPage() {
     return c;
   }, [jobs]);
 
-  const list = useMemo(() => (jobs || []).filter((j) => inFilter(j, filter) && matchJob(j, q)), [jobs, filter, q]);
+  // la ricerca guarda in tutto l'archivio, anche fra le consegnate; senza ricerca vale il filtro
+  const list = useMemo(() => (jobs || []).filter((j) => (q.trim() ? true : inFilter(j, filter)) && matchJob(j, q)), [jobs, filter, q]);
   const dueTotal = useMemo(() => list.reduce((t, j) => t + daSaldare(j), 0), [list]);
   const demoN = (jobs || []).filter((j) => j.demo).length;
   const qq = q.trim();

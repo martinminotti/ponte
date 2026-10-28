@@ -1,13 +1,13 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
-import { Camera, CheckCircle2, ChevronRight, Plus, Trash2, X } from 'lucide-react';
+import { Camera, CheckCircle2, ChevronRight, Clock, Minus, Plus, Trash2, X } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { toast } from 'sonner';
 import { GARANZIE, PAGAMENTI, VATS, VOCI_SUGGERITE, statoLabel } from '@/domain/constants';
 import { amountInput, eur, fmtDate, fmtDateTime, parseAmount, uid } from '@/domain/format';
-import { billingOf, calc, daSaldare, isAz, monthlyPending, sameVehicle, scadenza, totale } from '@/domain/logic';
-import type { Job, Photo, Settings } from '@/domain/types';
+import { billingOf, calc, daSaldare, isAz, monthlyPending, sameVehicle, scadenza, totale, withPayment } from '@/domain/logic';
+import type { Job, LineItem, Photo, Settings } from '@/domain/types';
 import { db } from '@/data/db';
 import { addPhoto, mutateJob, removePhoto, saveSettings } from '@/data/repo';
 import { useObjectUrl } from '@/app/hooks';
@@ -24,8 +24,25 @@ export const updater =
 
 /* ---------------- lavori eseguiti e totale ---------------- */
 
-export function ItemsSection({ job, up }: { job: Job; up: Up }) {
+export function ItemsSection({ job, up, settings }: { job: Job; up: Up; settings: Settings }) {
   const [focusId, setFocusId] = useState<string | null>(null);
+  const crew = useMemo(() => {
+    const a = [...(settings.workers || [])];
+    for (const w of [...(job.workers || []), settings.staffName || '']) if (w && !a.includes(w)) a.push(w);
+    return a;
+  }, [settings.workers, settings.staffName, job.workers]);
+  /** Manodopera: ore × tariffa dell'officina, con chi l'ha fatta (di partenza chi usa l'app, o il primo operaio della scheda). */
+  const addLabor = () => {
+    const id = uid('i');
+    const worker = (settings.role === 'staff' && settings.staffName) || job.workers[0] || crew[0] || '';
+    const rate = settings.laborRate || 0;
+    if (!rate) toast('Tariffa oraria non impostata', { description: 'La imposti una volta in Impostazioni → Valori predefiniti. Intanto scrivi l’importo qui.' });
+    up((j) => ({
+      ...j,
+      workers: worker && !j.workers.includes(worker) ? [...j.workers, worker] : j.workers,
+      items: [...j.items, { id, desc: 'Manodopera', kind: 'labor', worker, qty: 1, unit: rate, amount: rate }],
+    }));
+  };
   const c = calc(job);
   const due = daSaldare(job);
   const used = new Set(job.items.map((i) => i.desc.toLowerCase()));
@@ -51,49 +68,63 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
       ) : (
         <ul className="-mt-1 flex flex-col">
           <AnimatePresence initial={false}>
-            {job.items.map((it, n) => (
-              <motion.li
-                key={it.id}
-                layout
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                className="overflow-hidden"
-              >
-                <div className={`grid grid-cols-[minmax(0,1fr)_108px_40px] items-center gap-2 py-1.5 ${n ? 'border-t border-line' : ''}`}>
-                  <AutoInput
-                    list="voci"
-                    aria-label={`Descrizione voce ${n + 1}`}
-                    placeholder="Descrizione"
-                    value={it.desc}
-                    autoFocus={focusId === it.id && !it.desc}
-                    onCommit={(v) => setItem(it.id, { desc: v })}
-                    className="!min-h-12 !bg-transparent !px-1 hover:!border-transparent focus:!bg-surface-2 focus:!px-3"
-                  />
-                  <div className="relative">
+            {job.items.map((it, n) =>
+              it.kind === 'labor' ? (
+                <motion.li
+                  key={it.id}
+                  layout
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden"
+                >
+                  <LaborRow it={it} n={n} crew={crew} onChange={(patch) => setItem(it.id, patch)} onDelete={() => del(it.id)} />
+                </motion.li>
+              ) : (
+                <motion.li
+                  key={it.id}
+                  layout
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className={`grid grid-cols-[minmax(0,1fr)_108px_40px] items-center gap-2 py-1.5 ${n ? 'border-t border-line' : ''}`}>
                     <AutoInput
-                      inputMode="decimal"
-                      aria-label={`Importo voce ${n + 1} in euro`}
-                      placeholder="0,00"
-                      value={amountInput(it.amount)}
-                      autoFocus={focusId === it.id && !!it.desc}
-                      onCommit={(v) => setItem(it.id, { amount: parseAmount(v) })}
-                      className="w-cond tnum !min-h-12 !pr-3 !pl-7 text-right text-[1.125rem] font-semibold"
+                      list="voci"
+                      aria-label={`Descrizione voce ${n + 1}`}
+                      placeholder="Descrizione"
+                      value={it.desc}
+                      autoFocus={focusId === it.id && !it.desc}
+                      onCommit={(v) => setItem(it.id, { desc: v })}
+                      className="!min-h-12 !bg-transparent !px-1 hover:!border-transparent focus:!bg-surface-2 focus:!px-3"
                     />
-                    <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[0.9375rem] text-ink-3">€</span>
+                    <div className="relative">
+                      <AutoInput
+                        inputMode="decimal"
+                        aria-label={`Importo voce ${n + 1} in euro`}
+                        placeholder="0,00"
+                        value={amountInput(it.amount)}
+                        autoFocus={focusId === it.id && !!it.desc}
+                        onCommit={(v) => setItem(it.id, { amount: parseAmount(v) })}
+                        className="w-cond tnum !min-h-12 !pr-3 !pl-7 text-right text-[1.125rem] font-semibold"
+                      />
+                      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[0.9375rem] text-ink-3">€</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => del(it.id)}
+                      aria-label={`Rimuovi voce ${n + 1}`}
+                      className="press hit grid size-10 place-items-center rounded-full text-ink-3 hover:bg-danger-soft hover:text-danger"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => del(it.id)}
-                    aria-label={`Rimuovi voce ${n + 1}`}
-                    className="press hit grid size-10 place-items-center rounded-full text-ink-3 hover:bg-danger-soft hover:text-danger"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </motion.li>
-            ))}
+                </motion.li>
+              ),
+            )}
           </AnimatePresence>
         </ul>
       )}
@@ -104,9 +135,14 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
       </datalist>
 
       <div className="flex flex-col gap-2.5">
-        <Button variant="outline" icon={<Plus size={18} strokeWidth={2.4} />} onClick={() => add()} className="self-start">
-          Aggiungi voce
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" icon={<Plus size={18} strokeWidth={2.4} />} onClick={() => add()}>
+            Aggiungi voce
+          </Button>
+          <Button variant="outline" icon={<Clock size={18} strokeWidth={2.2} />} onClick={addLabor}>
+            Manodopera
+          </Button>
+        </div>
         <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:-mx-5 sm:px-5 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0" aria-label="Voci frequenti">
           {quick.map((v) => (
             <button
@@ -146,6 +182,73 @@ export function ItemsSection({ job, up }: { job: Job; up: Up }) {
   );
 }
 
+/** Riga di manodopera: chi l'ha fatta, ore (a mezz'ora) e tariffa. L'importo è ore × tariffa. */
+function LaborRow({ it, n, crew, onChange, onDelete }: { it: LineItem; n: number; crew: string[]; onChange: (p: Partial<LineItem>) => void; onDelete: () => void }) {
+  const qty = it.qty && it.qty > 0 ? it.qty : 1;
+  const unit = it.unit || 0;
+  const setQty = (q: number) => {
+    const v = Math.max(0.5, Math.round(q * 2) / 2);
+    onChange({ qty: v, amount: Math.round(v * unit) });
+  };
+  return (
+    <div className={`flex flex-col gap-2 py-2.5 ${n ? 'border-t border-line' : ''}`}>
+      <div className="flex items-center gap-2">
+        <span className="grid size-8 shrink-0 place-items-center rounded-[10px] bg-accent-soft text-accent-ink">
+          <Clock size={17} strokeWidth={2.2} />
+        </span>
+        <span className="text-[0.9688rem] font-semibold text-ink">Manodopera</span>
+        <select
+          aria-label={`Operatore della voce ${n + 1}`}
+          value={it.worker || ''}
+          onChange={(e) => onChange({ worker: e.target.value })}
+          className="ctl !min-h-10 !w-auto min-w-0 flex-1 !py-0 text-[0.9375rem]"
+        >
+          <option value="">Chi l'ha fatta?</option>
+          {crew.map((w) => (
+            <option key={w} value={w}>
+              {w}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label={`Rimuovi voce ${n + 1}`}
+          className="press hit grid size-10 shrink-0 place-items-center rounded-full text-ink-3 hover:bg-danger-soft hover:text-danger"
+        >
+          <Trash2 size={18} />
+        </button>
+      </div>
+      <div className="flex items-center gap-2 pl-10">
+        <div className="flex items-center rounded-[12px] bg-surface-2" role="group" aria-label="Ore">
+          <button type="button" aria-label="Mezz'ora in meno" onClick={() => setQty(qty - 0.5)} className="press hit grid size-10 place-items-center text-ink-2">
+            <Minus size={17} strokeWidth={2.4} />
+          </button>
+          <span className="tnum w-14 text-center text-[1rem] font-semibold text-ink">{qty.toLocaleString('it-IT')} h</span>
+          <button type="button" aria-label="Mezz'ora in più" onClick={() => setQty(qty + 0.5)} className="press hit grid size-10 place-items-center text-ink-2">
+            <Plus size={17} strokeWidth={2.4} />
+          </button>
+        </div>
+        <span className="text-ink-3">×</span>
+        <div className="relative w-[96px]">
+          <AutoInput
+            inputMode="decimal"
+            aria-label="Tariffa oraria in euro"
+            value={amountInput(unit)}
+            onCommit={(v) => {
+              const u = parseAmount(v);
+              onChange({ unit: u, amount: Math.round(qty * u) });
+            }}
+            className="tnum !min-h-10 !pr-2 !pl-6 text-right"
+          />
+          <span className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-[0.875rem] text-ink-3">€</span>
+        </div>
+        <span className="w-cond tnum ml-auto text-[1.125rem] font-semibold text-ink">{eur(it.amount)}</span>
+      </div>
+    </div>
+  );
+}
+
 function Row({ l, v }: { l: string; v: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
@@ -157,7 +260,7 @@ function Row({ l, v }: { l: string; v: string }) {
 
 /* ---------------- pagamento ---------------- */
 
-export function PaymentSection({ job, up }: { job: Job; up: Up }) {
+export function PaymentSection({ job, up, title = 'Pagamento' }: { job: Job; up: Up; title?: string }) {
   const tot = totale(job);
   const due = daSaldare(job);
   if (monthlyPending(job) && !job.paid) {
@@ -171,7 +274,7 @@ export function PaymentSection({ job, up }: { job: Job; up: Up }) {
     );
   }
   return (
-    <Section title="Pagamento">
+    <Section title={title} id="pagamento">
       {job.paid ? (
         <>
           <div className="flex items-start gap-3 rounded-[16px] bg-ok-soft p-4 text-ok">
@@ -206,8 +309,8 @@ export function PaymentSection({ job, up }: { job: Job; up: Up }) {
             disabled={!job.payMethod}
             onClick={() => {
               haptic('success');
-              up((j) => ({ ...j, paid: true, paidAt: Date.now(), paidAmount: daSaldare(j) }));
-              toast.success(`Incassati ${eur(due)}`);
+              up((j) => withPayment(j, j.payMethod));
+              toast.success(`Incassati ${eur(due)}`, { description: job.status === 'pronto' ? 'Scheda consegnata e archiviata.' : undefined });
             }}
           >
             {due > 0 ? `Incassa ${eur(due)}` : 'Segna come saldato'}
@@ -392,7 +495,7 @@ function Viewer({ p, onClose }: { p: Photo; onClose: () => void }) {
   );
 }
 
-export function PhotosSection({ job }: { job: Job }) {
+export function PhotosSection({ job, bare }: { job: Job; bare?: boolean }) {
   const photos = useLiveQuery(() => db.photos.where('jobId').equals(job.id).sortBy('createdAt'), [job.id], []);
   const [open, setOpen] = useState<Photo | null>(null);
   const [busy, setBusy] = useState(false);
@@ -413,25 +516,40 @@ export function PhotosSection({ job }: { job: Job }) {
       if (inp.current) inp.current.value = '';
     }
   };
+  const grid = (
+    <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+      {photos.map((p) => (
+        <Thumb key={p.id} p={p} onOpen={() => setOpen(p)} />
+      ))}
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => inp.current?.click()}
+        className="press flex aspect-square flex-col items-center justify-center gap-1 rounded-[14px] border-[1.5px] border-dashed border-line-strong text-ink-2 hover:border-accent hover:text-accent-ink disabled:opacity-50"
+      >
+        <Camera size={22} />
+        <span className="text-[0.7812rem] font-medium">{busy ? 'Salvo…' : 'Aggiungi'}</span>
+      </button>
+    </div>
+  );
+  const extras = (
+    <>
+      <input ref={inp} type="file" accept="image/*" capture="environment" multiple hidden onChange={(e) => onFiles(e.target.files)} />
+      <AnimatePresence>{open && <Viewer p={open} onClose={() => setOpen(null)} />}</AnimatePresence>
+    </>
+  );
+  if (bare)
+    return (
+      <div>
+        {grid}
+        {extras}
+      </div>
+    );
   return (
     <Section title="Foto all'arrivo" action={photos.length ? <span className="tnum text-[0.875rem] text-ink-3">{photos.length}</span> : undefined}>
       <p className="-mt-1 text-[0.9062rem] text-ink-2">Graffi, ammaccature, cruscotto e chilometri: restano sulla scheda in caso di contestazioni.</p>
-      <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-        {photos.map((p) => (
-          <Thumb key={p.id} p={p} onOpen={() => setOpen(p)} />
-        ))}
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => inp.current?.click()}
-          className="press flex aspect-square flex-col items-center justify-center gap-1 rounded-[14px] border-[1.5px] border-dashed border-line-strong text-ink-2 hover:border-accent hover:text-accent-ink disabled:opacity-50"
-        >
-          <Camera size={22} />
-          <span className="text-[0.7812rem] font-medium">{busy ? 'Salvo…' : 'Aggiungi'}</span>
-        </button>
-      </div>
-      <input ref={inp} type="file" accept="image/*" capture="environment" multiple hidden onChange={(e) => onFiles(e.target.files)} />
-      <AnimatePresence>{open && <Viewer p={open} onClose={() => setOpen(null)} />}</AnimatePresence>
+      {grid}
+      {extras}
     </Section>
   );
 }

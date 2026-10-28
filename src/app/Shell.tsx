@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { CarFront, Gauge, Plus, ReceiptText, Settings2, Store } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -8,7 +8,8 @@ import { Toaster } from 'sonner';
 import { overlayOpen, typing, useDesk, useGlass, useJobs, useNativeBarOn, useOverlayOpen, useScrolledDown, useScrolledPast, useSettings, useThemeSync, useWide } from './hooks';
 import { configureBar, endNativeSearch, nativeBarAvailable, onBarSearch, onBarSelect, setBarCompact, useNativeSearch, usePageActions } from '@/platform/nativeBar';
 import { inFilter, toInvoice } from '@/domain/logic';
-import { bindAndroidBack, initNative } from '@/platform/native';
+import { bindAndroidBack, haptic, initNative } from '@/platform/native';
+import { NewJobFlow } from '@/features/new/NewJobFlow';
 
 // symbol: SF Symbol usato dalla barra nativa di iOS
 const NAV = [
@@ -34,7 +35,9 @@ export function ShopBadge({ align = 'right' }: { align?: 'left' | 'right' }) {
       )}
       <span className="min-w-0">
         <span className="block truncate text-[0.9062rem] leading-tight font-semibold text-ink">{s.shop || 'La tua officina'}</span>
-        <span className="block truncate text-[0.7812rem] leading-tight text-ink-3">{s.shop ? 'Officina' : 'Imposta nome e logo'}</span>
+        <span className="block truncate text-[0.7812rem] leading-tight text-ink-3">
+          {s.role === 'staff' && s.staffName ? `${s.staffName}, dipendente` : s.shop ? 'Titolare' : 'Imposta nome e logo'}
+        </span>
       </span>
     </Link>
   );
@@ -77,6 +80,9 @@ export function Shell() {
   const nav = useNavigate();
 
   const desk = useDesk();
+  // il dipendente non ha la giornata (Oggi): solo schede, fatture e impostazioni
+  const staff = s.role === 'staff';
+  const sections = useMemo(() => NAV.filter((n) => !(staff && n.to === '/')), [staff]);
   const jobs = useJobs();
   const counts = useMemo(() => {
     const all = jobs || [];
@@ -108,7 +114,7 @@ export function Shell() {
       return configureBar(
         {
           mode: 'tabs',
-          tabs: NAV.map((n) => ({ id: n.to, label: n.label, symbol: n.symbol })),
+          tabs: sections.map((n) => ({ id: n.to, label: n.label, symbol: n.symbol })),
           selected: loc.pathname,
           accessory: { id: 'new', label: 'Nuova accettazione', symbol: 'plus' },
         },
@@ -118,7 +124,7 @@ export function Shell() {
     configureBar({ mode: 'hidden' }, dark);
     // il testo non entra nelle dipendenze: riconfigurare a ogni lettera azzererebbe il campo nativo
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nativeOn, overlay, top, page, loc.pathname, dark, search.active, search.placeholder]);
+  }, [nativeOn, overlay, top, page, loc.pathname, dark, search.active, search.placeholder, sections]);
   // uscendo dalle sezioni (si apre una scheda dai risultati) la ricerca si chiude; il testo resta all'elenco
   useEffect(() => {
     if (!top) endNativeSearch();
@@ -144,8 +150,12 @@ export function Shell() {
     return () => off?.();
   }, [nav]);
 
-  // "+" apre subito il modulo: Privato o Azienda si sceglie lì, in cima
-  const openNew = useCallback(() => nav('/nuova?cl=privato'), [nav]);
+  // "+": privato o azienda, poi cliente nuovo o che torna (NewJobFlow)
+  const [newOpen, setNewOpen] = useState(false);
+  const openNew = useCallback(() => {
+    haptic('light');
+    setNewOpen(true);
+  }, []);
   useEffect(() => {
     if (!nativeBarAvailable()) return;
     return onBarSelect((id) => {
@@ -204,7 +214,7 @@ export function Shell() {
       {glass && !wide && <div aria-hidden="true" className="edge-top transition-opacity duration-300" style={{ opacity: scrolled ? 1 : 0 }} />}
       {wide && (
         <aside className="safe-top sticky top-0 z-40 flex h-dvh w-[76px] shrink-0 flex-col items-center border-r border-line bg-surface px-3 pb-4 xl:w-[248px] xl:items-stretch xl:px-4 xl:pb-5">
-          <Link to="/" aria-label="Ponte, vai a Oggi" className="flex items-center gap-2.5 pt-5 pb-6 text-ink xl:pt-6 xl:pb-7 xl:pl-1">
+          <Link to={staff ? '/schede' : '/'} aria-label="Ponte" className="flex items-center gap-2.5 pt-5 pb-6 text-ink xl:pt-6 xl:pb-7 xl:pl-1">
             <PonteIcon size={desk ? 34 : 38} />
             {desk && <PonteWordmark height={22} />}
           </Link>
@@ -224,7 +234,7 @@ export function Shell() {
             )}
           </button>
           <nav className="flex w-full flex-col gap-1" aria-label="Sezioni">
-            {NAV.map(({ to, label, icon: Icon, end }) => {
+            {sections.map(({ to, label, icon: Icon, end }) => {
               const n = to === '/schede' ? counts.shop : to === '/mensile' ? counts.invoice : 0;
               return (
                 <NavLink
@@ -274,7 +284,7 @@ export function Shell() {
           <nav aria-label="Sezioni" className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
             <div className="mx-auto flex max-w-[560px] items-end gap-2.5 px-3.5 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
               <motion.div layout transition={SPRING} className={`glass pointer-events-auto flex flex-1 items-stretch rounded-full p-1 ${compact ? 'h-[52px]' : 'h-[62px]'}`}>
-                {NAV.map((n) => (
+                {sections.map((n) => (
                   <GlassTab key={n.to} {...n} compact={compact} />
                 ))}
               </motion.div>
@@ -295,8 +305,8 @@ export function Shell() {
 
       {!wide && top && !glass && !nativeOn && (
         <nav aria-label="Sezioni" className="glass safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line">
-          <div className="mx-auto grid h-[68px] max-w-[560px] grid-cols-5 items-center px-1">
-            {NAV.map((n) => (
+          <div className="mx-auto grid h-[68px] max-w-[560px] items-center px-1" style={{ gridTemplateColumns: `repeat(${sections.length + 1}, minmax(0, 1fr))` }}>
+            {sections.map((n) => (
               <TabLink key={n.to} {...n} />
             ))}
             <div className="flex justify-center">
@@ -313,6 +323,7 @@ export function Shell() {
         </nav>
       )}
 
+      <NewJobFlow open={newOpen} onOpenChange={setNewOpen} />
       <Toaster
         position={wide ? 'top-right' : 'top-center'}
         offset={wide ? 24 : 'calc(env(safe-area-inset-top, 0px) + 12px)'}

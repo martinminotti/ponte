@@ -6,6 +6,7 @@ export type PlateCountry = 'I' | 'RSM';
 export type Billing = 'mensile' | 'singola';
 export type ThemePref = 'system' | 'light' | 'dark';
 export type GlassPref = 'auto' | 'on' | 'off';
+export type Role = 'admin' | 'staff';
 
 export interface Company {
   name: string;
@@ -15,11 +16,21 @@ export interface Company {
   sdi: string;
 }
 
+export type ItemKind = 'labor' | 'part';
+
 export interface LineItem {
   id: string;
   desc: string;
-  /** centesimi */
+  /** centesimi: è sempre il totale della riga */
   amount: number;
+  /** quantità (pezzi) o ore di manodopera; facoltativa, 1 se assente */
+  qty?: number;
+  /** prezzo unitario o tariffa oraria, centesimi */
+  unit?: number;
+  /** 'labor' = manodopera (ore × tariffa, con l'operatore) */
+  kind?: ItemKind;
+  /** chi ha fatto la manodopera */
+  worker?: string;
 }
 
 export interface StatusEvent {
@@ -83,6 +94,8 @@ export interface Job {
   deliveredAt?: number;
 
   demo?: boolean;
+  /** voce aggiunta dal conto lavori di una ditta (lavoro o acquisto registrato al volo, già chiuso) */
+  quick?: boolean;
 }
 
 export interface Settings {
@@ -101,6 +114,14 @@ export interface Settings {
   /** vetro liquido: auto = solo iPhone e iPad */
   glass: GlassPref;
   nextNumber: number;
+  /** tariffa oraria della manodopera, centesimi */
+  laborRate: number;
+  /** profilo di chi usa questo dispositivo: titolare o dipendente (non impostato = schermata di benvenuto) */
+  role?: Role;
+  /** nome del dipendente che usa il dispositivo */
+  staffName?: string;
+  /** PIN facoltativo per entrare come titolare */
+  adminPin?: string;
   lastBackupAt?: number;
   migratedV1?: boolean;
 }
@@ -130,6 +151,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   glass: 'auto',
   nextNumber: 1,
+  laborRate: 0,
 };
 
 export const EMPTY_COMPANY: Company = { name: '', vat: '', cf: '', addr: '', sdi: '' };

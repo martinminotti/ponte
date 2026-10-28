@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import { scan, useScanner } from '@/platform/scanner';
-import { History, ScanLine, ScanText } from 'lucide-react';
+import { Camera, History, ScanLine, ScanText, X } from 'lucide-react';
+import { compressPhoto } from '@/platform/images';
+import { PhotosSection } from '@/features/job/sections';
 import { toast } from 'sonner';
 import { ActionBar, Page, TopBar } from '@/app/layout';
 import { useJob, useJobs, useSettings } from '@/app/hooks';
 import { SERVIZI } from '@/domain/constants';
-import { fmtDate, fmtPlate, normPlateText, norm } from '@/domain/format';
+import { fmtDate, fmtPlate, jobNumber, normPlateText, norm, uid } from '@/domain/format';
 import { veic } from '@/domain/logic';
 import { companies } from '@/domain/monthly';
 import { EMPTY_COMPANY, type ClientType, type Company, type Job, type PlateCountry } from '@/domain/types';
-import { createJob, patchJob } from '@/data/repo';
+import { addPhoto, createJob, patchJob } from '@/data/repo';
 import { haptic } from '@/platform/native';
 import { Button, Field, Input, Note, Segmented, Switch, TextArea, ToggleChip } from '@/ui/controls';
 import { PlateInput } from './PlateInput';
@@ -146,6 +148,7 @@ function FormInner({ job }: { job?: Job }) {
   const [usedLookup, setUsedLookup] = useState(false);
   const plateRef = useRef<HTMLInputElement>(null);
   const az = d.client === 'azienda';
+  const [shots, setShots] = useState<Shot[]>([]);
 
   // targa e telaio con la fotocamera (iPhone, VisionKit)
   const canScan = useScanner();
@@ -270,8 +273,16 @@ function FormInner({ job }: { job?: Job }) {
           warrantyMonths: settings.warranty ?? 12,
           warrantyNote: '',
         });
+        for (const p of shots) await addPhoto(created.id, p.blob, p.w, p.h).catch(() => {});
+        shots.forEach((p) => URL.revokeObjectURL(p.url));
         haptic('success');
-        nav(`/job/${created.id}`, { replace: true, state: { justCreated: true } });
+        // l'accettazione è finita: si torna all'elenco, la scheda è in cima
+        nav('/schede', { replace: true });
+        toast.success(`Accettazione registrata${created.plate ? ` · ${fmtPlate(created.plate, created.plateCountry)}` : ''}`, {
+          description: `Scheda N. ${jobNumber(created.number)}`,
+          action: { label: 'Apri', onClick: () => nav(`/job/${created.id}`) },
+          duration: 6000,
+        });
       }
     } catch {
       toast.error('Non sono riuscito a salvare. Riprova.');
@@ -448,6 +459,9 @@ function FormInner({ job }: { job?: Job }) {
           </Field>
         </Group>
 
+        {/* le foto si fanno al banco, mentre il cliente è lì: fanno parte dell'accettazione */}
+        {job ? <PhotosSection job={job} /> : <PendingPhotos list={shots} onChange={setShots} />}
+
         {err && !['plate', 'cname', 'cvat', 'owner'].includes(err.field) && <Note tone="danger">{err.msg}</Note>}
       </form>
 
@@ -457,5 +471,64 @@ function FormInner({ job }: { job?: Job }) {
         </Button>
       </ActionBar>
     </Page>
+  );
+}
+
+/* ---------------- foto all'arrivo (prima che la scheda esista) ---------------- */
+
+type Shot = { id: string; blob: Blob; w: number; h: number; url: string };
+
+function PendingPhotos({ list, onChange }: { list: Shot[]; onChange: (l: Shot[]) => void }) {
+  const inp = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const onFiles = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setBusy(true);
+    try {
+      const add: Shot[] = [];
+      for (const f of Array.from(files)) {
+        const { blob, w, h } = await compressPhoto(f);
+        add.push({ id: uid('s'), blob, w, h, url: URL.createObjectURL(blob) });
+      }
+      onChange([...list, ...add]);
+    } catch {
+      toast.error('Non riesco a usare questa immagine. Prova con una foto JPG o PNG.');
+    } finally {
+      setBusy(false);
+      if (inp.current) inp.current.value = '';
+    }
+  };
+  return (
+    <Group title="Foto all'arrivo">
+      <p className="-mt-1 text-[0.9062rem] text-ink-2">Graffi, ammaccature, cruscotto e chilometri, davanti al cliente: restano sulla scheda in caso di contestazioni.</p>
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+        {list.map((p) => (
+          <div key={p.id} className="relative aspect-square overflow-hidden rounded-[14px] bg-surface-2">
+            <img src={p.url} alt="" className="size-full object-cover" />
+            <button
+              type="button"
+              aria-label="Togli la foto"
+              onClick={() => {
+                URL.revokeObjectURL(p.url);
+                onChange(list.filter((x) => x.id !== p.id));
+              }}
+              className="press hit absolute top-1 right-1 grid size-7 place-items-center rounded-full bg-black/55 text-white backdrop-blur"
+            >
+              <X size={15} strokeWidth={2.6} />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => inp.current?.click()}
+          className="press flex aspect-square flex-col items-center justify-center gap-1 rounded-[14px] border-[1.5px] border-dashed border-line-strong text-ink-2 hover:border-accent hover:text-accent-ink disabled:opacity-50"
+        >
+          <Camera size={22} />
+          <span className="text-[0.7812rem] font-medium">{busy ? 'Preparo…' : 'Scatta'}</span>
+        </button>
+      </div>
+      <input ref={inp} type="file" accept="image/*" capture="environment" multiple hidden onChange={(e) => onFiles(e.target.files)} />
+    </Group>
   );
 }

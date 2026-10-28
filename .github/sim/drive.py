@@ -115,8 +115,8 @@ def check(ok: bool, what: str):
         failures += 1
 
 
-def has(text: str, exact=True) -> bool:
-    return find(text, exact) is not None
+def has(text: str, exact=True, kinds=None) -> bool:
+    return find(text, exact, kinds) is not None
 
 
 class Video:
@@ -127,6 +127,12 @@ class Video:
     def stop(self):
         self.p.send_signal(signal.SIGINT)
         self.p.wait(timeout=30)
+
+
+def enter_as_owner():
+    """Benvenuto all'apertura: si entra come titolare (vede anche Oggi)."""
+    if has("Titolare"):
+        tap("Titolare", wait=2.0, kinds=("web:button",))
 
 
 def launch(wait=6.0):
@@ -142,10 +148,11 @@ W = 402  # larghezza logica dell'iPhone 17 Pro, in punti
 try:
     # ------------------------------------------------------------------ scenario
     launch(8)
-    shot_png = lambda n: sh("xcrun", "simctl", "io", UDID, "screenshot", f"{OUT}/{n}.png")
-    shot_png("01-avvio")
-    time.sleep(6)
-    shot("01b-avvio-14s")
+    shot("00-benvenuto")
+    check(has("Titolare") and has("Dipendente"), "benvenuto: scelta titolare / dipendente")
+    check(not has("Oggi"), "sul benvenuto la barra nativa non c'è")
+    enter_as_owner()
+    shot("01-avvio")
     if has("Prova con dati di esempio"):
         tap("Prova con dati di esempio", wait=2.5)
     shot("02-oggi")
@@ -202,17 +209,27 @@ try:
     v.stop()
     if tap("Segna: Pronto", wait=1.4):
         shot("08-pronto")
-        check(has("Segna: Consegnato"), "dopo il tocco diventa «Segna: Consegnato»")
-    if tap("Avvisa", wait=1.4):
+        check(has("Incassa", exact=False, kinds=NATIVE), "a pronto la barra propone «Incassa»")
+        check(has("Pronto da ritirare"), "a pronto il pagamento è in primo piano")
+    if tap("Avvisa", wait=1.4, kinds=NATIVE):
         shot("09-whatsapp")
-        check(not has("Segna: Consegnato"), "con il foglio aperto la barra si fa da parte")
+        check(not has("Incassa", exact=False, kinds=NATIVE), "con il foglio aperto la barra si fa da parte")
         tap("Chiudi", wait=1.2, kinds=("web:button",))
         shot("10-whatsapp-chiuso")
-        check(has("Segna: Consegnato"), "chiuso il foglio la barra torna")
+        check(has("Incassa", exact=False, kinds=NATIVE), "chiuso il foglio la barra torna")
+    if tap("Contanti", kinds=("web:button",), wait=0.8):
+        tap("Incassa", exact=False, kinds=NATIVE, wait=1.6)
+        shot("10b-consegnato")
+        check(has("Invia il conto", exact=False, kinds=NATIVE), "incassato: consegnato, la barra propone «Invia il conto»")
 
     # indietro e nuova accettazione
     tap("Schede", wait=1.4, kinds=("web:button",))  # indietro dalla scheda
-    tap("Nuova accettazione", wait=1.8, kinds=NATIVE)
+    tap("Nuova accettazione", wait=1.2, kinds=NATIVE)
+    shot("11a-chi-porta")
+    check(has("Privato") and has("Azienda"), "+: prima la scelta privato / azienda")
+    tap("Privato", exact=False, wait=0.9, kinds=("web:button",))
+    check(has("Cliente che torna", exact=False), "poi cliente nuovo o che torna")
+    tap("Cliente nuovo", exact=False, wait=1.8, kinds=("web:button",))
     shot("11-nuova")
     check(has("Registra accettazione"), "modulo: «Registra accettazione» nella barra nativa")
     check(not has("Leggi la targa con la fotocamera"), "sul simulatore (senza fotocamera) il pulsante della targa non compare")
@@ -220,6 +237,7 @@ try:
     # tema scuro
     sh("xcrun", "simctl", "ui", UDID, "appearance", "dark")
     launch(6)
+    enter_as_owner()
     shot("20-scuro-oggi")
     tap("Schede", wait=1.2, kinds=NATIVE)
     shot("21-scuro-schede")
@@ -230,6 +248,7 @@ try:
     # testo grande (Dimensioni testo)
     sh("xcrun", "simctl", "ui", UDID, "content_size", "extra-extra-large")
     launch(6)
+    enter_as_owner()
     shot("30-testo-grande-oggi")
     tap("Schede", wait=1.2, kinds=NATIVE)
     shot("31-testo-grande-schede")

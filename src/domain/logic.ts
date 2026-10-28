@@ -1,6 +1,6 @@
-import type { Job, StatusKey } from './types';
+import type { Job, LineItem, StatusKey } from './types';
 import type { FilterKey } from './constants';
-import { norm } from './format';
+import { eur, norm } from './format';
 
 export const isAz = (j: Pick<Job, 'client'> | null | undefined): boolean => j?.client === 'azienda';
 
@@ -56,8 +56,15 @@ export function toInvoice(j: Job): boolean {
   return isAz(j) && isClosedStatus(j.status) && !j.invoiced;
 }
 
+/** Consegnata e senza niente in sospeso (né da incassare né da fatturare): va in archivio. */
+export function isArchived(j: Job): boolean {
+  return j.status === 'consegnato' && !isDue(j) && !toInvoice(j);
+}
+
 export function inFilter(j: Job, f: FilterKey): boolean {
   switch (f) {
+    case 'attive':
+      return !isArchived(j);
     case 'officina':
       return !isClosedStatus(j.status);
     case 'pronti':
@@ -67,7 +74,7 @@ export function inFilter(j: Job, f: FilterKey): boolean {
     case 'fatturare':
       return toInvoice(j);
     case 'chiusi':
-      return j.status === 'consegnato' && !isDue(j);
+      return isArchived(j);
     default:
       return true;
   }
@@ -113,6 +120,26 @@ export function waNumber(p: string, prefix = '39'): string {
 export function waLink(phone: string, text: string, prefix: string): string | null {
   const n = waNumber(phone, prefix);
   return n ? `https://wa.me/${n}?text=${encodeURIComponent(text)}` : null;
+}
+
+/**
+ * Incasso del saldo. Se il veicolo era pronto, l'incasso è il ritiro: la scheda passa da sola a Consegnato.
+ */
+export function withPayment(j: Job, method: string, now = Date.now()): Job {
+  const paid: Job = { ...j, paid: true, paidAt: now, paidAmount: daSaldare(j), payMethod: method || j.payMethod };
+  return j.status === 'pronto' ? withStatus(paid, 'consegnato', now) : paid;
+}
+
+/** Testo della voce come compare su conto, PDF e messaggi: manodopera con operatore e ore, pezzi con quantità. */
+export function itemText(i: Pick<LineItem, 'desc' | 'qty' | 'unit' | 'kind' | 'worker'>): string {
+  const q = i.qty && i.qty > 0 ? i.qty : 1;
+  const n = q.toLocaleString('it-IT', { maximumFractionDigits: 2 });
+  if (i.kind === 'labor') {
+    const base = i.desc || 'Manodopera';
+    return `${base}${i.worker ? ` – ${i.worker}` : ''} (${n} h${i.unit ? ` × ${eur(i.unit)}/h` : ''})`;
+  }
+  const base = i.desc || 'Voce';
+  return q !== 1 ? `${base} (${n}${i.unit ? ` × ${eur(i.unit)}` : ' pz'})` : base;
 }
 
 /** Applica un cambio di stato con cronologia e date di chiusura/consegna. */

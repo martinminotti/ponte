@@ -1,6 +1,6 @@
 import type { Job, Settings, StatusKey } from './types';
 import { eur, fmtDate, fmtDay, fmtPlate, monthLabel } from './format';
-import { calc, daSaldare, isAz, monthlyPending, scadenza, totale, veic } from './logic';
+import { calc, daSaldare, isAz, itemText, monthlyPending, scadenza, totale, veic } from './logic';
 import type { CompanyGroup, MonthTotals } from './monthly';
 import { jobDate, monthTotals, rateKeys } from './monthly';
 
@@ -8,7 +8,7 @@ export function riepilogo(j: Job): string {
   let t = '';
   const items = (j.items || []).filter((i) => i.desc || i.amount);
   if (items.length) {
-    t += '\n\nLavori eseguiti:\n' + items.map((i) => `• ${i.desc || 'Voce'} – ${eur(i.amount)}`).join('\n');
+    t += '\n\nLavori eseguiti:\n' + items.map((i) => `• ${itemText(i)} – ${eur(i.amount)}`).join('\n');
   }
   const tot = totale(j);
   if (tot > 0) {
@@ -56,5 +56,20 @@ export function monthMsg(co: CompanyGroup, list: Job[], ym: string, no: string, 
     `\nTotale: ${eur(T.gross)}` +
     (no ? `\nFattura n. ${no}` : '') +
     '\n\nTi mandiamo anche il PDF con il dettaglio completo.';
+  return t + (s.shop ? `\n\n${s.shop}` : '');
+}
+
+/**
+ * Messaggio di cortesia che accompagna il conto in PDF dopo il saldo.
+ * Va con il file condiviso (WhatsApp lo mostra come didascalia) o da solo se il file si allega a mano.
+ */
+export function paidMsg(j: Job, s: Pick<Settings, 'shop' | 'shopPhone'>): string {
+  const v = veic(j) + (j.plate ? ` (${fmtPlate(j.plate, j.plateCountry)})` : '');
+  const name = j.owner || (isAz(j) ? j.company?.name : '') || '';
+  const tot = j.paidAmount ?? totale(j);
+  let t = `Buongiorno${name ? ' ' + name : ''}, grazie per aver scelto ${s.shop || 'la nostra officina'}.`;
+  t += `\n\nTi inviamo in allegato il riepilogo dei lavori su ${v}: totale ${eur(tot)}${j.paid ? `, saldato${j.payMethod ? ` con ${j.payMethod.toLowerCase()}` : ''}` : ''}.`;
+  if (j.warrantyMonths > 0) t += ` I lavori sono in garanzia per ${j.warrantyMonths} mesi, fino al ${fmtDate(scadenza(j))}.`;
+  t += `\n\nPer qualsiasi cosa siamo a disposizione${s.shopPhone ? ` al ${s.shopPhone}` : ''}. Buona strada!`;
   return t + (s.shop ? `\n\n${s.shop}` : '');
 }

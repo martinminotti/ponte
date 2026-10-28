@@ -7,7 +7,7 @@ import { useJobs, useSettings, useWide, useWidth } from '@/app/hooks';
 import { BrandMark } from '@/app/Shell';
 import { PAGAMENTI } from '@/domain/constants';
 import { eur, fmtDay, fmtPlate, monthLabel, norm, shiftMonth, ymOf } from '@/domain/format';
-import { daSaldare, totale, veic, waLink } from '@/domain/logic';
+import { totale, veic, waLink, withPayment } from '@/domain/logic';
 import { commonNo, companies, compKey, eligible, jobDate, monthJobs, monthTotals, type CompanyGroup } from '@/domain/monthly';
 import { monthMsg } from '@/domain/messages';
 import type { Job } from '@/domain/types';
@@ -21,6 +21,10 @@ import { DocActions } from '@/features/doc/DocActions';
 import { MonthPaper } from '@/features/doc/Paper';
 
 let memo = { co: '', ym: ymOf(Date.now()) };
+/** Apre Fatture ditte su una ditta e un mese (dal conto lavori). */
+export function presetMonth(co: string, ym: string) {
+  memo = { co, ym };
+}
 
 export function MonthPage() {
   const jobs = useJobs();
@@ -248,13 +252,8 @@ export function MonthPage() {
             disabled={!mpay}
             onClick={() =>
               mark(
-                (j, now) => ({
-                  ...j,
-                  paid: true,
-                  paidAt: now,
-                  paidAmount: daSaldare(j),
-                  payMethod: mpay,
-                }),
+                // incassato il mese: i lavori ancora «pronti» passano a consegnati
+                (j, now) => withPayment(j, mpay, now),
                 `Incassati ${eur(T.due)}`,
               )
             }
@@ -276,9 +275,14 @@ export function MonthPage() {
     </div>
   );
   const newBtn = co && (
-    <Button variant="ghost" block icon={<Plus size={19} strokeWidth={2.4} />} onClick={() => nav('/nuova?cl=azienda', { state: { prefill: prefillFor(co) } })}>
-      Nuovo lavoro per {co.name}
-    </Button>
+    <div className="flex flex-col gap-1">
+      <Button variant="outline" block icon={<Plus size={19} strokeWidth={2.4} />} onClick={() => nav(`/ditta/${encodeURIComponent(co.key)}`)}>
+        Segna un lavoro o un acquisto
+      </Button>
+      <Button variant="ghost" block onClick={() => nav('/nuova?cl=azienda', { state: { prefill: prefillFor(co) } })}>
+        Nuova accettazione per {co.name}
+      </Button>
+    </div>
   );
 
   return (

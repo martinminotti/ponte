@@ -2,7 +2,7 @@ import type { jsPDF as JsPDF } from 'jspdf';
 import type { Job, Settings } from '@/domain/types';
 import { DEFAULT_ACCENT } from '@/domain/types';
 import { amount, fmtDate, fmtPlate, jobNumber, monthLabel } from '@/domain/format';
-import { calc, custName, daSaldare, isAz, monthlyPending, scadenza, totale, veic } from '@/domain/logic';
+import { calc, custName, daSaldare, isAz, itemText, monthlyPending, scadenza, totale, veic } from '@/domain/logic';
 import { jobDate, monthTotals, rateKeys, type CompanyGroup } from '@/domain/monthly';
 import { hexToRgb, inkOn, okHex } from '@/platform/brand';
 import { imageSize } from '@/platform/images';
@@ -286,7 +286,7 @@ export async function buildJobPdf(j: Job, s: Settings): Promise<Blob> {
   }
   items.forEach((it, n) => {
     doc.font('normal', 9.8);
-    const dl = doc.lines(it.desc || 'Voce', W - 2 * M - 48);
+    const dl = doc.lines(itemText(it), W - 2 * M - 48);
     const rh = Math.max(8, dl.length * 4.6 + 3.6);
     doc.ensure(rh, true);
     if (n % 2 === 1) {
@@ -393,7 +393,7 @@ export async function buildMonthPdf(co: CompanyGroup, list: Job[], ym: string, n
     const items = (j.items || []).filter((i) => i.desc || i.amount);
     for (const it of items) {
       doc.font('normal', 9.8);
-      const dl = doc.lines(it.desc || 'Voce', W - 2 * M - 48);
+      const dl = doc.lines(itemText(it), W - 2 * M - 48);
       const rh = Math.max(7.5, dl.length * 4.6 + 3);
       doc.ensure(rh, true);
       doc.col(INK);

@@ -40,14 +40,16 @@ export const VOCI_SUGGERITE = [
   'Ricambi',
 ];
 
-export type FilterKey = 'tutti' | 'officina' | 'pronti' | 'saldo' | 'fatturare' | 'chiusi';
+export type FilterKey = 'attive' | 'officina' | 'pronti' | 'saldo' | 'fatturare' | 'chiusi' | 'tutti';
+/** "Attive" è la vista di partenza: tutto tranne le schede consegnate e saldate, che vanno in "Consegnate" */
 export const FILTRI: { k: FilterKey; l: string }[] = [
-  { k: 'tutti', l: 'Tutte' },
+  { k: 'attive', l: 'Attive' },
   { k: 'officina', l: 'In officina' },
   { k: 'pronti', l: 'Pronte' },
   { k: 'saldo', l: 'Da incassare' },
   { k: 'fatturare', l: 'Da fatturare' },
-  { k: 'chiusi', l: 'Chiuse' },
+  { k: 'chiusi', l: 'Consegnate' },
+  { k: 'tutti', l: 'Tutte' },
 ];
 
 export const PRESETS = [
