@@ -404,9 +404,19 @@ final class GlassBar: PassthroughView {
 
 // MARK: - capsula delle sezioni
 
+/// La "lente" sotto la sezione attiva: si arrotonda da sola a ogni dimensione, anche durante le animazioni.
+final class LensView: UIView {
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layer.cornerRadius = bounds.height / 2
+    }
+}
+
 final class TabsView: UIView {
     private let glass = Glass.view(radius: 31)
-    private let lens = UIView()
+    private let lens = LensView()
+    /// la lente è agganciata con i vincoli al pulsante scelto: segue la barra quando si compatta o si allarga
+    private var lensPins: [NSLayoutConstraint] = []
     private let stack = UIStackView()
     private var buttons: [UIButton] = []
     private let items: [BarItem]
@@ -429,6 +439,8 @@ final class TabsView: UIView {
         ])
         lens.backgroundColor = Ponte.lens
         lens.layer.cornerCurve = .continuous
+        lens.translatesAutoresizingMaskIntoConstraints = false
+        lens.isUserInteractionEnabled = false
         glass.contentView.addSubview(lens)
 
         stack.axis = .horizontal
@@ -462,13 +474,32 @@ final class TabsView: UIView {
     func select(_ id: String?, animated: Bool) {
         selected = id
         restyle()
-        if animated {
+        pinLens()
+        if animated, window != nil {
             UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: [.beginFromCurrentState, .allowUserInteraction]) {
-                self.placeLens()
+                self.layoutIfNeeded()
             }
         } else {
             setNeedsLayout()
         }
+    }
+
+    private func pinLens() {
+        NSLayoutConstraint.deactivate(lensPins)
+        lensPins = []
+        guard let i = items.firstIndex(where: { $0.id == selected }), i < buttons.count else {
+            lens.isHidden = true
+            return
+        }
+        let b = buttons[i]
+        lensPins = [
+            lens.leadingAnchor.constraint(equalTo: b.leadingAnchor),
+            lens.trailingAnchor.constraint(equalTo: b.trailingAnchor),
+            lens.topAnchor.constraint(equalTo: b.topAnchor),
+            lens.bottomAnchor.constraint(equalTo: b.bottomAnchor),
+        ]
+        NSLayoutConstraint.activate(lensPins)
+        lens.isHidden = false
     }
 
     func setCompact(_ c: Bool) {
@@ -499,19 +530,6 @@ final class TabsView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         glass.layer.cornerRadius = bounds.height / 2
-        placeLens()
-    }
-
-    private func placeLens() {
-        guard let i = items.firstIndex(where: { $0.id == selected }), i < buttons.count else {
-            lens.alpha = 0
-            return
-        }
-        stack.layoutIfNeeded()
-        let f = stack.convert(buttons[i].frame, to: glass.contentView)
-        lens.frame = f
-        lens.layer.cornerRadius = f.height / 2
-        lens.alpha = 1
     }
 }
 
