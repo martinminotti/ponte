@@ -61,7 +61,7 @@ export function NewJobFlow({ open, onOpenChange }: { open: boolean; onOpenChange
   };
 
   return (
-    <Sheet open={open} onOpenChange={change} title={titles[step.k][0]} description={titles[step.k][1]}>
+    <Sheet open={open} onOpenChange={change} title={titles[step.k][0]} description={titles[step.k][1]} tall={step.k === 'privati' || step.k === 'ditte'}>
       <div className="relative overflow-hidden">
         <AnimatePresence initial={false} mode="popLayout" custom={dir}>
           <motion.div
@@ -189,7 +189,8 @@ function CustomerRow({ c, onPick }: { c: Customer; onPick: (v?: KnownVehicle) =>
           <span className="flex items-center gap-1.5 text-[0.8438rem] text-ink-3">
             {c.phone && (
               <>
-                <Phone size={13} /> <span className="tnum">{c.phone}</span> ·
+                <Phone size={13} /> <span className="tnum">{c.phone}</span>
+                <span aria-hidden="true">·</span>
               </>
             )}
             ultima visita {fmtDate(c.lastAt)}

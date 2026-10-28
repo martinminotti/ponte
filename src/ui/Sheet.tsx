@@ -13,6 +13,14 @@ type SheetProps = {
   description?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  /** foglio alto e di altezza fissa: per le ricerche, così non si accorcia (e non finisce sotto la tastiera) mentre i risultati calano */
+  tall?: boolean;
+};
+
+/** Scorrendo l'elenco la tastiera si chiude, come nelle app di sistema. */
+const blurOnScroll = () => {
+  const a = document.activeElement as HTMLElement | null;
+  if (a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) a.blur();
 };
 
 /**
@@ -24,7 +32,7 @@ export function Sheet(p: SheetProps) {
   return wide ? <CenterDialog {...p} /> : <BottomSheet {...p} />;
 }
 
-function CenterDialog({ open, onOpenChange, title, description, children, footer }: SheetProps) {
+function CenterDialog({ open, onOpenChange, title, description, children, footer, tall }: SheetProps) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
@@ -36,7 +44,7 @@ function CenterDialog({ open, onOpenChange, title, description, children, footer
             <div className="pointer-events-none fixed inset-0 z-50 grid place-items-center p-6">
               <Dialog.Content asChild forceMount aria-describedby={undefined}>
                 <motion.div
-                  className="pointer-events-auto flex max-h-[min(720px,88dvh)] w-full max-w-[520px] flex-col rounded-[24px] bg-surface shadow-[0_24px_80px_-12px_rgba(0,0,0,.35),0_0_0_1px_var(--line)] outline-none"
+                  className={`pointer-events-auto flex w-full max-w-[520px] flex-col rounded-[24px] ${tall ? 'h-[min(720px,88dvh)]' : 'max-h-[min(720px,88dvh)]'} bg-surface shadow-[0_24px_80px_-12px_rgba(0,0,0,.35),0_0_0_1px_var(--line)] outline-none`}
                   initial={{ opacity: 0, scale: 0.96, y: 8 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.97, y: 4, transition: { duration: 0.14 } }}
@@ -51,7 +59,9 @@ function CenterDialog({ open, onOpenChange, title, description, children, footer
                       <X size={18} strokeWidth={2.4} />
                     </Dialog.Close>
                   </div>
-                  <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-2 pb-6">{children}</div>
+                  <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-2 pb-6" onTouchMove={blurOnScroll}>
+                    {children}
+                  </div>
                   {footer && <div className="border-t border-line px-6 py-4">{footer}</div>}
                 </motion.div>
               </Dialog.Content>
@@ -63,14 +73,14 @@ function CenterDialog({ open, onOpenChange, title, description, children, footer
   );
 }
 
-function BottomSheet({ open, onOpenChange, title, description, children, footer }: SheetProps) {
+function BottomSheet({ open, onOpenChange, title, description, children, footer, tall }: SheetProps) {
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} repositionInputs={false}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]" />
         <Drawer.Content
           aria-describedby={undefined}
-          className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[92dvh] w-full max-w-[560px] flex-col rounded-t-[28px] bg-surface outline-none glass:inset-x-2 glass:bottom-[calc(env(safe-area-inset-bottom,0px)+6px)] glass:w-auto glass:rounded-[34px] glass:bg-[var(--glass-fill-thick)] glass:shadow-[var(--glass-shadow)] glass:backdrop-blur-2xl glass:backdrop-saturate-150 glass:ring-1 glass:ring-white/40 dark:glass:ring-white/10"
+          className={`fixed inset-x-0 bottom-0 z-50 mx-auto flex ${tall ? 'h-[88dvh]' : 'max-h-[92dvh]'} w-full max-w-[560px] flex-col rounded-t-[28px] bg-surface outline-none glass:inset-x-2 glass:bottom-[calc(env(safe-area-inset-bottom,0px)+6px)] glass:w-auto glass:rounded-[34px] glass:bg-[var(--glass-fill-thick)] glass:shadow-[var(--glass-shadow)] glass:backdrop-blur-2xl glass:backdrop-saturate-150 glass:ring-1 glass:ring-white/40 dark:glass:ring-white/10`}
         >
           <div className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-line-strong" aria-hidden="true" />
           <div className="flex items-start justify-between gap-3 px-5 pt-3 pb-2">
@@ -82,7 +92,9 @@ function BottomSheet({ open, onOpenChange, title, description, children, footer 
               <X size={18} strokeWidth={2.4} />
             </Drawer.Close>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-2 pb-5">{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-2 pb-5" onTouchMove={blurOnScroll}>
+            {children}
+          </div>
           {footer && (
             <div className="border-t border-line bg-surface px-5 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+12px)] glass:rounded-b-[34px] glass:border-transparent glass:bg-transparent glass:pb-[max(12px,calc(env(safe-area-inset-bottom,0px)-6px))]">
               {footer}

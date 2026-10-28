@@ -115,6 +115,11 @@ export async function initNative(dark: boolean) {
     if (platform() === 'android') {
       await StatusBar.setOverlaysWebView({ overlay: true });
     }
+    if (platform() === 'ios') {
+      // niente barra "frecce / Fine" sopra la tastiera: i moduli di Ponte hanno già il loro pulsante
+      const { Keyboard } = await import('@capacitor/keyboard');
+      await Keyboard.setAccessoryBarVisible({ isVisible: false });
+    }
   } catch {
     /* plugin non disponibile */
   }
