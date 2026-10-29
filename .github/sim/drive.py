@@ -280,14 +280,16 @@ try:
         tap("Detta a voce", exact=False, wait=1.6)
         shot("12f-voce-scuro")
         sh("xcrun", "simctl", "ui", UDID, "appearance", "light")
-        tap("Chiudi", exact=False, wait=1.2, kinds=("web:button",))
-        tap("Annulla", wait=1.4, kinds=("web:button",))  # esce dal modulo: la bozza resta salvata
+        tap("Chiudi", exact=False, wait=1.6, kinds=("web:button",))  # esce dall'accettazione: la bozza resta da riprendere
+        shot("12g-voce-chiusa")
+        check(has("Nuova accettazione", kinds=NATIVE), "«Chiudi» torna all'elenco con la barra nativa")
         tap("Nuova accettazione", wait=1.2, kinds=NATIVE)
     tap("Privato", exact=False, wait=0.9, kinds=("web:button",))
     check(has("Cliente che torna", exact=False), "poi cliente nuovo o che torna")
     tap("Cliente nuovo", exact=False, wait=1.8, kinds=("web:button",))
     shot("11-nuova")
     check(has("Registra accettazione"), "modulo: «Registra accettazione» nella barra nativa")
+    check(has("Riprendi", exact=False, kinds=("web:button",)), "modulo: propone di riprendere l'accettazione a voce non finita")
     check(not has("Leggi la targa con la fotocamera"), "sul simulatore (senza fotocamera) il pulsante della targa non compare")
 
     # tema scuro

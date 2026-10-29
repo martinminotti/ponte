@@ -92,6 +92,7 @@ export function localInterpret(text: string, d: Draft, ctx: { expect?: FieldKey 
   const t = clean(text);
   const toks = tokens(stripCountryWords(text));
   const used = new Set<string>(); // pezzi di frase già usati come dato (non diventano lavori o note)
+  const ends: number[] = []; // dove finiscono targa e modello: un "di Nome Cognome" subito dopo è il proprietario
 
   // paese della targa
   const cc = countryFrom(text);
@@ -134,6 +135,7 @@ export function localInterpret(text: string, d: Draft, ctx: { expect?: FieldKey 
     if (r && r.plate.length >= 2) {
       p.plate = r.plate;
       used.add(toks.slice(ti, k + r.used).join(' '));
+      ends.push(k + r.used);
     }
   } else if (expect === 'plate') {
     // risposta secca alla domanda sulla targa: solo se somiglia davvero a una targa
@@ -206,6 +208,7 @@ export function localInterpret(text: string, d: Draft, ctx: { expect?: FieldKey 
       model.push(w);
     }
     if (model.length) p.model = model.join(' ');
+    ends.push(b.at + b.used + model.length);
   } else if (expect === 'make') {
     const words = toks.filter((x) => !STOP.has(x));
     if (words.length && words.length <= 4) p.model = words.join(' ');
@@ -218,6 +221,11 @@ export function localInterpret(text: string, d: Draft, ctx: { expect?: FieldKey 
   if (om) {
     const n = nameAfter(tokens(om[1]), 0, 3);
     if (n && n.split(' ').length >= 1 && !p.companyName?.includes(n)) p.owner = n;
+  } else if (ends.some((e) => toks[e] === 'di' && /^[a-z']{3,}$/.test(toks[e + 1] || '') && /^[a-z']{3,}$/.test(toks[e + 2] || ''))) {
+    // "Golf di Marco Bianchi", "targa AB 123 CD di Luca Verdi"
+    const e = ends.find((x) => toks[x] === 'di')!;
+    const n = nameAfter(toks, e + 1, 3);
+    if (n.split(' ').length >= 2 && !REQ_RE.test(n) && !NOTE_RE.test(n)) p.owner = n;
   } else if (expect === 'owner') {
     const n = nameAfter(tokens(t.replace(/^(e|è|si chiama|allora|il proprietario e|il cliente e)\s+/, '')), 0, 4);
     if (n) p.owner = n;

@@ -108,6 +108,14 @@ function FormInner({ job }: { job?: Job }) {
     const t = window.setTimeout(() => storeDraft(d), 400);
     return () => window.clearTimeout(t);
   }, [d, editing, saved]);
+  // uscendo dal modulo l'ultima modifica si salva subito (salvo che l'accettazione sia stata registrata)
+  const doneRef = useRef(false);
+  useEffect(
+    () => () => {
+      if (!editing && !doneRef.current && !isBlank(dRef.current)) storeDraft(dRef.current);
+    },
+    [editing],
+  );
   const restoreOffer =
     saved && isBlank(d)
       ? {
@@ -256,6 +264,7 @@ function FormInner({ job }: { job?: Job }) {
         });
         for (const p of shots) await addPhoto(created.id, p.blob, p.w, p.h).catch(() => {});
         shots.forEach((p) => URL.revokeObjectURL(p.url));
+        doneRef.current = true;
         clearSavedDraft();
         haptic('success');
         // l'accettazione è finita: si torna all'elenco, la scheda è in cima
@@ -493,6 +502,15 @@ function FormInner({ job }: { job?: Job }) {
         host={host}
         editing={editing}
         onClose={() => setVoice(false)}
+        onExit={() => {
+          setVoice(false);
+          if (job) nav(`/job/${job.id}`, { replace: true });
+          else {
+            const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+            if (idx > 0) nav(-1);
+            else nav('/schede', { replace: true });
+          }
+        }}
         onEdit={editField}
         shots={job ? undefined : shots}
         onShots={job ? undefined : setShots}

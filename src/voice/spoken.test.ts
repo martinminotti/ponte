@@ -163,6 +163,11 @@ describe('interprete di base, frasi da banco', () => {
     expect(a.draft.company.name).toBe('Edil Rossi Srl');
     expect(a.issues).toEqual([]);
   });
+  it('«di Nome Cognome» dopo targa o modello', () => {
+    expect(localInterpret('targa AB 123 CD di Luca Verdi', emptyDraft(), { now: NOW }).owner).toBe('luca verdi');
+    expect(localInterpret('una Panda di Anna Neri', emptyDraft(), { now: NOW }).owner).toBe('anna neri');
+    expect(localInterpret('rumore di freni anteriori', emptyDraft(), { now: NOW }).owner).toBeUndefined();
+  });
   it('modello seguito dalla targa', () => {
     const p = localInterpret('Ducato targa EZ 215 KB', emptyDraft(), { now: NOW });
     expect(p.make).toBe('Fiat');

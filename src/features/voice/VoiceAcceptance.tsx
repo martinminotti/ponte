@@ -30,6 +30,7 @@ export function VoiceAcceptance({
   host,
   editing,
   onClose,
+  onExit,
   onEdit,
   shots,
   onShots,
@@ -42,6 +43,8 @@ export function VoiceAcceptance({
   editing: boolean;
   /** chiude la voce e torna al modulo, con tutto quello che è stato scritto */
   onClose: () => void;
+  /** esce dall'accettazione (la bozza resta da riprendere) */
+  onExit: () => void;
   onEdit: (f: FieldKey) => void;
   shots?: Shot[];
   onShots?: (l: Shot[]) => void;
@@ -104,9 +107,9 @@ export function VoiceAcceptance({
                 {/* testata */}
                 <header className="shrink-0 pt-[env(safe-area-inset-top,0px)]">
                   <div className="mx-auto flex h-14 max-w-[680px] items-center gap-2 px-3">
-                    <Dialog.Close className="press flex h-11 items-center gap-1.5 rounded-full px-3 text-[1rem] font-medium text-accent-ink hover:bg-surface-2">
+                    <button type="button" onClick={onExit} className="press flex h-11 items-center gap-1.5 rounded-full px-3 text-[1rem] font-medium text-accent-ink hover:bg-surface-2">
                       <X size={20} strokeWidth={2.4} /> Chiudi
-                    </Dialog.Close>
+                    </button>
                     <Dialog.Title className="min-w-0 flex-1 truncate text-center text-[1rem] font-semibold text-ink">{editing ? 'Modifica a voce' : 'Accettazione a voce'}</Dialog.Title>
                     <button type="button" onClick={onClose} className="press flex h-11 items-center gap-1.5 rounded-full px-3 text-[1rem] font-medium text-accent-ink hover:bg-surface-2">
                       <ListChecks size={20} /> Modulo
