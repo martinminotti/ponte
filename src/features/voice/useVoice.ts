@@ -35,7 +35,14 @@ export function useVoiceSession(open: boolean, host: VoiceHost, extraWords: stri
       // nell'app si parte subito (chi ha scelto "a voce" vuole parlare); nel browser serve il tocco per microfono e voce
       if (isNative() && sup.transcriber) void s.start();
     });
-    const onVis = () => document.visibilityState === 'hidden' && s?.background();
+    // fuori dall'app si va in pausa; se è stato solo un attimo (un avviso, un tremolio della vista) si riprende da soli
+    let hiddenAt = 0;
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenAt = Date.now();
+        s?.background();
+      } else if (s && s.state.phase === 'paused' && s.state.pausedBy === 'background' && Date.now() - hiddenAt < 3000) void s.start();
+    };
     document.addEventListener('visibilitychange', onVis);
     return () => {
       alive = false;
