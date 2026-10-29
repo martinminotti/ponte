@@ -167,9 +167,26 @@ button,
 a {
   touch-action: manipulation;
 }
-button {
+/* è un'app: niente testo da selezionare, niente menu "Copia" o anteprime con la pressione prolungata.
+   Si seleziona e si incolla solo dentro i campi in cui si scrive. */
+html,
+body {
   -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
+}
+img,
+svg,
+a {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+input,
+textarea,
+[contenteditable='true'] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
 }
 input,
 textarea,
