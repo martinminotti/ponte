@@ -12,11 +12,19 @@ import { haptic } from '@/platform/native';
 import { Button } from '@/ui/controls';
 import { SPRING, SPRING_FAST } from '@/ui/motion';
 import { openAppSettings } from '@/voice/listen';
-import type { VoiceHost } from '@/voice/session';
+import type { PauseReason, VoiceHost } from '@/voice/session';
 import type { Shot } from '@/features/form/parts';
 import { LiveCard } from './LiveCard';
 import { Orb } from './Orb';
 import { useVoiceSession } from './useVoice';
+
+const PAUSED: Record<PauseReason, string> = {
+  tap: 'In pausa',
+  voice: 'In pausa',
+  idle: 'In pausa · silenzio lungo',
+  background: 'In pausa · eri fuori dall’app',
+  call: 'In pausa · chiamata',
+};
 
 export interface RestoreOffer {
   label: string;
@@ -128,9 +136,8 @@ export function VoiceAcceptance({
   };
 
   // una riga sola: quello che stai dicendo, altrimenti la domanda dell'assistente
-  const line = state?.partial
-    ? { k: 'p', t: state.partial, you: true }
-    : { k: state?.reply.show ?? '', t: phase === 'paused' && !state?.reply.show.startsWith('In pausa') ? 'In pausa' : (state?.reply.show ?? ''), you: false };
+  const paused = phase === 'paused' ? PAUSED[state?.pausedBy ?? 'tap'] : null;
+  const line = state?.partial ? { k: 'p', t: state.partial, you: true } : { k: paused ?? state?.reply.show ?? '', t: paused ?? state?.reply.show ?? '', you: false };
 
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>

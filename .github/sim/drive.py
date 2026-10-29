@@ -259,8 +259,9 @@ try:
         shot("12a-voce")
         check(has("Esci") and has("Apri il modulo"), "a voce: schermata aperta, in alto solo cerchi di vetro")
         check(not has("Oggi", kinds=NATIVE), "a voce: la barra nativa si fa da parte")
+        check(has("Metti in pausa l’ascolto", exact=False), "a voce: nell'app si apre già in ascolto")
         if not has("Metti in pausa l’ascolto", exact=False):
-            tap("Inizia a dettare", exact=False, wait=1.0, kinds=("web:button",))
+            tap("dettare", exact=False, wait=1.0, kinds=("web:button",))
         say("Golf grigia targa GK 482 TR, è di Marco Bianchi, telefono 335 812 4471")
         shot("12b-voce-golf")
         check(has("Marco Bianchi", exact=False), "a voce: proprietario scritto nella scheda")

@@ -68,7 +68,11 @@ export interface VoiceState {
   known: Job | null;
   /** la sessione è partita almeno una volta */
   started: boolean;
+  /** perché è in pausa: lo si dice in due parole sotto la sfera */
+  pausedBy: PauseReason | null;
 }
+
+export type PauseReason = 'tap' | 'voice' | 'idle' | 'background' | 'call';
 
 export interface VoiceHost {
   getDraft(): Draft;
@@ -140,6 +144,7 @@ export class VoiceSession {
       canSpeak: !!d.speaker,
       known: null,
       started: false,
+      pausedBy: null,
     };
     if (d.host.prefilled) this.declined.add('prefilled');
   }
@@ -172,7 +177,7 @@ export class VoiceSession {
   toggle() {
     const ph = this.s.phase;
     if (ph === 'speaking') return this.interruptSpeech();
-    if (ph === 'listening' || ph === 'thinking') return this.pause();
+    if (ph === 'listening' || ph === 'thinking') return this.pause('tap');
     return this.start();
   }
 
@@ -180,7 +185,7 @@ export class VoiceSession {
     const t = this.d.transcriber;
     if (!t || this.disposed) return;
     if (this.s.phase === 'starting' || this.listening) return;
-    this.set({ phase: 'starting', problem: null, started: true });
+    this.set({ phase: 'starting', problem: null, started: true, pausedBy: null });
     try {
       await t.prepare();
     } catch (e) {
@@ -236,11 +241,11 @@ export class VoiceSession {
     this.set({ level: 0, partial: '' });
   }
 
-  async pause(reason?: string) {
+  async pause(by: PauseReason = 'tap') {
     this.wantListen = false;
     this.d.speaker?.cancel();
     await this.unlisten();
-    this.set({ phase: 'paused', notice: reason ?? this.s.notice });
+    this.set({ phase: 'paused', pausedBy: by });
   }
 
   private bumpIdle() {
@@ -248,8 +253,7 @@ export class VoiceSession {
     const ms = this.d.idlePauseMs ?? 90_000;
     this.idleTimer = setTimeout(() => {
       if (this.listening && !this.busy) {
-        this.setReply({ show: 'In pausa', say: '', expect: this.s.reply.expect });
-        this.pause();
+        this.pause('idle');
       }
     }, ms);
   }
@@ -260,7 +264,7 @@ export class VoiceSession {
     this.wantListen = false;
     void this.d.transcriber?.stop().catch(() => {});
     if (err.kind === 'interrupted') {
-      this.set({ phase: 'paused', notice: 'In pausa per una chiamata' });
+      this.set({ phase: 'paused', pausedBy: 'call' });
       return;
     }
     if (err.kind === 'network' && this.d.transcriber?.kind === 'cloud') {
@@ -540,8 +544,7 @@ export class VoiceSession {
       return this.reply('Ho annullato l’ultima modifica.');
     }
     if (i === 'pause') {
-      this.setReply({ show: 'In pausa', say: '', expect: this.s.reply.expect });
-      return this.pause();
+      return this.pause('voice');
     }
     if (i === 'help') {
       const r: Reply = { show: HELP.show, say: HELP.say, expect: this.s.reply.expect };
@@ -633,7 +636,7 @@ export class VoiceSession {
 
   /** l'app va in secondo piano o si apre un'altra schermata */
   background() {
-    if (this.listening || this.speaking) void this.pause();
+    if (this.listening || this.speaking) void this.pause('background');
   }
 }
 
