@@ -66,7 +66,12 @@ export function VoiceAcceptance({
   words: string[];
   restore?: RestoreOffer | null;
 }) {
-  const { session, state } = useVoiceSession(open, host, words);
+  // la schermata è arrivata in cima: solo allora parte l'ascolto
+  const [entered, setEntered] = useState(false);
+  useEffect(() => {
+    if (!open) setEntered(false);
+  }, [open]);
+  const { session, state } = useVoiceSession(open, host, words, entered);
   const [typing, setTyping] = useState(false);
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -156,10 +161,13 @@ export function VoiceAcceptance({
               <motion.div
                 className="fixed inset-0 z-50 bg-bg outline-none"
                 // sale dal basso e torna giù, come un modale a schermo intero di iOS (stesso percorso all'andata e al ritorno)
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
+                // `transform` intero (non y): Motion lo fa girare sul compositore, fluido anche mentre sotto si disegna il modulo
+                initial={{ transform: 'translateY(100%)' }}
+                animate={{ transform: 'translateY(0%)' }}
+                exit={{ transform: 'translateY(100%)' }}
                 transition={{ type: 'spring', bounce: 0, duration: 0.5 }}
+                onAnimationComplete={(def) => (def as { transform?: string }).transform === 'translateY(0%)' && setEntered(true)}
+                style={{ willChange: 'transform' }}
               >
                 {/* la scheda scorre sotto i comandi di vetro */}
                 <div className="absolute inset-0 overflow-y-auto overscroll-contain">

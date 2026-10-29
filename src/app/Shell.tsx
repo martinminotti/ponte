@@ -10,6 +10,9 @@ import { blurNativeSearch, configureBar, endNativeSearch, nativeBarAvailable, on
 import { inFilter, toInvoice } from '@/domain/logic';
 import { bindAndroidBack, haptic, initNative } from '@/platform/native';
 import { setSwipeBack } from '@/platform/navigation';
+import { SwipeBack } from './SwipeBack';
+
+const isTouch = () => typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches;
 import { NewJobFlow } from '@/features/new/NewJobFlow';
 
 // symbol: SF Symbol usato dalla barra nativa di iOS
@@ -104,8 +107,9 @@ export function Shell() {
   const nativeOn = useNativeBarOn();
   const overlay = useOverlayOpen(nativeOn);
   const anyOverlay = useOverlayOpen(true);
-  // gesto dal bordo per tornare indietro: dove c'è un indietro e nessun foglio aperto
-  useEffect(() => setSwipeBack(!top && !anyOverlay && !wide), [top, anyOverlay, wide]);
+  // il gesto di WebKit non ha la fotografia della schermata precedente: resta spento, il gesto è SwipeBack
+  useEffect(() => setSwipeBack(false), []);
+  const swipeOn = !wide && !anyOverlay && isTouch();
   const page = usePageActions();
   const search = useNativeSearch();
   const pageRef = useRef(page);
@@ -293,7 +297,9 @@ export function Shell() {
       )}
 
       <div className="min-w-0 flex-1">
-        <Outlet />
+        <SwipeBack enabled={swipeOn}>
+          <Outlet />
+        </SwipeBack>
       </div>
 
       {!wide && top && nativeOn && <div aria-hidden="true" className="edge-bottom" />}

@@ -19,7 +19,7 @@ const IDLE: VoiceState | null = null;
  * Crea la sessione quando la schermata a voce si apre e la chiude quando si chiude.
  * L'host deve restare lo stesso oggetto: legge la bozza da un riferimento sempre aggiornato.
  */
-export function useVoiceSession(open: boolean, host: VoiceHost, extraWords: string[]): { session: VoiceSession | null; state: VoiceState | null } {
+export function useVoiceSession(open: boolean, host: VoiceHost, extraWords: string[], entered = true): { session: VoiceSession | null; state: VoiceState | null } {
   const v = useVoiceSettings();
   const [session, setSession] = useState<VoiceSession | null>(null);
   const words = extraWords.join('|');
@@ -32,8 +32,6 @@ export function useVoiceSession(open: boolean, host: VoiceHost, extraWords: stri
       if (!alive) return;
       s = new VoiceSession({ host, settings: v, transcriber: sup.transcriber, speaker: sup.speaker, extraWords: words ? words.split('|') : [] });
       setSession(s);
-      // nell'app si parte subito (chi ha scelto "a voce" vuole parlare); nel browser serve il tocco per microfono e voce
-      if (isNative() && sup.transcriber) void s.start();
     });
     // fuori dall'app si va in pausa; se è stato solo un attimo (un avviso, un tremolio della vista) si riprende da soli
     let hiddenAt = 0;
@@ -53,6 +51,12 @@ export function useVoiceSession(open: boolean, host: VoiceHost, extraWords: stri
     // la sessione vive finché la schermata è aperta: le impostazioni cambiano solo da Impostazioni
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  // nell'app si parte da soli (chi ha scelto "a voce" vuole parlare), ma solo a schermata arrivata:
+  // microfono, sessione audio e aptica non devono rubare fotogrammi alla salita; nel browser serve il tocco
+  useEffect(() => {
+    if (open && entered && session && isNative() && session.state.phase === 'idle' && !session.state.started) void session.start();
+  }, [open, entered, session]);
 
   const state = useSyncExternalStore(
     (cb) => (session ? session.subscribe(cb) : () => {}),

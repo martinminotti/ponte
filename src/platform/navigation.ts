@@ -35,7 +35,7 @@ export function setSwipeBack(enabled: boolean) {
 /** il gesto dal bordo è in corso o è appena finito: la pagina è già stata animata dal sistema */
 let swipingUntil = 0;
 let edgeTouchAt = 0;
-function markSwipe(ms: number) {
+export function markSwipe(ms: number) {
   swipingUntil = Math.max(swipingUntil, Date.now() + ms);
 }
 const swiping = () => Date.now() < swipingUntil;
@@ -114,9 +114,13 @@ export function installNavTransitions(router: Router) {
       document.documentElement.dataset.nav = dir;
       if (skip || dir === 'none') t?.skipTransition();
     });
-    t.finished.finally(() => {
-      delete document.documentElement.dataset.nav;
-    });
+    // una transizione saltata rifiuta queste promesse: non è un errore
+    (t as VT & { ready?: Promise<void>; updateCallbackDone?: Promise<void> }).ready?.catch(() => {});
+    t.finished
+      .catch(() => {})
+      .finally(() => {
+        delete document.documentElement.dataset.nav;
+      });
     return t;
   };
 

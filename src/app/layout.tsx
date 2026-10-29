@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { searchShortcut, useGlass, useJobs, useNativeBarOn, useWide } from './hooks';
 import { useNativeActions, type NativeAction } from '@/platform/nativeBar';
 import { viewTransitionsOn } from '@/platform/navigation';
+import { useIsUnderlay } from './underlay';
 import { ListPage } from '@/features/list/ListPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 
@@ -178,7 +179,9 @@ export function ActionBar({ children, maxW = 760, native }: { children: ReactNod
   const wide = useWide();
   const nativeOn = useNativeBarOn();
   // su iPhone le azioni passano alla barra nativa; qui resta solo la sfumatura sotto il contenuto
-  useNativeActions(nativeOn && native ? native : null);
+  // la schermata disegnata sotto il gesto indietro non comanda la barra nativa
+  const under = useIsUnderlay();
+  useNativeActions(nativeOn && native && !under ? native : null);
   if (nativeOn && native) return <div aria-hidden="true" className="edge-bottom" />;
   if (glass && !wide) {
     return (

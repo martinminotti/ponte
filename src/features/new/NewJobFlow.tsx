@@ -51,6 +51,13 @@ export function NewJobFlow({ open, onOpenChange }: { open: boolean; onOpenChange
     change(false);
     nav(path, state ? { state } : undefined);
   };
+  /** A voce: la schermata a voce sale sopra il foglio e lo copre; sotto si cambia pagina senza animazioni,
+   *  e il foglio si chiude solo quando non si vede più. Un movimento solo, dal basso verso l'alto. */
+  const goVoice = () => {
+    haptic('medium');
+    nav('/nuova?voce=1', { viewTransition: false });
+    setTimeout(() => change(false), 650);
+  };
 
   const people = useMemo(() => customers(jobs || []), [jobs]);
   const firms = useMemo(() => companies(jobs || []), [jobs]);
@@ -92,7 +99,7 @@ export function NewJobFlow({ open, onOpenChange }: { open: boolean; onOpenChange
                   <>
                     <button
                       type="button"
-                      onClick={() => go('/nuova?voce=1')}
+                      onClick={goVoice}
                       className="press flex w-full items-center gap-4 rounded-[20px] bg-accent p-4 text-left text-on-accent shadow-[var(--shadow-accent)] hover:brightness-[1.04]"
                     >
                       <span className="grid size-12 shrink-0 place-items-center rounded-full bg-on-accent/12">

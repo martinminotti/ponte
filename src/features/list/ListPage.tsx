@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMatch, useNavigate, useSearchParams } from 'react-router';
 import { Plus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { useIsUnderlay } from '@/app/underlay';
 import { overlayOpen, searchShortcut, typing, useGlass, useJobs, useNativeBarOn, useSettings, useWide } from '@/app/hooks';
 import { useNativeSearch } from '@/platform/nativeBar';
 import { STATI, statoIndex } from '@/domain/constants';
@@ -52,7 +53,9 @@ export function ListPage() {
   const [sp, setSp] = useSearchParams();
 
   // filtro o ricerca arrivati da un riquadro di Oggi: /schede?f=pronti, /schede?cerca=1
+  const under = useIsUnderlay();
   useEffect(() => {
+    if (under) return;
     const f = sp.get('f') as FilterKey | null;
     if (f && FILTRI.some((x) => x.k === f)) setFilter(f);
     if (sp.get('cerca'))

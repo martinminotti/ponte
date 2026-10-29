@@ -1,6 +1,5 @@
-import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
-import { createHashRouter, Navigate, RouterProvider } from 'react-router';
-import { useSettings } from './hooks';
+import { Component, useEffect, useState, type ReactNode } from 'react';
+import { createHashRouter, RouterProvider } from 'react-router';
 import { MotionConfig } from 'motion/react';
 import { migrateLegacy } from '@/data/backup';
 import { getSettings, requestPersistence } from '@/data/repo';
@@ -8,60 +7,15 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Welcome } from '@/features/welcome/Welcome';
 import { db } from '@/data/db';
 import { Shell } from './Shell';
-import { PanePlaceholder, Workspace } from './layout';
-import { JobPage } from '@/features/job/JobPage';
-import { DashboardPage } from '@/features/dashboard/DashboardPage';
+import { preload, screenRoutes } from './routes';
 import { UpdatePrompt } from './UpdatePrompt';
 import { installNavTransitions } from '@/platform/navigation';
 
-// le schermate meno frequenti si caricano quando servono
-const loadForm = () => import('@/features/form/FormPage');
-const loadDoc = () => import('@/features/doc/DocPage');
-const loadMonth = () => import('@/features/month/MonthPage');
-const loadSettings = () => import('@/features/settings/SettingsPage');
-const loadDitta = () => import('@/features/ditta/DittaPage');
-const DittaPage = lazy(() => loadDitta().then((m) => ({ default: m.DittaPage })));
-const FormPage = lazy(() => loadForm().then((m) => ({ default: m.FormPage })));
-const DocPage = lazy(() => loadDoc().then((m) => ({ default: m.DocPage })));
-const MonthPage = lazy(() => loadMonth().then((m) => ({ default: m.MonthPage })));
-const SettingsPage = lazy(() => loadSettings().then((m) => ({ default: m.SettingsPage })));
-// precaricate appena l'app è pronta: senza, la prima apertura di Fatture o Impostazioni mostrava un fotogramma vuoto
-const preload = () => [loadMonth, loadSettings, loadForm, loadDoc, loadDitta].forEach((f) => f().catch(() => {}));
-const L = (n: ReactNode) => <Suspense fallback={null}>{n}</Suspense>;
-
 // Hash router: funziona su qualunque hosting statico, dentro Capacitor e come file singolo.
-const router = createHashRouter([
-  {
-    element: <Shell />,
-    children: [
-      {
-        path: '/',
-        element: <Workspace />,
-        children: [
-          { index: true, element: <Home /> },
-          { path: 'schede', element: <PanePlaceholder /> },
-          { path: 'job/:id', element: <JobPage /> },
-          { path: 'job/:id/conto', element: L(<DocPage />) },
-          { path: 'job/:id/modifica', element: L(<FormPage />) },
-          { path: 'nuova', element: L(<FormPage />) },
-          { path: 'ditta/:key', element: L(<DittaPage />) },
-        ],
-      },
-      { path: '/mensile', element: L(<MonthPage />) },
-      { path: '/impostazioni', element: L(<SettingsPage />) },
-      { path: '*', element: <PanePlaceholder /> },
-    ],
-  },
-]);
+const router = createHashRouter([{ element: <Shell />, children: screenRoutes }]);
 
 // transizioni come su iOS per tutte le navigazioni dell'app (link, pulsanti, indietro)
 installNavTransitions(router as unknown as Parameters<typeof installNavTransitions>[0]);
-
-/** Oggi è del titolare: chi entra come dipendente va dritto alle schede. */
-function Home() {
-  const s = useSettings();
-  return s.role === 'staff' ? <Navigate to="/schede" replace /> : <DashboardPage />;
-}
 
 class Boundary extends Component<{ children: ReactNode }, { err: Error | null }> {
   state = { err: null as Error | null };
