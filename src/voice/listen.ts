@@ -399,7 +399,7 @@ class CloudTranscriber implements Transcriber {
 
 /* ------------------------------------------------------------------ simulato (test) */
 
-type SimWindow = Window & { __PONTE_VOICE_SIM__?: boolean; ponteVoice?: { say(t: string): void; partial(t: string): void; listening(): boolean } };
+type SimWindow = Window & { __PONTE_VOICE_SIM__?: boolean; ponteVoice?: { say(t: string): void; partial(t: string): void; level(v: number): void; listening(): boolean } };
 
 class SimTranscriber implements Transcriber {
   kind = 'sim' as const;
@@ -413,6 +413,7 @@ class SimTranscriber implements Transcriber {
         window.setTimeout(() => this.h?.final(t), 120);
       },
       partial: (t) => this.h?.partial(t),
+      level: (v) => this.h?.level(v),
       listening: () => !!this.h,
     };
   }

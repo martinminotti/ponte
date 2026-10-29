@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { AnimatePresence, motion } from 'motion/react';
 import { AlertTriangle, ArrowUp, Camera, History, Keyboard, ListChecks, RotateCcw, Settings2, Undo2, Volume2, VolumeX, X } from 'lucide-react';
@@ -76,6 +76,14 @@ export function VoiceAcceptance({
   useEffect(() => {
     if (state?.problem && !state.problem.retry) setTyping(true);
   }, [state?.problem]);
+
+  // un colpo leggero quando il microfono si apre dopo un tocco (non a ogni giro di conversazione)
+  const prevPhase = useRef(state?.phase);
+  useEffect(() => {
+    const p = prevPhase.current;
+    prevPhase.current = state?.phase;
+    if (state?.phase === 'listening' && (p === 'starting' || p === 'paused' || p === 'idle' || p === 'error')) haptic('light');
+  }, [state?.phase]);
 
   // la riga appena scritta resta in vista, anche se la scheda è lunga
   const first = state?.recent[0];
@@ -239,7 +247,7 @@ export function VoiceAcceptance({
                                 : 'w-wide line-clamp-2 max-w-[24ch] text-[1.3125rem] leading-tight font-semibold text-balance text-ink'
                             }
                           >
-                            {line.you ? `«${line.t}»` : line.t}
+                            {line.you ? <LiveWords text={line.t} /> : line.t}
                           </motion.p>
                         </AnimatePresence>
                       </div>
@@ -249,7 +257,7 @@ export function VoiceAcceptance({
                       <Circle size="lg" label="Annulla l’ultima modifica" disabled={!state?.canUndo} onClick={() => session?.undo()}>
                         <Undo2 size={23} />
                       </Circle>
-                      <Orb phase={phase} level={state?.level ?? 0} onPress={() => session?.toggle()} invite={!state?.started} />
+                      <Orb phase={phase} level={state?.level ?? 0} hearing={!!state?.partial} onPress={() => session?.toggle()} invite={!state?.started} />
                       {shots && onShots ? (
                         <Circle size="lg" label={photoBusy ? 'Preparo la foto' : 'Foto all’arrivo'} disabled={photoBusy} onClick={() => photoIn.current?.click()} badge={shots.length || undefined}>
                           <Camera size={23} />
@@ -323,6 +331,33 @@ export function VoiceAcceptance({
         )}
       </AnimatePresence>
     </Dialog.Root>
+  );
+}
+
+/**
+ * Quello che stai dicendo, parola per parola: ogni parola nuova emerge da una leggera sfocatura,
+ * così si vede che il telefono ti sta seguendo. Le correzioni del riconoscimento cambiano la parola senza scatti.
+ */
+function LiveWords({ text }: { text: string }) {
+  const words = text.split(/\s+/).filter(Boolean);
+  // sullo schermo solo la coda della frase: mentre si parla conta l'ultima parola
+  const from = Math.max(0, words.length - 14);
+  return (
+    <span>
+      {from > 0 && '… '}
+      {words.slice(from).map((w, i) => (
+        <Fragment key={from + i}>
+          <motion.span
+            className="inline-block"
+            initial={{ opacity: 0, y: 3, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+          >
+            {w}
+          </motion.span>{' '}
+        </Fragment>
+      ))}
+    </span>
   );
 }
 

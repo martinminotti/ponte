@@ -616,3 +616,21 @@ select.ctl {
     opacity: 0;
   }
 }
+
+/* alone di luce del microfono: si gonfia e si accende con la voce */
+.orb-glow {
+  background: conic-gradient(from 0deg, var(--accent), #ffb347, var(--accent), #ff3d6e, var(--accent));
+  filter: blur(14px);
+}
+.orb-glow-spin {
+  animation: orb-spin 7s linear infinite;
+}
+.orb-glow-fast {
+  animation: orb-spin 1.6s linear infinite;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .orb-glow {
+    filter: none;
+    background: var(--accent-soft);
+  }
+}
