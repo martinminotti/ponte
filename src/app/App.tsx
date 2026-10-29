@@ -12,6 +12,7 @@ import { PanePlaceholder, Workspace } from './layout';
 import { JobPage } from '@/features/job/JobPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { UpdatePrompt } from './UpdatePrompt';
+import { installNavTransitions } from '@/platform/navigation';
 
 // le schermate meno frequenti si caricano quando servono
 const loadForm = () => import('@/features/form/FormPage');
@@ -52,6 +53,9 @@ const router = createHashRouter([
     ],
   },
 ]);
+
+// transizioni come su iOS per tutte le navigazioni dell'app (link, pulsanti, indietro)
+installNavTransitions(router as unknown as Parameters<typeof installNavTransitions>[0]);
 
 /** Oggi è del titolare: chi entra come dipendente va dritto alle schede. */
 function Home() {

@@ -59,6 +59,8 @@ function FormInner({ job }: { job?: Job }) {
   /* ---- accettazione a voce: stessa bozza del modulo ---- */
   const canListen = useCanListen();
   const [voice, setVoice] = useState(() => sp.get('voce') === '1');
+  const voiceRef = useRef(voice);
+  voiceRef.current = voice;
   const dRef = useRef(d);
   dRef.current = d;
   const jobsRef = useRef(jobs);
@@ -147,7 +149,8 @@ function FormInner({ job }: { job?: Job }) {
   };
 
   useEffect(() => {
-    if (!editing && !d.plate) plateRef.current?.focus({ preventScroll: true });
+    // con la voce si parla: la tastiera non deve comparire da sola
+    if (!editing && !d.plate && !voiceRef.current) plateRef.current?.focus({ preventScroll: true });
     // solo all'apertura
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

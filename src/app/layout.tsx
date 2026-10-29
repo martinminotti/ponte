@@ -4,6 +4,7 @@ import { CarFront, ChevronLeft } from 'lucide-react';
 import { motion } from 'motion/react';
 import { searchShortcut, useGlass, useJobs, useNativeBarOn, useWide } from './hooks';
 import { useNativeActions, type NativeAction } from '@/platform/nativeBar';
+import { viewTransitionsOn } from '@/platform/navigation';
 import { ListPage } from '@/features/list/ListPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 
@@ -162,7 +163,8 @@ export function Page({ children, className = '' }: { children: ReactNode; classN
   const { pathname } = useLocation();
   // fra le sezioni (Oggi, Schede, Fatture, Impostazioni) si passa all'istante, come con la barra di iOS
   const section = ['/', '/schede', '/mensile', '/impostazioni'].includes(pathname);
-  if (wide || section) return <div className={className}>{children}</div>;
+  // con le View Transitions il movimento lo fa la transizione (avanti da destra, indietro verso destra): niente doppioni
+  if (wide || section || viewTransitionsOn()) return <div className={className}>{children}</div>;
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }} className={className}>
       {children}

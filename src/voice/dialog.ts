@@ -20,14 +20,14 @@ export type Asked = Partial<Record<FieldKey, number>>;
 
 /** [detto a voce, scritto sullo schermo] */
 const QUESTIONS: Record<string, [string, string]> = {
-  plate: ['Qual è la targa?', 'La targa?'],
+  plate: ['Mi dici la targa?', 'La targa?'],
   cname: ['Come si chiama la ditta?', 'Il nome della ditta?'],
-  cvat: ['Mi dici la partita IVA della ditta?', 'La partita IVA?'],
-  owner: ['Di chi è il veicolo? Nome e cognome.', 'Di chi è il veicolo?'],
-  phone: ['Il numero di telefono del cliente?', 'Il telefono?'],
+  cvat: ['Mi dai la partita IVA?', 'La partita IVA?'],
+  owner: ['Di chi è la macchina?', 'Di chi è il veicolo?'],
+  phone: ['Mi lasci il numero del cliente?', 'Il telefono?'],
   request: ['Cosa c’è da fare?', 'Cosa c’è da fare?'],
-  make: ['Che veicolo è? Marca e modello.', 'Che veicolo è?'],
-  dueDate: ['Per quando lo vuole?', 'Per quando?'],
+  make: ['Che macchina è?', 'Che veicolo è?'],
+  dueDate: ['Per quando la vuole?', 'Per quando?'],
 };
 
 /** La prossima cosa da chiedere, in ordine di importanza. null = ha tutto quello che serve. */
@@ -74,43 +74,25 @@ export interface Reply {
   yesNo?: boolean;
 }
 
-const sentenceCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+/** come risponde una persona: un cenno breve, che cambia, e si ripetono solo i numeri che contano */
+const ACKS = ['Ok', 'Perfetto', 'Bene', 'Fatto'];
+let ackTurn = 0;
+const ack = () => ACKS[ackTurn++ % ACKS.length];
 
-/** "targa G, K, 4…, Volkswagen Golf, Marco Bianchi." — al massimo tre conferme, le più importanti */
+/**
+ * "Perfetto, targa G K, 4 8 2, T R." — a voce si ripetono solo targa, telefono e partita IVA
+ * (un numero sbagliato costa caro); nomi, lavori e il resto si vedono sulla scheda.
+ */
 export function confirmations(changes: Change[]): string {
-  const rank: FieldKey[] = [
-    'plate',
-    'phone',
-    'cvat',
-    'owner',
-    'cname',
-    'make',
-    'model',
-    'dueDate',
-    'km',
-    'tyres',
-    'wa',
-    'client',
-    'plateCountry',
-    'services',
-    'vin',
-    'request',
-    'notes',
-    'ccf',
-    'caddr',
-    'csdi',
-  ];
-  const said = changes.filter((c) => c.say).sort((a, b) => rank.indexOf(a.field) - rank.indexOf(b.field));
-  if (!said.length) return '';
-  const top = said.slice(0, 3).map((c) => c.say);
-  const rest = said.length - top.length;
-  return sentenceCase(top.join(', ')) + (rest > 0 ? `, e ${rest === 1 ? 'un’altra cosa' : `altre ${rest} cose`}` : '') + '.';
+  const critical = (['plate', 'phone', 'cvat'] as FieldKey[]).map((f) => changes.find((c) => c.field === f && c.say)).filter(Boolean) as Change[];
+  if (critical.length) return `${ack()}, ${critical.map((c) => c.say).join(', ')}.`;
+  return changes.some((c) => c.say) ? `${ack()}.` : '';
 }
 
 /** una frase con la sua versione corta per lo schermo */
 export type Said = { say: string; show: string };
 
-export const DONE: Said = { say: 'Ho tutto quello che serve. Aggiungi pure altro, oppure dì «registra».', show: 'Tutto pronto.' };
+export const DONE: Said = { say: 'Ho tutto. Quando vuoi, dimmi registra.', show: 'Tutto pronto.' };
 
 export function compose(changes: Change[], issues: Issue[], ask: Ask | null, extra?: Said): Reply {
   const conf = confirmations(changes);
@@ -128,16 +110,16 @@ export function compose(changes: Change[], issues: Issue[], ask: Ask | null, ext
 export function greeting(d: Draft, asked: Asked = {}): Reply {
   const ask = nextAsk(d, asked);
   const blank = !d.plate && !d.vin && !d.owner && !d.company.name;
-  if (blank) return { show: 'Dimmi targa, cliente e lavori.', say: 'Ciao. Dimmi pure: targa, cliente e cosa c’è da fare.', expect: 'plate' };
+  if (blank) return { show: 'Dimmi targa, cliente e lavori.', say: 'Ciao! Dimmi pure.', expect: 'plate' };
   const who = d.client === 'azienda' ? d.company.name : d.owner;
-  const intro = who ? `Ho già i dati di ${who}.` : 'Ho già qualche dato.';
+  const intro = who ? `Ciao! Ho già i dati di ${who}.` : 'Ciao!';
   if (!ask) return { show: DONE.show, say: `${intro} ${DONE.say}`, expect: null };
   return { show: ask.show, say: `${intro} ${ask.say}`, expect: ask.field };
 }
 
 export const HELP: Said = {
-  say: 'Parla come al banco: targa, nome del cliente, telefono e cosa c’è da fare. Se sbaglio dimmi «no, la targa è…» oppure «annulla». Quando hai finito dì «registra».',
+  say: 'Parlami come a un collega: targa, cliente, telefono e cosa c’è da fare. Se sbaglio dimmi pure no, oppure annulla. Alla fine, registra.',
   show: 'Dì targa, cliente e lavori. Poi «registra».',
 };
 
-export const NOT_UNDERSTOOD: Said = { say: 'Scusa, non ho capito. Puoi ripetere con calma?', show: 'Non ho capito.' };
+export const NOT_UNDERSTOOD: Said = { say: 'Scusa, me lo ripeti?', show: 'Non ho capito.' };

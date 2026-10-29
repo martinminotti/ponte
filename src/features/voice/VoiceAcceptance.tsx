@@ -17,6 +17,7 @@ import type { Shot } from '@/features/form/parts';
 import { LiveCard } from './LiveCard';
 import { Orb } from './Orb';
 import { useVoiceSession } from './useVoice';
+import { saveVoice } from './saveVoice';
 
 const PAUSED: Record<PauseReason, string> = {
   tap: 'In pausa',
@@ -85,6 +86,13 @@ export function VoiceAcceptance({
     if (state?.problem && !state.problem.retry) setTyping(true);
   }, [state?.problem]);
 
+  // aprendo la voce la tastiera si chiude (se un campo del modulo aveva il fuoco) e non si riapre da sola
+  useEffect(() => {
+    if (!open) return;
+    const a = document.activeElement as HTMLElement | null;
+    if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) a.blur();
+  }, [open]);
+
   // un colpo leggero quando il microfono si apre dopo un tocco (non a ogni giro di conversazione)
   const prevPhase = useRef(state?.phase);
   useEffect(() => {
@@ -144,13 +152,14 @@ export function VoiceAcceptance({
       <AnimatePresence>
         {open && (
           <Dialog.Portal forceMount>
-            <Dialog.Content asChild forceMount aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()}>
+            <Dialog.Content asChild forceMount aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()} onCloseAutoFocus={(e) => e.preventDefault()}>
               <motion.div
                 className="fixed inset-0 z-50 bg-bg outline-none"
-                initial={{ opacity: 0, y: 28 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 28, transition: { duration: 0.18 } }}
-                transition={SPRING}
+                // sale dal basso e torna giù, come un modale a schermo intero di iOS (stesso percorso all'andata e al ritorno)
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', bounce: 0, duration: 0.5 }}
               >
                 {/* la scheda scorre sotto i comandi di vetro */}
                 <div className="absolute inset-0 overflow-y-auto overscroll-contain">
@@ -208,7 +217,14 @@ export function VoiceAcceptance({
                     </Circle>
                     <Dialog.Title className="min-w-0 flex-1 truncate text-center text-[1rem] font-semibold text-ink">{editing ? 'Modifica a voce' : 'A voce'}</Dialog.Title>
                     {state?.canSpeak && session && (
-                      <Circle label={state.speak ? 'Togli la voce' : 'Rimetti la voce'} pressed={state.speak} onClick={() => session.setSpeak(!state.speak)}>
+                      <Circle
+                        label={state.speak ? 'Togli la voce' : 'Rimetti la voce'}
+                        pressed={state.speak}
+                        onClick={() => {
+                          session.setSpeak(!state.speak);
+                          void saveVoice({ replies: !state.speak });
+                        }}
+                      >
                         {state.speak ? <Volume2 size={21} /> : <VolumeX size={21} />}
                       </Circle>
                     )}

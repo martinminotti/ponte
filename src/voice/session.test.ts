@@ -67,7 +67,7 @@ function setup(o: { settings?: Partial<VoiceSettings>; interpret?: (text: string
   };
   const mic = new FakeMic();
   const voice = new FakeVoice(mic);
-  const settings: VoiceSettings = { ...DEFAULT_VOICE, speak: o.speak ?? true, ...(o.settings || {}) };
+  const settings: VoiceSettings = { ...DEFAULT_VOICE, replies: o.speak ?? true, ...(o.settings || {}) };
   const s = new VoiceSession({
     host,
     settings,
@@ -105,7 +105,7 @@ describe('sessione a voce', () => {
     expect(t.draft.make).toBe('Volkswagen');
     expect(t.s.state.mode).toBe('base');
     expect(t.s.state.recent).toContain('plate');
-    expect(t.voice.said.at(-1)).toContain('Targa G, K, 4, 8, 2, T, R');
+    expect(t.voice.said.at(-1)).toContain('targa G K, 4 8 2, T R');
   });
 
   it('il microfono è chiuso mentre l’assistente parla e si riapre dopo', async () => {
@@ -326,7 +326,7 @@ describe('sessione a voce', () => {
   it('si mette in pausa da solo dopo un lungo silenzio', async () => {
     vi.useFakeTimers();
     const t = setup({ speak: false });
-    const s = new VoiceSession({ host: t.host, settings: DEFAULT_VOICE, transcriber: t.mic, speaker: null, idlePauseMs: 1000, now: () => NOW });
+    const s = new VoiceSession({ host: t.host, settings: { ...DEFAULT_VOICE, replies: false }, transcriber: t.mic, speaker: null, idlePauseMs: 1000, now: () => NOW });
     await s.start();
     expect(s.state.phase).toBe('listening');
     await vi.advanceTimersByTimeAsync(1100);

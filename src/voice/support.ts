@@ -15,6 +15,7 @@ interface VoiceInputPlugin {
   speak(o: { text: string }): Promise<void>;
   stopSpeaking(): Promise<void>;
   openSettings(): Promise<void>;
+  voiceInfo(): Promise<{ name: string; quality: 'premium' | 'enhanced' | 'default' }>;
   addListener(e: 'partial' | 'final', cb: (d: { text: string }) => void): Promise<PluginListenerHandle>;
   addListener(e: 'level', cb: (d: { value: number }) => void): Promise<PluginListenerHandle>;
   addListener(e: 'error', cb: (d: { code: string; message: string }) => void): Promise<PluginListenerHandle>;
@@ -49,4 +50,17 @@ export async function canListen(v: VoiceSettings): Promise<boolean> {
   const n = await nativeCheck();
   if (n?.available) return true;
   return !!speechRecognitionClass() && Capacitor.getPlatform() === 'web';
+}
+
+export interface VoiceInfo {
+  name: string;
+  quality: 'premium' | 'enhanced' | 'default';
+}
+
+/** la voce italiana che userà l'assistente (iPhone: quella di sistema migliore installata) */
+export async function voiceInfo(): Promise<VoiceInfo | null> {
+  if (nativeAvailable()) return VoiceInput.voiceInfo().catch(() => null);
+  if (typeof speechSynthesis === 'undefined') return null;
+  const v = speechSynthesis.getVoices().find((x) => /^it([-_]|$)/i.test(x.lang));
+  return v ? { name: v.name, quality: /premium|enhanced|migliorat|natural|neural/i.test(v.name) ? 'enhanced' : 'default' } : null;
 }

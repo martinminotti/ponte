@@ -118,8 +118,8 @@ export interface VoiceSettings {
   stt: 'device' | 'cloud';
   /** modello di trascrizione nel cloud; vuoto = consigliato */
   sttModel: string;
-  /** l'assistente risponde anche a voce */
-  speak: boolean;
+  /** l'assistente risponde anche a voce (spento: si guarda la scheda, risponde solo lo schermo) */
+  replies: boolean;
   /** quando il titolare ha letto l'avviso sui dati inviati al fornitore */
   consentAt?: number;
 }

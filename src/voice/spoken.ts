@@ -800,12 +800,16 @@ export function vatChecksumOk(vat: string): boolean {
 
 /* ------------------------------------------------------------------ per la voce che risponde */
 
-/** targa da leggere ad alta voce lettera per lettera: "GK482TR" → "G, K, 4, 8, 2, T, R" */
+/**
+ * Codice da leggere ad alta voce come lo dice una persona: a gruppi, con una piccola pausa tra un gruppo e l'altro.
+ * "GK482TR" → "G K, 4 8 2, T R"; "01234567897" → "0 1 2, 3 4 5, 6 7 8, 9 7"
+ */
 export function spell(s: string): string {
-  return s
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '')
-    .split('')
+  const n = s.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const groups = n.match(/[A-Z]+|\d+/g) || [];
+  return groups
+    .flatMap((g) => (/\d/.test(g) && g.length > 4 ? g.match(/\d{1,3}/g) || [g] : [g]))
+    .map((g) => g.split('').join(' '))
     .join(', ');
 }
 

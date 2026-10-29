@@ -140,7 +140,7 @@ export class VoiceSession {
       notice: null,
       problem: d.transcriber ? null : { title: 'Ascolto non disponibile', text: 'Su questo dispositivo non posso ascoltare. Puoi scrivere le frasi qui sotto.', settings: false, retry: false },
       canUndo: false,
-      speak: d.settings.speak && !!d.speaker,
+      speak: !!d.settings.replies && !!d.speaker,
       canSpeak: !!d.speaker,
       known: null,
       started: false,

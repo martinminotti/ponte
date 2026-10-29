@@ -7,6 +7,7 @@ class MainViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeBarPlugin())
         bridge?.registerPluginInstance(PlateScannerPlugin())
         bridge?.registerPluginInstance(VoiceInputPlugin())
+        bridge?.registerPluginInstance(NavigationPlugin())
         #if DEBUG
         if UITestProbe.enabled, let wv = webView {
             probe = UITestProbe(webView: wv)

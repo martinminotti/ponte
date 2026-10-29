@@ -296,10 +296,11 @@ describe('dialogo', () => {
     expect(nextAsk(d)?.field).toBe('cname');
     expect(missingForSave(d)).toBe('il nome della ditta e la partita IVA');
   });
-  it('risposta: conferma la targa lettera per lettera e chiede il resto', () => {
+  it('risposta: un cenno, la targa a gruppi come la dice una persona, la domanda', () => {
     const a = applyPatch(emptyDraft(), { plate: 'GK482TR' }, NOW);
     const r = compose(a.changes, a.issues, nextAsk(a.draft));
-    expect(r.say).toBe('Targa G, K, 4, 8, 2, T, R. Di chi è il veicolo? Nome e cognome.');
+    expect(r.say).toMatch(/^(Ok|Perfetto|Bene|Fatto), targa G K, 4 8 2, T R\. Di chi è la macchina\?$/);
+    expect(r.show).toBe('Di chi è il veicolo?');
     expect(r.expect).toBe('owner');
   });
   it('saluto con i dati del cliente che torna', () => {

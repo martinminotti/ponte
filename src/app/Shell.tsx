@@ -9,6 +9,7 @@ import { overlayOpen, typing, useDesk, useGlass, useJobs, useNativeBarOn, useOve
 import { blurNativeSearch, configureBar, endNativeSearch, nativeBarAvailable, onBarSearch, onBarSelect, setBarCompact, useNativeSearch, usePageActions } from '@/platform/nativeBar';
 import { inFilter, toInvoice } from '@/domain/logic';
 import { bindAndroidBack, haptic, initNative } from '@/platform/native';
+import { setSwipeBack } from '@/platform/navigation';
 import { NewJobFlow } from '@/features/new/NewJobFlow';
 
 // symbol: SF Symbol usato dalla barra nativa di iOS
@@ -102,6 +103,9 @@ export function Shell() {
   // barra nativa di iOS: sezioni sulle schermate principali, azioni della schermata altrove, nascosta sotto i fogli
   const nativeOn = useNativeBarOn();
   const overlay = useOverlayOpen(nativeOn);
+  const anyOverlay = useOverlayOpen(true);
+  // gesto dal bordo per tornare indietro: dove c'è un indietro e nessun foglio aperto
+  useEffect(() => setSwipeBack(!top && !anyOverlay && !wide), [top, anyOverlay, wide]);
   const page = usePageActions();
   const search = useNativeSearch();
   const pageRef = useRef(page);

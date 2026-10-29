@@ -15,7 +15,7 @@ export const DEFAULT_VOICE: VoiceSettings = {
   proxyToken: '',
   stt: 'device',
   sttModel: '',
-  speak: true,
+  replies: false,
 };
 
 export function voiceSettings(s: Pick<Settings, 'voice'> | undefined): VoiceSettings {

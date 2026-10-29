@@ -29,6 +29,7 @@ public class VoiceInputPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerD
         CAPPluginMethod(name: "speak", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stopSpeaking", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "openSettings", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "voiceInfo", returnType: CAPPluginReturnPromise),
     ]
 
     private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "it-IT"))
@@ -325,9 +326,22 @@ public class VoiceInputPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerD
             if self.synth.isSpeaking { self.synth.stopSpeaking(at: .immediate) }
             let u = AVSpeechUtterance(string: text)
             u.voice = self.voice
-            u.rate = AVSpeechUtteranceDefaultSpeechRate * 1.02
+            u.rate = AVSpeechUtteranceDefaultSpeechRate * 0.98
+            u.pitchMultiplier = 1.0
+            u.postUtteranceDelay = 0.05
             u.preUtteranceDelay = 0.05
             self.synth.speak(u)
+        }
+    }
+
+    /// la voce che userà l'assistente: se è quella base, le Impostazioni suggeriscono di scaricarne una migliore
+    @objc func voiceInfo(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            guard let v = self.voice else { return call.resolve(["name": "", "quality": "default"]) }
+            var q = "default"
+            if v.quality == .enhanced { q = "enhanced" }
+            if #available(iOS 16.0, *), v.quality == .premium { q = "premium" }
+            call.resolve(["name": v.name, "quality": q])
         }
     }
 

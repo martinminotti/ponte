@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckCircle2, ExternalLink, Eye, EyeOff, Loader2, ShieldCheck, Sparkles, XCircle } from 'lucide-react';
-import { getSettings, saveSettings } from '@/data/repo';
-import type { Settings, VoiceProvider, VoiceSettings } from '@/domain/types';
+import { saveVoice } from './saveVoice';
+import { voiceInfo, type VoiceInfo } from '@/voice/support';
+import type { Settings, VoiceProvider } from '@/domain/types';
 import { openExternal } from '@/platform/native';
 import { AutoInput, Button, Field, Note, Section, Segmented, Switch } from '@/ui/controls';
 import { PROVIDERS, aiReady, cloudSttPossible, modelOf, voiceSettings } from '@/voice/config';
@@ -14,16 +15,6 @@ const OPTIONS: { v: VoiceProvider; l: string; d: string }[] = [
   { v: 'gemini', l: 'Google Gemini', d: 'Modelli Gemini. Serve una chiave di Google AI Studio.' },
   { v: 'compatible', l: 'Altro compatibile con OpenAI', d: 'Groq, Mistral, OpenRouter, un server nell’officina: indirizzo, chiave e modello.' },
 ];
-
-/** le modifiche si mettono in fila e partono dal valore salvato: due campi cambiati di seguito non si sovrascrivono */
-let chain: Promise<void> = Promise.resolve();
-function saveVoice(p: Partial<VoiceSettings>) {
-  chain = chain.then(async () => {
-    const cur = await getSettings();
-    await saveSettings({ voice: { ...voiceSettings(cur), ...p } });
-  });
-  return chain;
-}
 
 /** Impostazioni → Assistente vocale (solo titolare). Qui si collega il modello: fornitore, chiave, prova. */
 export function VoiceSettingsSection({ s }: { s: Settings }) {
@@ -235,13 +226,36 @@ export function VoiceSettingsSection({ s }: { s: Settings }) {
           )}
 
           <Switch
-            checked={v.speak}
-            onChange={(on) => save({ speak: on })}
+            checked={v.replies}
+            onChange={(on) => save({ replies: on })}
             label="Risposte a voce"
-            description="L’assistente conferma la targa e chiede quello che manca. Si può zittire anche dalla schermata."
+            description="Spente: l’assistente non parla, si guarda la scheda. Accese: conferma targa e telefono e chiede quello che manca."
           />
+          {v.replies && <VoiceQuality />}
         </>
       )}
     </Section>
+  );
+}
+
+/** sull'iPhone la naturalezza dipende dalla voce scaricata: si dice quale si usa e come averne una migliore */
+function VoiceQuality() {
+  const [info, setInfo] = useState<VoiceInfo | null>(null);
+  useEffect(() => {
+    let alive = true;
+    voiceInfo().then((i) => alive && setInfo(i));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  if (!info) return null;
+  return info.quality === 'default' ? (
+    <Note tone="warn">
+      Voce in uso: {info.name || 'base'}. Per una voce naturale scarica una voce italiana «Premium» o «Migliorata» in Impostazioni iPhone → Accessibilità → Contenuti letti → Voci → Italiano.
+    </Note>
+  ) : (
+    <p className="text-[0.875rem] text-ink-3">
+      Voce in uso: {info.name} ({info.quality === 'premium' ? 'Premium' : 'Migliorata'}).
+    </p>
   );
 }

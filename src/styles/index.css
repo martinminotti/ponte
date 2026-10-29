@@ -634,3 +634,61 @@ select.ctl {
     background: var(--accent-soft);
   }
 }
+
+/* ---------------- transizioni fra le schermate (View Transitions, iPhone) ----------------
+   come UINavigationController: avanti la nuova entra da destra e la vecchia arretra del 30 % scurendosi;
+   indietro il percorso inverso. Curva: molla senza rimbalzo (risposta 0,45 s). */
+:root {
+  --nav-spring: linear(0, 0.0324, 0.1084, 0.2048, 0.3072, 0.4069, 0.4991, 0.5816, 0.6536, 0.7154, 0.7676, 0.8113, 0.8475, 0.8773, 0.9016, 0.9213, 0.9373, 0.9501, 0.9605, 0.9687, 0.9753, 0.9805, 0.9847, 0.9879, 0.9905, 0.9926, 0.9942, 0.9955, 1);
+  --nav-dur: 0.56s;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s;
+}
+html[data-nav='push']::view-transition-old(root) {
+  animation: nav-back var(--nav-dur) var(--nav-spring) both;
+}
+html[data-nav='push']::view-transition-new(root) {
+  animation: nav-in-right var(--nav-dur) var(--nav-spring) both;
+  box-shadow: -8px 0 28px -6px rgba(0, 0, 0, 0.22);
+}
+html[data-nav='pop']::view-transition-old(root) {
+  z-index: 2;
+  animation: nav-out-right var(--nav-dur) var(--nav-spring) both;
+  box-shadow: -8px 0 28px -6px rgba(0, 0, 0, 0.22);
+}
+html[data-nav='pop']::view-transition-new(root) {
+  z-index: 1;
+  animation: nav-from-back var(--nav-dur) var(--nav-spring) both;
+}
+html[data-nav='fade']::view-transition-old(root),
+html[data-nav='fade']::view-transition-new(root) {
+  animation-duration: 0.2s;
+}
+@keyframes nav-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes nav-back {
+  to {
+    transform: translateX(-30%);
+    filter: brightness(0.92);
+  }
+}
+@keyframes nav-out-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes nav-from-back {
+  from {
+    transform: translateX(-30%);
+    filter: brightness(0.92);
+  }
+}
+/* le notifiche restano ferme mentre la pagina scorre */
+[data-sonner-toaster] {
+  view-transition-name: toasts;
+}

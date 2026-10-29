@@ -20,6 +20,7 @@
 		625D3AE88FD03F03D044EC38 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EA083566830EC307CCB0B65 /* MainViewController.swift */; };
 		9287BE1BCFEBB9206DEA4905 /* NativeBarPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2188F4080E460D07BCF539E /* NativeBarPlugin.swift */; };
 		A1989AFAFFB318F1E1B123E5 /* PlateScannerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = E882141AACB7EB7B66022D75 /* PlateScannerPlugin.swift */; };
+		BD6F7815B56D6270488FBEE2 /* NavigationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2ACA08A54B7942395724A9F /* NavigationPlugin.swift */; };
 		1CD8E034A9548C0970217F0E /* VoiceInputPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1C3A706C947586A7D0746C /* VoiceInputPlugin.swift */; };
 /* End PBXBuildFile section */
 
@@ -38,6 +39,7 @@
 		2EA083566830EC307CCB0B65 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		C2188F4080E460D07BCF539E /* NativeBarPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeBarPlugin.swift; sourceTree = "<group>"; };
 		E882141AACB7EB7B66022D75 /* PlateScannerPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlateScannerPlugin.swift; sourceTree = "<group>"; };
+		C2ACA08A54B7942395724A9F /* NavigationPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationPlugin.swift; sourceTree = "<group>"; };
 		3A1C3A706C947586A7D0746C /* VoiceInputPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputPlugin.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -79,6 +81,7 @@
 				2EA083566830EC307CCB0B65 /* MainViewController.swift */,
 				C2188F4080E460D07BCF539E /* NativeBarPlugin.swift */,
 				E882141AACB7EB7B66022D75 /* PlateScannerPlugin.swift */,
+				C2ACA08A54B7942395724A9F /* NavigationPlugin.swift */,
 				3A1C3A706C947586A7D0746C /* VoiceInputPlugin.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
@@ -179,6 +182,7 @@
 				625D3AE88FD03F03D044EC38 /* MainViewController.swift in Sources */,
 				9287BE1BCFEBB9206DEA4905 /* NativeBarPlugin.swift in Sources */,
 				A1989AFAFFB318F1E1B123E5 /* PlateScannerPlugin.swift in Sources */,
+				BD6F7815B56D6270488FBEE2 /* NavigationPlugin.swift in Sources */,
 				1CD8E034A9548C0970217F0E /* VoiceInputPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
