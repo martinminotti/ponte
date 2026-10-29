@@ -1,106 +1,26 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import { scan, useScanner } from '@/platform/scanner';
-import { Camera, History, ScanLine, ScanText, X } from 'lucide-react';
-import { compressPhoto } from '@/platform/images';
+import { History, Mic, RotateCcw, ScanLine, ScanText } from 'lucide-react';
 import { PhotosSection } from '@/features/job/sections';
 import { toast } from 'sonner';
-import { ActionBar, Page, TopBar } from '@/app/layout';
+import { ActionBar, BarButton, Page, TopBar } from '@/app/layout';
 import { useJob, useJobs, useSettings } from '@/app/hooks';
 import { SERVIZI } from '@/domain/constants';
-import { fmtDate, fmtPlate, jobNumber, normPlateText, norm, uid } from '@/domain/format';
+import { fmtDate, fmtPlate, jobNumber, normPlateText, norm } from '@/domain/format';
 import { veic } from '@/domain/logic';
 import { companies } from '@/domain/monthly';
-import { EMPTY_COMPANY, type ClientType, type Company, type Job, type PlateCountry } from '@/domain/types';
+import { EMPTY_COMPANY, type ClientType, type Company, type Job } from '@/domain/types';
+import { MARCHE, fromJob, isBlank, validate, type Draft, type FieldKey } from '@/domain/draft';
+import type { VoiceHost } from '@/voice/session';
+import { VoiceAcceptance } from '@/features/voice/VoiceAcceptance';
+import { useCanListen } from '@/features/voice/useVoice';
+import { clearSavedDraft, loadSavedDraft, savedLabel, storeDraft, type SavedDraft } from './draftStore';
 import { addPhoto, createJob, patchJob } from '@/data/repo';
 import { haptic } from '@/platform/native';
 import { Button, Field, Input, Note, Segmented, Switch, TextArea, ToggleChip } from '@/ui/controls';
 import { PlateInput } from './PlateInput';
-
-const MARCHE = [
-  'Alfa Romeo',
-  'Audi',
-  'BMW',
-  'Citroën',
-  'Dacia',
-  'DS',
-  'Fiat',
-  'Ford',
-  'Honda',
-  'Hyundai',
-  'Iveco',
-  'Jeep',
-  'Kia',
-  'Lancia',
-  'Land Rover',
-  'Mazda',
-  'Mercedes-Benz',
-  'Mini',
-  'Mitsubishi',
-  'Nissan',
-  'Opel',
-  'Peugeot',
-  'Porsche',
-  'Renault',
-  'Seat',
-  'Skoda',
-  'Smart',
-  'Suzuki',
-  'Tesla',
-  'Toyota',
-  'Volkswagen',
-  'Volvo',
-];
-
-interface Draft {
-  client: ClientType;
-  plateCountry: PlateCountry;
-  plate: string;
-  vin: string;
-  make: string;
-  model: string;
-  km: string;
-  dueDate: string;
-  company: Company;
-  owner: string;
-  phone: string;
-  wa: boolean;
-  services: string[];
-  tyres: string;
-  request: string;
-  notes: string;
-}
-
-const fromJob = (j: Partial<Job>): Draft => ({
-  client: j.client || 'privato',
-  plateCountry: j.plateCountry || 'I',
-  plate: j.plate || '',
-  vin: j.vin || '',
-  make: j.make || '',
-  model: j.model || '',
-  km: j.km || '',
-  dueDate: j.dueDate || '',
-  company: { ...EMPTY_COMPANY, ...(j.company || {}) },
-  owner: j.owner || '',
-  phone: j.phone || '',
-  wa: j.wa !== false,
-  services: [...(j.services || [])],
-  tyres: j.tyres || '',
-  request: j.request || '',
-  notes: j.notes || '',
-});
-
-function Group({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <fieldset className="card flex min-w-0 flex-col gap-4 p-4 sm:p-5">
-      <legend className="sr-only">{title}</legend>
-      <h3 aria-hidden="true" className="w-semi -mb-0.5 text-[1.0625rem] font-semibold text-ink">
-        {title}
-      </h3>
-      {children}
-    </fieldset>
-  );
-}
+import { Group, PendingPhotos, type Shot } from './parts';
 
 export function FormPage() {
   const { id } = useParams();
@@ -109,21 +29,6 @@ export function FormPage() {
   if (editing && existing === undefined) return null;
   if (editing && existing === null) return <p className="p-8 text-center text-ink-2">Scheda non trovata.</p>;
   return <FormInner key={id || 'new'} job={existing || undefined} />;
-}
-
-/** Regole del modulo, campo per campo. Il primo errore è quello che riceve il fuoco al salvataggio. */
-function validate(d: Draft): Record<string, string> {
-  const e: Record<string, string> = {};
-  const plate = normPlateText(d.plate, d.plateCountry);
-  const vin = d.vin.toUpperCase().replace(/\s+/g, '');
-  if (!plate && !vin) e.plate = 'Inserisci la targa o il telaio.';
-  if (d.client === 'azienda') {
-    const vat = d.company.vat.replace(/\s+/g, '');
-    if (!d.company.name.trim()) e.cname = 'Inserisci la ragione sociale.';
-    if (!vat && !d.company.cf.trim()) e.cvat = 'Inserisci la partita IVA (o il COE) oppure il codice fiscale.';
-    else if (/^\d+$/.test(vat) && vat.length !== 11) e.cvat = `La partita IVA italiana ha 11 cifre (qui ${vat.length}).`;
-  } else if (!d.owner.trim()) e.owner = 'Inserisci il nome del proprietario.';
-  return e;
 }
 
 function FormInner({ job }: { job?: Job }) {
@@ -149,6 +54,75 @@ function FormInner({ job }: { job?: Job }) {
   const plateRef = useRef<HTMLInputElement>(null);
   const az = d.client === 'azienda';
   const [shots, setShots] = useState<Shot[]>([]);
+  const prefilled = !!(loc.state as { prefill?: unknown } | null)?.prefill;
+
+  /* ---- accettazione a voce: stessa bozza del modulo ---- */
+  const canListen = useCanListen();
+  const [voice, setVoice] = useState(() => sp.get('voce') === '1');
+  const dRef = useRef(d);
+  dRef.current = d;
+  const jobsRef = useRef(jobs);
+  jobsRef.current = jobs;
+  const saveRef = useRef<() => Promise<boolean>>(async () => false);
+  const [host] = useState<VoiceHost>(() => ({
+    getDraft: () => dRef.current,
+    setDraft: (next) => {
+      dRef.current = next;
+      setD(next);
+      // gli avvisi dei campi si riferivano alla bozza di prima: si ricontrollano al prossimo salvataggio o uscita dal campo
+      setErr(null);
+      setErrs({});
+    },
+    save: () => saveRef.current(),
+    close: () => setVoice(false),
+    jobs: () => jobsRef.current,
+    editing,
+    prefilled,
+  }));
+  const voiceWords = useMemo(
+    () => [
+      ...(settings.workers || []),
+      ...companies(jobs)
+        .slice(0, 30)
+        .map((c) => c.name),
+    ],
+    [settings.workers, jobs],
+  );
+  const editField = (f: FieldKey) => {
+    setVoice(false);
+    const ids: Partial<Record<FieldKey, string>> = { plateCountry: 'f-plate', dueDate: 'f-due', request: 'f-req', tyres: 'f-tyre', services: 'f-req', wa: 'f-phone', client: 'f-plate' };
+    const id = ids[f] || `f-${f}`;
+    // dopo la chiusura della schermata a voce: il campo va al centro e prende il fuoco
+    window.setTimeout(() => {
+      const el = document.getElementById(id);
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      el?.focus({ preventScroll: true });
+    }, 320);
+  };
+
+  /* ---- copia di sicurezza della nuova accettazione ---- */
+  const [saved, setSaved] = useState<SavedDraft | null>(() => (job || prefilled || sp.get('plate') ? null : loadSavedDraft()));
+  useEffect(() => {
+    if (editing) return;
+    if (saved && isBlank(d)) return; // c'è una bozza da riprendere: non la si cancella finché non si inizia
+    const t = window.setTimeout(() => storeDraft(d), 400);
+    return () => window.clearTimeout(t);
+  }, [d, editing, saved]);
+  const restoreOffer =
+    saved && isBlank(d)
+      ? {
+          label: savedLabel(saved),
+          onRestore: () => {
+            host.setDraft(saved.d);
+            setSaved(null);
+            haptic('success');
+          },
+          onDiscard: () => {
+            clearSavedDraft();
+            setSaved(null);
+          },
+        }
+      : null;
 
   // targa e telaio con la fotocamera (iPhone, VisionKit)
   const canScan = useScanner();
@@ -225,6 +199,12 @@ function FormInner({ job }: { job?: Job }) {
 
   const submit = async (e?: FormEvent) => {
     e?.preventDefault();
+    await trySave(true);
+  };
+
+  /** salva la scheda; false se mancano dati (dal modulo si va al primo campo, dalla voce lo dice l'assistente) */
+  const trySave = async (focus: boolean): Promise<boolean> => {
+    const d = dRef.current;
     const plate = normPlateText(d.plate, d.plateCountry);
     const vin = d.vin.toUpperCase().replace(/\s+/g, '');
     const company = az ? { ...d.company, vat: d.company.vat.replace(/\s+/g, ''), cf: d.company.cf.toUpperCase().replace(/\s+/g, ''), name: d.company.name.trim() } : { ...EMPTY_COMPANY };
@@ -233,9 +213,9 @@ function FormInner({ job }: { job?: Job }) {
     if (first) {
       haptic('warning');
       setTouched(new Set(Object.keys(all)));
-      setErrs(all);
-      document.getElementById(`f-${first}`)?.focus();
-      return;
+      setErrs(all as Record<string, string>);
+      if (focus) document.getElementById(`f-${first}`)?.focus();
+      return false;
     }
 
     const fields = {
@@ -256,6 +236,7 @@ function FormInner({ job }: { job?: Job }) {
         haptic('success');
         toast.success('Modifiche salvate');
         nav(`/job/${job.id}`, { replace: true });
+        return true;
       } else {
         const created = await createJob({
           ...fields,
@@ -275,6 +256,7 @@ function FormInner({ job }: { job?: Job }) {
         });
         for (const p of shots) await addPhoto(created.id, p.blob, p.w, p.h).catch(() => {});
         shots.forEach((p) => URL.revokeObjectURL(p.url));
+        clearSavedDraft();
         haptic('success');
         // l'accettazione è finita: si torna all'elenco, la scheda è in cima
         nav('/schede', { replace: true });
@@ -283,19 +265,59 @@ function FormInner({ job }: { job?: Job }) {
           action: { label: 'Apri', onClick: () => nav(`/job/${created.id}`) },
           duration: 6000,
         });
+        return true;
       }
     } catch {
       toast.error('Non sono riuscito a salvare. Riprova.');
       setBusy(false);
+      return false;
     }
   };
+  saveRef.current = () => trySave(false);
 
   const errFor = (f: string) => errs[f] || (err?.field === f ? err.msg : undefined);
 
   return (
     <Page className="pb-28">
-      <TopBar back={job ? `/job/${job.id}` : '/'} backLabel={editing ? 'Scheda' : 'Annulla'} title={editing ? 'Modifica dati' : 'Nuova accettazione'} />
+      <TopBar
+        back={job ? `/job/${job.id}` : '/'}
+        backLabel={editing ? 'Scheda' : 'Annulla'}
+        title={editing ? 'Modifica dati' : 'Nuova accettazione'}
+        right={
+          canListen ? (
+            <BarButton label="Detta a voce" onClick={() => setVoice(true)}>
+              <Mic size={22} />
+            </BarButton>
+          ) : undefined
+        }
+      />
       <form id="job-form" onSubmit={submit} noValidate className="mx-auto flex max-w-[760px] flex-col gap-3 px-4 pt-1">
+        {restoreOffer && !voice && (
+          <div className="flex items-center justify-between gap-3 rounded-[16px] bg-surface p-3.5 pl-4 ring-1 ring-line">
+            <p className="min-w-0 text-[0.9062rem] leading-snug text-ink-2">
+              <span className="font-semibold text-ink">Accettazione non finita</span> · {restoreOffer.label}
+            </p>
+            <div className="flex shrink-0 gap-1.5">
+              <Button size="sm" variant="ghost" onClick={restoreOffer.onDiscard}>
+                No
+              </Button>
+              <Button size="sm" variant="primary" icon={<RotateCcw size={16} />} onClick={restoreOffer.onRestore}>
+                Riprendi
+              </Button>
+            </div>
+          </div>
+        )}
+        {canListen && !voice && !editing && isBlank(d) && !restoreOffer && (
+          <button type="button" onClick={() => setVoice(true)} className="press flex items-center gap-3.5 rounded-[18px] bg-accent-soft p-3.5 pl-4 text-left">
+            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-accent text-on-accent">
+              <Mic size={22} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[1rem] font-semibold text-ink">Dettala a voce</span>
+              <span className="block text-[0.875rem] text-ink-2">Parla come al banco: compilo io il modulo.</span>
+            </span>
+          </button>
+        )}
         <Segmented
           label="Tipo di cliente"
           value={d.client}
@@ -465,70 +487,24 @@ function FormInner({ job }: { job?: Job }) {
         {err && !['plate', 'cname', 'cvat', 'owner'].includes(err.field) && <Note tone="danger">{err.msg}</Note>}
       </form>
 
+      <VoiceAcceptance
+        open={voice}
+        draft={d}
+        host={host}
+        editing={editing}
+        onClose={() => setVoice(false)}
+        onEdit={editField}
+        shots={job ? undefined : shots}
+        onShots={job ? undefined : setShots}
+        words={voiceWords}
+        restore={restoreOffer}
+      />
+
       <ActionBar native={[{ id: 'save', label: editing ? 'Salva modifiche' : 'Registra accettazione', symbol: '', style: 'primary', disabled: busy, onPress: () => submit() }]}>
         <Button type="submit" form="job-form" variant="primary" size="lg" block disabled={busy}>
           {editing ? 'Salva modifiche' : 'Registra accettazione'}
         </Button>
       </ActionBar>
     </Page>
-  );
-}
-
-/* ---------------- foto all'arrivo (prima che la scheda esista) ---------------- */
-
-type Shot = { id: string; blob: Blob; w: number; h: number; url: string };
-
-function PendingPhotos({ list, onChange }: { list: Shot[]; onChange: (l: Shot[]) => void }) {
-  const inp = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
-  const onFiles = async (files: FileList | null) => {
-    if (!files?.length) return;
-    setBusy(true);
-    try {
-      const add: Shot[] = [];
-      for (const f of Array.from(files)) {
-        const { blob, w, h } = await compressPhoto(f);
-        add.push({ id: uid('s'), blob, w, h, url: URL.createObjectURL(blob) });
-      }
-      onChange([...list, ...add]);
-    } catch {
-      toast.error('Non riesco a usare questa immagine. Prova con una foto JPG o PNG.');
-    } finally {
-      setBusy(false);
-      if (inp.current) inp.current.value = '';
-    }
-  };
-  return (
-    <Group title="Foto all'arrivo">
-      <p className="-mt-1 text-[0.9062rem] text-ink-2">Graffi, ammaccature, cruscotto e chilometri, davanti al cliente: restano sulla scheda in caso di contestazioni.</p>
-      <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-        {list.map((p) => (
-          <div key={p.id} className="relative aspect-square overflow-hidden rounded-[14px] bg-surface-2">
-            <img src={p.url} alt="" className="size-full object-cover" />
-            <button
-              type="button"
-              aria-label="Togli la foto"
-              onClick={() => {
-                URL.revokeObjectURL(p.url);
-                onChange(list.filter((x) => x.id !== p.id));
-              }}
-              className="press hit absolute top-1 right-1 grid size-7 place-items-center rounded-full bg-black/55 text-white backdrop-blur"
-            >
-              <X size={15} strokeWidth={2.6} />
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => inp.current?.click()}
-          className="press flex aspect-square flex-col items-center justify-center gap-1 rounded-[14px] border-[1.5px] border-dashed border-line-strong text-ink-2 hover:border-accent hover:text-accent-ink disabled:opacity-50"
-        >
-          <Camera size={22} />
-          <span className="text-[0.7812rem] font-medium">{busy ? 'Preparo…' : 'Scatta'}</span>
-        </button>
-      </div>
-      <input ref={inp} type="file" accept="image/*" capture="environment" multiple hidden onChange={(e) => onFiles(e.target.files)} />
-    </Group>
   );
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
-import { Building2, ChevronLeft, ChevronRight, History, Phone, Plus, Search, User, UserPlus } from 'lucide-react';
+import { Building2, ChevronLeft, ChevronRight, History, Mic, Phone, Plus, Search, User, UserPlus } from 'lucide-react';
 import { useJobs } from '@/app/hooks';
 import { customers, matchCustomer, type Customer, type KnownVehicle } from '@/domain/customers';
 import { fmtDate, fmtPlate, norm } from '@/domain/format';
@@ -11,6 +11,7 @@ import { haptic } from '@/platform/native';
 import { Plate } from '@/ui/Plate';
 import { Sheet } from '@/ui/Sheet';
 import { SPRING } from '@/ui/motion';
+import { useCanListen } from '@/features/voice/useCanListen';
 
 type Step = { k: 'tipo' } | { k: 'chi'; cl: ClientType } | { k: 'privati' } | { k: 'ditte' };
 
@@ -26,6 +27,7 @@ export function NewJobFlow({ open, onOpenChange }: { open: boolean; onOpenChange
   const [dir, setDir] = useState(1);
   const [q, setQ] = useState('');
   const step = stack[stack.length - 1];
+  const canListen = useCanListen();
 
   const reset = () => {
     setStack([{ k: 'tipo' }]);
@@ -86,6 +88,25 @@ export function NewJobFlow({ open, onOpenChange }: { open: boolean; onOpenChange
 
             {step.k === 'tipo' && (
               <>
+                {canListen && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => go('/nuova?voce=1')}
+                      className="press flex w-full items-center gap-4 rounded-[20px] bg-accent p-4 text-left text-on-accent shadow-[var(--shadow-accent)] hover:brightness-[1.04]"
+                    >
+                      <span className="grid size-12 shrink-0 place-items-center rounded-full bg-on-accent/12">
+                        <Mic size={26} strokeWidth={2.2} />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="w-wide block text-[1.125rem] font-semibold">A voce</span>
+                        <span className="block text-[0.9062rem] opacity-80">Parla come al banco: compilo io la scheda</span>
+                      </span>
+                      <ChevronRight size={20} className="shrink-0 opacity-70" />
+                    </button>
+                    <p className="mt-1.5 px-1 text-[0.8438rem] font-medium text-ink-3">Oppure scrivi tu: chi porta il veicolo?</p>
+                  </>
+                )}
                 <Choice icon={<User size={24} strokeWidth={2} />} title="Privato" text="Conto lavori, nessuna fattura" onClick={() => push({ k: 'chi', cl: 'privato' })} />
                 <Choice icon={<Building2 size={24} strokeWidth={2} />} title="Azienda" text="Dati per la fattura, IVA, conto di fine mese" onClick={() => push({ k: 'chi', cl: 'azienda' })} />
               </>

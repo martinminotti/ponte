@@ -2,6 +2,7 @@ import { db } from './db';
 import { getSettings, normalizeJob, normalizeSettings } from './repo';
 import type { Job, LineItem, Photo, Settings } from '@/domain/types';
 import { uid } from '@/domain/format';
+import { withoutSecrets } from '@/voice/config';
 
 export const LEGACY_KEY = 'registro-officina-v1';
 const APP = 'registro-officina';
@@ -124,7 +125,8 @@ export async function exportBackup(): Promise<BackupFile> {
   for (const p of photos) {
     dumps.push({ id: p.id, jobId: p.jobId, w: p.w, h: p.h, createdAt: p.createdAt, type: p.blob.type || 'image/jpeg', data: await blobToBase64(p.blob) });
   }
-  return { app: APP, version: 2, exportedAt: Date.now(), settings, jobs, photos: dumps };
+  // la chiave dell'assistente vocale non esce dal dispositivo
+  return { app: APP, version: 2, exportedAt: Date.now(), settings: { ...settings, voice: withoutSecrets(settings.voice) }, jobs, photos: dumps };
 }
 
 export interface ImportResult {
@@ -168,7 +170,8 @@ export async function importBackup(text: string, mode: 'merge' | 'replace'): Pro
       await db.jobs.bulkPut(jobs);
       await db.photos.bulkPut(photos);
       res.added = jobs.length;
-      await db.settings.put({ ...normalizeSettings({ ...cur, ...settings }), migratedV1: true, key: 'main' });
+      // le impostazioni della voce restano quelle del dispositivo (il backup non ha la chiave)
+      await db.settings.put({ ...normalizeSettings({ ...cur, ...settings, voice: cur.voice }), migratedV1: true, key: 'main' });
     } else {
       const maxNo = (await db.jobs.orderBy('number').last())?.number ?? 0;
       let n = Math.max(maxNo, cur.nextNumber - 1);

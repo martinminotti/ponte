@@ -64,6 +64,7 @@ Ponte mette tutto questo in tasca. Un'auto si accetta in trenta secondi scrivend
 - **Consegne promesse** con ritardi evidenziati e **incassi settimanali** delle ultime otto settimane.
 
 ### Accettazione e archivio
+- **Accettazione a voce**: si parla come al banco («Golf targa GK 482 TR, di Marco Bianchi, fa rumore ai freni, la vuole venerdì») e la scheda si compila da sola, con conferma della targa lettera per lettera, domande su quello che manca, «annulla» e «registra». Funziona con OpenAI, Claude, Gemini o un servizio compatibile, e anche senza AI con le regole di base. Dettagli in [docs/assistente-vocale.md](docs/assistente-vocale.md).
 - **Targa disegnata**, italiana o di San Marino, con telaio, marca, modello, chilometri e consegna prevista.
 - **Già visto**: Ponte riconosce targa e telaio e propone i dati dell'ultima visita.
 - **Foto all'arrivo** di graffi, cruscotto e chilometri, compresse sul dispositivo.

@@ -10,9 +10,20 @@ final class UITestProbe {
     private weak var webView: WKWebView?
     private let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ui.json")
 
-    static var enabled: Bool { ProcessInfo.processInfo.arguments.contains("-PonteUITest") }
+    private let cmd = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("cmd.js")
 
-    init(webView: WKWebView) { self.webView = webView }
+    static var enabled: Bool { ProcessInfo.processInfo.arguments.contains("-PonteUITest") }
+    /// con -PonteVoiceSim l'accettazione a voce usa il microfono simulato (il simulatore non ha voce da riconoscere)
+    static var voiceSim: Bool { ProcessInfo.processInfo.arguments.contains("-PonteVoiceSim") }
+
+    init(webView: WKWebView) {
+        self.webView = webView
+        if Self.voiceSim {
+            let js = "window.__PONTE_VOICE_SIM__ = true;"
+            webView.configuration.userContentController.addUserScript(WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+            webView.evaluateJavaScript(js, completionHandler: nil)
+        }
+    }
 
     func start() {
         timer = Timer.scheduledTimer(withTimeInterval: 0.6, repeats: true) { [weak self] _ in self?.tick() }
@@ -35,6 +46,12 @@ final class UITestProbe {
     """
 
     private func tick() {
+        // comandi dello script di prova (es. ponteVoice.say("…")): un file in tmp, eseguito e cancellato
+        if let c = try? String(contentsOf: cmd, encoding: .utf8) {
+            try? FileManager.default.removeItem(at: cmd)
+            webView?.evaluateJavaScript(c, completionHandler: nil)
+        }
+        if Self.voiceSim { webView?.evaluateJavaScript("window.__PONTE_VOICE_SIM__ = true;", completionHandler: nil) }
         webView?.evaluateJavaScript(js) { [url] result, _ in
             guard let s = result as? String else { return }
             try? s.write(to: url, atomically: true, encoding: .utf8)

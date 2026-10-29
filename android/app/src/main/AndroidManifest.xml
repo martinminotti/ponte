@@ -34,4 +34,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- foto all'arrivo del veicolo -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- accettazione a voce (registrazione e trascrizione nel cloud) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 </manifest>

@@ -129,6 +129,21 @@ class Video:
         self.p.wait(timeout=30)
 
 
+def js(code: str):
+    """Esegue JavaScript nella pagina attraverso la sonda (file tmp/cmd.js)."""
+    global _container
+    if not _container:
+        _container = sh("xcrun", "simctl", "get_app_container", UDID, BUNDLE, "data").strip()
+    with open(os.path.join(_container, "tmp", "cmd.js"), "w") as fh:
+        fh.write(code)
+    time.sleep(0.9)
+
+
+def say(text: str, wait=1.6):
+    js(f"window.ponteVoice && window.ponteVoice.say({json.dumps(text)})")
+    time.sleep(wait)
+
+
 def enter_as_owner():
     """Benvenuto all'apertura: si entra come titolare (vede anche Oggi)."""
     # il primo avvio sul simulatore può metterci parecchio: si aspetta il benvenuto fino a 40 s
@@ -143,7 +158,7 @@ def launch(wait=6.0):
     sh("xcrun", "simctl", "terminate", UDID, BUNDLE, check=False)
     n = len([f for f in os.listdir(OUT) if f.startswith("stdout")])
     # stdout dell'app: Capacitor ci scrive la console JavaScript (⚡️ [log] / [error])
-    sh("xcrun", "simctl", "launch", "--terminate-running-process", f"--stdout={OUT}/stdout-{n}.txt", f"--stderr={OUT}/stderr-{n}.txt", UDID, BUNDLE, "-PonteUITest")
+    sh("xcrun", "simctl", "launch", "--terminate-running-process", f"--stdout={OUT}/stdout-{n}.txt", f"--stderr={OUT}/stderr-{n}.txt", UDID, BUNDLE, "-PonteUITest", "-PonteVoiceSim")
     time.sleep(wait)
 
 
@@ -237,6 +252,37 @@ try:
     tap("Nuova accettazione", wait=1.2, kinds=NATIVE)
     shot("11a-chi-porta")
     check(has("Privato", exact=False) and has("Azienda", exact=False), "+: prima la scelta privato / azienda")
+    check(has("A voce", exact=False, kinds=("web:button",)), "+: accettazione a voce come prima scelta")
+
+    # accettazione a voce (microfono simulato: il simulatore non ha voce da riconoscere)
+    if tap("A voce", exact=False, wait=2.0, kinds=("web:button",)):
+        shot("12a-voce")
+        check(has("Accettazione a voce", exact=False), "a voce: schermata aperta")
+        check(not has("Oggi", kinds=NATIVE), "a voce: la barra nativa si fa da parte")
+        if not has("Metti in pausa l’ascolto", exact=False):
+            tap("Inizia a dettare", exact=False, wait=1.0, kinds=("web:button",))
+        say("Golf grigia targa GK 482 TR, è di Marco Bianchi, telefono 335 812 4471")
+        shot("12b-voce-golf")
+        check(has("Marco Bianchi", exact=False), "a voce: proprietario scritto nella scheda")
+        check(has("335 812 4471", exact=False), "a voce: telefono scritto e formattato")
+        say("fa rumore ai freni e c'è un graffio sul paraurti, la vuole venerdì")
+        shot("12c-voce-lavori")
+        check(has("Fa rumore ai freni", exact=False), "a voce: lavori richiesti")
+        check(has("graffio sul paraurti", exact=False), "a voce: note all'arrivo separate")
+        say("annulla")
+        check(not has("graffio sul paraurti", exact=False), "a voce: «annulla» toglie l'ultima modifica")
+        shot("12d-voce-annulla")
+        tap("Modulo", exact=False, wait=1.4, kinds=("web:button",))
+        shot("12e-voce-modulo")
+        check(has("Registra accettazione"), "dalla voce al modulo: stessa bozza, pronta da registrare")
+        sh("xcrun", "simctl", "ui", UDID, "appearance", "dark")
+        time.sleep(1.0)
+        tap("Detta a voce", exact=False, wait=1.6)
+        shot("12f-voce-scuro")
+        sh("xcrun", "simctl", "ui", UDID, "appearance", "light")
+        tap("Chiudi", exact=False, wait=1.2, kinds=("web:button",))
+        tap("Annulla", wait=1.4, kinds=("web:button",))  # esce dal modulo: la bozza resta salvata
+        tap("Nuova accettazione", wait=1.2, kinds=NATIVE)
     tap("Privato", exact=False, wait=0.9, kinds=("web:button",))
     check(has("Cliente che torna", exact=False), "poi cliente nuovo o che torna")
     tap("Cliente nuovo", exact=False, wait=1.8, kinds=("web:button",))

@@ -1,0 +1,9 @@
+name = "ponte-ai"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+# origini dell'app: iPhone (capacitor://localhost), Android (https://localhost), web
+ALLOWED_ORIGINS = "capacitor://localhost,https://localhost,https://martinminotti.github.io"
+# solo per il fornitore "compatibile con OpenAI", es. https://api.groq.com/openai/v1
+COMPATIBLE_BASE_URL = ""

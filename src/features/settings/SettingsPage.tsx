@@ -14,6 +14,7 @@ import { readLogo } from '@/platform/images';
 import { haptic, saveFile } from '@/platform/native';
 import { AutoInput, Button, Field, Note, Section, Segmented } from '@/ui/controls';
 import { Sheet } from '@/ui/Sheet';
+import { VoiceSettingsSection } from '@/features/voice/VoiceSettings';
 
 export function SettingsPage() {
   const admin = useSettings().role !== 'staff';
@@ -132,6 +133,8 @@ export function SettingsPage() {
                 </div>
               </Section>
             )}
+
+            {admin && <VoiceSettingsSection s={s} />}
 
             <Section title="Aspetto">
               <Field label="Colore dei documenti" hint="Il colore di intestazione e totali sul conto e sui PDF. L'app resta arancio Ponte.">

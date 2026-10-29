@@ -4,6 +4,10 @@
 <dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Per fotografare il veicolo all'arrivo in officina.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Per dettare l'accettazione del veicolo a voce.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Per trasformare in testo quello che detti durante l'accettazione. Quando l'iPhone lo permette, il riconoscimento avviene sul telefono.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Per allegare foto del veicolo alla scheda.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

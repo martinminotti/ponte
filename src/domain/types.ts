@@ -98,6 +98,32 @@ export interface Job {
   quick?: boolean;
 }
 
+/** chi interpreta le frasi dettate: 'base' = regole sul telefono, senza AI */
+export type VoiceProvider = 'base' | 'openai' | 'anthropic' | 'gemini' | 'compatible';
+
+export interface VoiceSettings {
+  /** l'accettazione a voce compare nel + e nel modulo */
+  enabled: boolean;
+  provider: VoiceProvider;
+  /** 'key' = chiave sul dispositivo; 'proxy' = la chiave sta su un server ponte (consigliato con più dispositivi) */
+  connection: 'key' | 'proxy';
+  apiKey: string;
+  /** modello; vuoto = quello consigliato per il fornitore */
+  model: string;
+  /** indirizzo dell'API per i fornitori compatibili con OpenAI (Groq, Mistral, OpenRouter, server locale…) */
+  baseUrl: string;
+  proxyUrl: string;
+  proxyToken: string;
+  /** trascrizione: sul dispositivo (Apple, browser) o nel cloud del fornitore */
+  stt: 'device' | 'cloud';
+  /** modello di trascrizione nel cloud; vuoto = consigliato */
+  sttModel: string;
+  /** l'assistente risponde anche a voce */
+  speak: boolean;
+  /** quando il titolare ha letto l'avviso sui dati inviati al fornitore */
+  consentAt?: number;
+}
+
 export interface Settings {
   shop: string;
   shopAddr: string;
@@ -122,6 +148,8 @@ export interface Settings {
   staffName?: string;
   /** PIN facoltativo per entrare come titolare */
   adminPin?: string;
+  /** accettazione a voce (assente = valori predefiniti) */
+  voice?: VoiceSettings;
   lastBackupAt?: number;
   migratedV1?: boolean;
 }
