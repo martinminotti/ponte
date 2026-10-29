@@ -6,7 +6,23 @@ import { PonteIcon, PonteWordmark } from '@/ui/Brand';
 import { SPRING, SPRING_FAST } from '@/ui/motion';
 import { Toaster } from 'sonner';
 import { overlayOpen, typing, useDesk, useGlass, useJobs, useNativeBarOn, useOverlayOpen, useScrolledDown, useScrolledPast, useSettings, useThemeSync, useWide } from './hooks';
-import { blurNativeSearch, configureBar, endNativeSearch, nativeBarAvailable, onBarSearch, onBarSelect, setBarCompact, useNativeSearch, usePageActions } from '@/platform/nativeBar';
+import {
+  blurNativeSearch,
+  configureBar,
+  configureTop,
+  endNativeSearch,
+  nativeBarAvailable,
+  onBarSearch,
+  onBarSelect,
+  onTopSelect,
+  setBarCompact,
+  setTopNative,
+  topIsNative,
+  useNativeSearch,
+  usePageActions,
+  useTopHeld,
+  useTopSpec,
+} from '@/platform/nativeBar';
 import { inFilter, toInvoice } from '@/domain/logic';
 import { bindAndroidBack, haptic, initNative } from '@/platform/native';
 import { setSwipeBack } from '@/platform/navigation';
@@ -158,6 +174,32 @@ export function Shell() {
     if (nativeOn && top) setBarCompact(compact);
   }, [nativeOn, top, compact]);
 
+  // testata nativa in alto (capsule Liquid Glass): la schermata la dichiara con TopBar o SectionNotch.
+  // Si fa da parte sotto i fogli, durante il gesto indietro, con la ricerca nativa e mentre una schermata a foglio
+  // sale o scende: intanto la pagina disegna la sua copia web, ferma al suo posto. Il passaggio fra le due è istantaneo.
+  const topSpec = useTopSpec();
+  const topHeld = useTopHeld();
+  const topSpecRef = useRef(topSpec);
+  topSpecRef.current = topSpec;
+  const topOff = !nativeOn || overlay || topHeld || search.active || !topSpec;
+  useEffect(() => {
+    if (!nativeBarAvailable()) return;
+    if (topOff) {
+      // prima compare la copia web, poi si toglie la nativa: mai un fotogramma senza testata
+      setTopNative(false);
+      const r = requestAnimationFrame(() => configureTop(null, dark, false).catch(() => {}));
+      return () => cancelAnimationFrame(r);
+    }
+    let live = true;
+    configureTop({ title: topSpec!.title, visible: topSpec!.visible, leading: topSpec!.leading, trailing: topSpec!.trailing }, dark, topIsNative())
+      .then(() => live && setTopNative(true))
+      .catch(() => live && setTopNative(false));
+    return () => {
+      live = false;
+    };
+  }, [topOff, topSpec, dark]);
+  useEffect(() => (nativeBarAvailable() ? onTopSelect((id) => topSpecRef.current?.onSelect(id)) : undefined), []);
+
   useEffect(() => {
     initNative(dark);
   }, [dark]);
@@ -233,9 +275,8 @@ export function Shell() {
 
   return (
     <div className="min-h-dvh lg:flex">
-      {/* copre l'area della barra di stato del telefono mentre si scorre */}
-      {!glass && <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[45] h-[env(safe-area-inset-top,0px)] bg-bg" />}
-      {glass && !wide && <div aria-hidden="true" className="edge-top transition-opacity duration-300" style={{ opacity: scrolled ? 1 : 0 }} />}
+      {/* solo sotto la barra di stato, mentre si scorre: l'ora resta leggibile; le testate sono capsule, senza fasce */}
+      {!wide && <div aria-hidden="true" className="status-veil" style={{ opacity: scrolled ? 1 : 0 }} />}
       {wide && (
         <aside className="safe-top sticky top-0 z-40 flex h-dvh w-[76px] shrink-0 flex-col items-center border-r border-line bg-surface px-3 pb-4 xl:w-[248px] xl:items-stretch xl:px-4 xl:pb-5">
           <Link to={staff ? '/schede' : '/'} aria-label="Ponte" className="flex items-center gap-2.5 pt-5 pb-6 text-ink xl:pt-6 xl:pb-7 xl:pl-1">

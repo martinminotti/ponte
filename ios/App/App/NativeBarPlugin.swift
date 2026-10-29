@@ -10,7 +10,11 @@ import Capacitor
 ///   NativeBar.configure({ mode: "hidden" })
 ///   NativeBar.configure({ mode: "search", text, placeholder, dark })  campo di ricerca nativo sopra la tastiera
 ///   NativeBar.setCompact({ compact })
-///   evento "select" { id }, evento "search" { text, end }
+///   NativeBar.configureTop({ mode: "bar", title, visible, leading: { id, label, symbol } | null,
+///                            trailing: [{ id, label, symbol, disabled, menu: [{ id, label, symbol, destructive, group }] }],
+///                            dark, animated })
+///   NativeBar.configureTop({ mode: "hidden", animated })
+///   evento "select" { id }, evento "search" { text, end }, evento "top" { id }
 @objc(NativeBarPlugin)
 public class NativeBarPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "NativeBarPlugin"
@@ -19,9 +23,11 @@ public class NativeBarPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "configure", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setCompact", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "blurSearch", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "configureTop", returnType: CAPPluginReturnPromise),
     ]
 
     private var bar: GlassBar?
+    private var top: GlassTopBar?
 
     override public func load() {
         DispatchQueue.main.async { self.install() }
@@ -43,6 +49,41 @@ public class NativeBarPlugin: CAPPlugin, CAPBridgedPlugin {
             b.topAnchor.constraint(equalTo: host.topAnchor),
         ])
         bar = b
+
+        // testata in alto: capsule di vetro (indietro o X, titolo, azioni e menu ••• nativi)
+        let t = GlassTopBar { [weak self] id in self?.notifyListeners("top", data: ["id": id]) }
+        t.translatesAutoresizingMaskIntoConstraints = false
+        host.addSubview(t)
+        NSLayoutConstraint.activate([
+            t.leadingAnchor.constraint(equalTo: host.leadingAnchor),
+            t.trailingAnchor.constraint(equalTo: host.trailingAnchor),
+            t.topAnchor.constraint(equalTo: host.topAnchor),
+            t.bottomAnchor.constraint(equalTo: host.safeAreaLayoutGuide.topAnchor, constant: GlassTopBar.rowHeight),
+        ])
+        top = t
+    }
+
+    @objc public func configureTop(_ call: CAPPluginCall) {
+        let mode = call.getString("mode") ?? "hidden"
+        let animated = call.getBool("animated") ?? true
+        let dark = call.getBool("dark")
+        let config: TopBarConfig? = mode == "bar" ? TopBarConfig(call.options) : nil
+        DispatchQueue.main.async {
+            self.install()
+            guard let top = self.top else { return call.resolve() }
+            if let dark { top.overrideUserInterfaceStyle = dark ? .dark : .light }
+            top.superview?.bringSubviewToFront(top)
+            top.apply(config, animated: animated)
+            // la risposta parte dopo che UIKit ha disegnato il nuovo stato: la pagina toglie la sua copia solo allora
+            var done = false
+            let finish = {
+                if done { return }
+                done = true
+                call.resolve()
+            }
+            CATransaction.setCompletionBlock(finish)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12, execute: finish)
+        }
     }
 
     @objc public func configure(_ call: CAPPluginCall) {
@@ -648,6 +689,326 @@ final class GlassButton: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         glass.layer.cornerRadius = bounds.height / 2
+    }
+}
+
+// MARK: - testata in alto
+
+struct TopMenuItem: Equatable {
+    let id: String
+    let label: String
+    let symbol: String
+    let destructive: Bool
+    let group: Int
+
+    init?(_ d: [String: Any]) {
+        guard let id = d["id"] as? String else { return nil }
+        self.id = id
+        label = d["label"] as? String ?? ""
+        symbol = d["symbol"] as? String ?? ""
+        destructive = d["destructive"] as? Bool ?? false
+        group = (d["group"] as? NSNumber)?.intValue ?? 0
+    }
+}
+
+struct TopItem: Equatable {
+    let id: String
+    let label: String
+    let symbol: String
+    let disabled: Bool
+    let menu: [TopMenuItem]
+
+    init?(_ d: [String: Any]?) {
+        guard let d, let id = d["id"] as? String else { return nil }
+        self.id = id
+        label = d["label"] as? String ?? ""
+        symbol = d["symbol"] as? String ?? ""
+        disabled = d["disabled"] as? Bool ?? false
+        menu = (d["menu"] as? [[String: Any]] ?? []).compactMap { TopMenuItem($0) }
+    }
+}
+
+struct TopBarConfig: Equatable {
+    let title: String
+    let visible: Bool
+    let leading: TopItem?
+    let trailing: [TopItem]
+
+    init(_ o: [AnyHashable: Any]) {
+        title = o["title"] as? String ?? ""
+        visible = o["visible"] as? Bool ?? true
+        leading = TopItem(o["leading"] as? [String: Any])
+        trailing = (o["trailing"] as? [[String: Any]] ?? []).compactMap { TopItem($0) }
+    }
+}
+
+/// Testata delle schermate in Liquid Glass vero: a sinistra il pulsante tondo (indietro o X), al centro la capsula
+/// con il titolo, a destra i pulsanti tondi; "•••" apre il menu di sistema (UIMenu) che nasce dal pulsante.
+/// Niente fascia: le capsule galleggiano sul contenuto della pagina, che scorre sotto e viene rifratto.
+/// Toccando il titolo si torna in cima, come toccando la barra di stato.
+final class GlassTopBar: PassthroughView {
+    static let rowHeight: CGFloat = 56
+    private static let size: CGFloat = 44
+
+    private let onSelect: (String) -> Void
+    private let row = PassthroughView()
+    private let leadingSlot = PassthroughView()
+    private let trailing = PassthroughStack()
+    private let pill = Glass.view(radius: GlassTopBar.size / 2)
+    private let titleLabel = UILabel()
+    private var config: TopBarConfig?
+    private var shown = false
+
+    init(onSelect: @escaping (String) -> Void) {
+        self.onSelect = onSelect
+        super.init(frame: .zero)
+        row.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(row)
+        leadingSlot.translatesAutoresizingMaskIntoConstraints = false
+        row.addSubview(leadingSlot)
+        trailing.axis = .horizontal
+        trailing.spacing = 8
+        trailing.alignment = .center
+        trailing.translatesAutoresizingMaskIntoConstraints = false
+        row.addSubview(trailing)
+
+        pill.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.font = .systemFont(ofSize: 16, weight: .semibold)
+        titleLabel.textColor = Ponte.ink
+        titleLabel.lineBreakMode = .byTruncatingTail
+        titleLabel.textAlignment = .center
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        pill.contentView.addSubview(titleLabel)
+        pill.isAccessibilityElement = true
+        pill.accessibilityTraits = [.header, .button]
+        pill.accessibilityHint = "Torna in cima"
+        pill.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapTitle)))
+        row.addSubview(pill)
+
+        let center = pill.centerXAnchor.constraint(equalTo: row.centerXAnchor)
+        center.priority = .defaultHigh
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 12),
+            row.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -12),
+            row.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+            row.heightAnchor.constraint(equalToConstant: GlassTopBar.rowHeight),
+
+            leadingSlot.leadingAnchor.constraint(equalTo: row.leadingAnchor),
+            leadingSlot.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            leadingSlot.widthAnchor.constraint(equalToConstant: GlassTopBar.size),
+            leadingSlot.heightAnchor.constraint(equalToConstant: GlassTopBar.size),
+
+            trailing.trailingAnchor.constraint(equalTo: row.trailingAnchor),
+            trailing.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+
+            center,
+            pill.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            pill.heightAnchor.constraint(equalToConstant: GlassTopBar.size),
+            // il titolo sta sempre fra i pulsanti, alla stessa distanza dai due lati finché c'è posto
+            pill.leadingAnchor.constraint(greaterThanOrEqualTo: row.leadingAnchor, constant: GlassTopBar.size + 10),
+            pill.trailingAnchor.constraint(lessThanOrEqualTo: trailing.leadingAnchor, constant: -10),
+            pill.trailingAnchor.constraint(lessThanOrEqualTo: row.trailingAnchor, constant: -(GlassTopBar.size + 10)),
+
+            titleLabel.leadingAnchor.constraint(equalTo: pill.contentView.leadingAnchor, constant: 18),
+            titleLabel.trailingAnchor.constraint(equalTo: pill.contentView.trailingAnchor, constant: -18),
+            titleLabel.centerYAnchor.constraint(equalTo: pill.contentView.centerYAnchor),
+        ])
+        row.alpha = 0
+        isHidden = true
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) non usato") }
+
+    @objc private func tapTitle() { onSelect("title") }
+
+    func apply(_ c: TopBarConfig?, animated: Bool) {
+        guard let c else { return hide(animated: animated) }
+        let before = config
+        config = c
+        let wasShown = shown && !isHidden
+        isHidden = false
+        isUserInteractionEnabled = true
+
+        // titolo: il testo nuovo si dissolve sul vecchio e la capsula si allarga o si stringe con una molla
+        if before?.title != c.title {
+            if animated && wasShown {
+                UIView.transition(with: titleLabel, duration: 0.22, options: [.transitionCrossDissolve, .beginFromCurrentState]) { self.titleLabel.text = c.title }
+            } else {
+                titleLabel.text = c.title
+            }
+            pill.accessibilityLabel = c.title
+        }
+        if before?.leading != c.leading { setLeading(c.leading, animated: animated && wasShown) }
+        if before?.trailing != c.trailing {
+            // stessi pulsanti, menu diverso (es. una voce in più): si sostituiscono senza movimento
+            let sameShape = before?.trailing.map { [$0.id, $0.symbol] } == c.trailing.map { [$0.id, $0.symbol] }
+            setTrailing(c.trailing, animated: animated && wasShown && !sameShape)
+        }
+
+        let target: CGFloat = c.visible ? 1 : 0
+        if !animated || !wasShown && !c.visible {
+            UIView.performWithoutAnimation {
+                self.layoutIfNeeded()
+                self.row.alpha = target
+                self.row.transform = .identity
+            }
+        } else if row.alpha != target || before?.visible != c.visible || !wasShown {
+            // si materializza dal centro: vetro che cresce e prende corpo, senza rimbalzo
+            if c.visible && row.alpha < 0.01 {
+                layoutIfNeeded()
+                row.transform = CGAffineTransform(scaleX: 0.86, y: 0.86)
+            }
+            UIView.animate(withDuration: 0.38, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: [.beginFromCurrentState, .allowUserInteraction]) {
+                self.row.alpha = target
+                self.row.transform = c.visible ? .identity : CGAffineTransform(scaleX: 0.9, y: 0.9)
+                self.layoutIfNeeded()
+            }
+        } else {
+            UIView.animate(withDuration: 0.38, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: [.beginFromCurrentState, .allowUserInteraction]) {
+                self.layoutIfNeeded()
+            }
+        }
+        row.isUserInteractionEnabled = c.visible
+        shown = true
+    }
+
+    private func hide(animated: Bool) {
+        config = nil
+        shown = false
+        isUserInteractionEnabled = false
+        if !animated {
+            row.alpha = 0
+            isHidden = true
+            return
+        }
+        UIView.animate(withDuration: 0.18, delay: 0, options: [.beginFromCurrentState, .curveEaseIn]) {
+            self.row.alpha = 0
+        } completion: { _ in
+            if !self.shown { self.isHidden = true }
+        }
+    }
+
+    private func setLeading(_ it: TopItem?, animated: Bool) {
+        let old = leadingSlot.subviews
+        var fresh: UIView?
+        if let it {
+            let v = circle(it)
+            leadingSlot.addSubview(v)
+            NSLayoutConstraint.activate([
+                v.leadingAnchor.constraint(equalTo: leadingSlot.leadingAnchor),
+                v.trailingAnchor.constraint(equalTo: leadingSlot.trailingAnchor),
+                v.topAnchor.constraint(equalTo: leadingSlot.topAnchor),
+                v.bottomAnchor.constraint(equalTo: leadingSlot.bottomAnchor),
+            ])
+            fresh = v
+        }
+        swap(old: old, new: fresh.map { [$0] } ?? [], animated: animated)
+    }
+
+    private func setTrailing(_ items: [TopItem], animated: Bool) {
+        let old = trailing.arrangedSubviews
+        old.forEach { trailing.removeArrangedSubview($0); $0.removeFromSuperview() }
+        let views = items.map { circle($0) }
+        views.forEach { trailing.addArrangedSubview($0) }
+        if animated, !old.isEmpty || !views.isEmpty {
+            // i pulsanti nuovi compaiono crescendo appena dal loro centro
+            views.forEach {
+                $0.alpha = 0
+                $0.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+            }
+            UIView.animate(withDuration: 0.34, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: [.beginFromCurrentState, .allowUserInteraction]) {
+                views.forEach {
+                    $0.alpha = 1
+                    $0.transform = .identity
+                }
+            }
+        }
+    }
+
+    private func swap(old: [UIView], new: [UIView], animated: Bool) {
+        guard animated else {
+            old.forEach { $0.removeFromSuperview() }
+            return
+        }
+        new.forEach {
+            $0.alpha = 0
+            $0.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        }
+        UIView.animate(withDuration: 0.34, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: [.beginFromCurrentState, .allowUserInteraction]) {
+            old.forEach {
+                $0.alpha = 0
+                $0.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+            }
+            new.forEach {
+                $0.alpha = 1
+                $0.transform = .identity
+            }
+        } completion: { _ in old.forEach { $0.removeFromSuperview() } }
+    }
+
+    /// Pulsante tondo di vetro: su iOS 26 il pulsante di sistema in Liquid Glass (UIButton.Configuration.glass),
+    /// prima il materiale cromato. Con un menu, il tocco apre il menu nativo che nasce dal pulsante.
+    private func circle(_ it: TopItem) -> UIView {
+        let b = UIButton(type: .system)
+        var cfg = UIButton.Configuration.plain()
+        var liquid = false
+        #if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            cfg = UIButton.Configuration.glass()
+            liquid = true
+        }
+        #endif
+        cfg.image = UIImage(systemName: it.symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold))
+        cfg.baseForegroundColor = Ponte.ink
+        cfg.cornerStyle = .capsule
+        cfg.contentInsets = .zero
+        b.configuration = cfg
+        b.accessibilityLabel = it.label
+        b.isEnabled = !it.disabled
+        b.alpha = it.disabled ? 0.45 : 1
+        if !it.menu.isEmpty {
+            b.menu = menu(it.menu)
+            b.showsMenuAsPrimaryAction = true
+        } else {
+            b.addAction(UIAction { [weak self] _ in self?.onSelect(it.id) }, for: .touchUpInside)
+        }
+        b.translatesAutoresizingMaskIntoConstraints = false
+        if liquid {
+            NSLayoutConstraint.activate([
+                b.widthAnchor.constraint(equalToConstant: GlassTopBar.size),
+                b.heightAnchor.constraint(equalToConstant: GlassTopBar.size),
+            ])
+            return b
+        }
+        let g = Glass.view(radius: GlassTopBar.size / 2)
+        g.translatesAutoresizingMaskIntoConstraints = false
+        g.contentView.addSubview(b)
+        NSLayoutConstraint.activate([
+            g.widthAnchor.constraint(equalToConstant: GlassTopBar.size),
+            g.heightAnchor.constraint(equalToConstant: GlassTopBar.size),
+            b.topAnchor.constraint(equalTo: g.contentView.topAnchor),
+            b.bottomAnchor.constraint(equalTo: g.contentView.bottomAnchor),
+            b.leadingAnchor.constraint(equalTo: g.contentView.leadingAnchor),
+            b.trailingAnchor.constraint(equalTo: g.contentView.trailingAnchor),
+        ])
+        return g
+    }
+
+    /// Menu di sistema: le voci a gruppi (le righe di separazione), le distruttive in rosso.
+    private func menu(_ items: [TopMenuItem]) -> UIMenu {
+        var groups: [[TopMenuItem]] = []
+        for it in items {
+            if let last = groups.last?.last, last.group == it.group { groups[groups.count - 1].append(it) } else { groups.append([it]) }
+        }
+        let sections: [UIMenuElement] = groups.map { g in
+            UIMenu(title: "", options: .displayInline, children: g.map { it in
+                UIAction(title: it.label, image: it.symbol.isEmpty ? nil : UIImage(systemName: it.symbol), attributes: it.destructive ? .destructive : []) { [weak self] _ in
+                    self?.onSelect(it.id)
+                }
+            })
+        }
+        return UIMenu(title: "", children: sections)
     }
 }
 

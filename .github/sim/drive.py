@@ -217,9 +217,28 @@ try:
         shot("06-ricerca-chiusa")
         check(has("Peugeot 208", exact=False), "chiudendo torna l'elenco completo")
 
+    # notch delle sezioni: scorrendo, il titolo grande lascia il posto alla capsula nativa con la lente
+    swipe(W // 2, 640, W // 2, 240)
+    time.sleep(1.2)
+    shot("06b-schede-notch")
+    check(has("Cerca", kinds=NATIVE), "Schede scorsa: notch nativa con la lente")
+    swipe(W // 2, 240, W // 2, 760)
+    time.sleep(0.6)
+    swipe(W // 2, 240, W // 2, 760)
+    time.sleep(1.2)
+    check(not has("Cerca", kinds=NATIVE), "in cima la notch si ritira: resta il titolo grande")
+
     # scheda: azioni native
     tap("Volkswagen Golf 2.0 TDI", exact=False, wait=1.8, kinds=("web:a",))
     shot("07-scheda")
+    check(has("Schede", kinds=NATIVE) and has("Altre azioni", kinds=NATIVE), "scheda: testata nativa con indietro e •••")
+    check(has("Scheda N.", exact=False), "scheda: titolo nella capsula di vetro")
+    if tap("Altre azioni", wait=1.2, kinds=NATIVE):
+        shot("07b-menu")
+        check(has("Elimina scheda", exact=False) and has("Modifica dati", exact=False), "•••: menu nativo con le azioni della scheda")
+        idb("ui", "tap", str(W // 2), "120")  # fuori dal menu: si chiude
+        time.sleep(1.0)
+        check(not has("Elimina scheda", exact=False), "il menu si chiude toccando fuori")
     check(has("Avvisa"), "scheda: «Avvisa» nella barra nativa")
     check(has("Segna: Pronto"), "scheda: «Segna: Pronto» nella barra nativa")
     v = Video("v2-scheda")
@@ -247,8 +266,13 @@ try:
         shot("10b-consegnato")
         check(has("Invia il conto", exact=False, kinds=NATIVE), "incassato: consegnato, la barra propone «Invia il conto»")
 
-    # indietro e nuova accettazione
-    tap("Schede", wait=1.4, kinds=("web:button",))  # indietro dalla scheda
+    # indietro col gesto dal bordo: la scheda segue il dito e sotto c'è l'elenco vero
+    swipe(2, 420, 330, 420, dur=0.45)
+    time.sleep(1.6)
+    shot("10c-gesto-indietro")
+    check(has("Nuova accettazione", kinds=NATIVE), "gesto dal bordo: torna all'elenco con la barra nativa")
+    if not has("Nuova accettazione", kinds=NATIVE):
+        tap("Schede", wait=1.4, kinds=NATIVE)  # indietro dalla scheda
     tap("Nuova accettazione", wait=1.2, kinds=NATIVE)
     shot("11a-chi-porta")
     check(has("Privato", exact=False) and has("Azienda", exact=False), "+: prima la scelta privato / azienda")
@@ -291,6 +315,7 @@ try:
     tap("Cliente nuovo", exact=False, wait=1.8, kinds=("web:button",))
     shot("11-nuova")
     check(has("Registra accettazione"), "modulo: «Registra accettazione» nella barra nativa")
+    check(has("Annulla l’accettazione", kinds=NATIVE), "modulo a foglio: X nativa in alto a sinistra")
     check(has("Riprendi", exact=False, kinds=("web:button",)), "modulo: propone di riprendere l'accettazione a voce non finita")
     check(not has("Leggi la targa con la fotocamera"), "sul simulatore (senza fotocamera) il pulsante della targa non compare")
 

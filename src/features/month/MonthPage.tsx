@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Building2, Check, ChevronDown, ChevronLeft, ChevronRight, Plus, ReceiptText, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { Page } from '@/app/layout';
+import { Page, SectionNotch } from '@/app/layout';
 import { useJobs, useSettings, useWide, useWidth } from '@/app/hooks';
 import { BrandMark } from '@/app/Shell';
 import { PAGAMENTI } from '@/domain/constants';
@@ -32,6 +32,7 @@ export function MonthPage() {
   const wide = useWide();
   const [wref, pw] = useWidth<HTMLDivElement>();
   const two = pw >= 1000;
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const nav = useNavigate();
   const cos = useMemo(() => companies(jobs || []), [jobs]);
   const [coKey, setCoKey] = useState(memo.co);
@@ -287,6 +288,7 @@ export function MonthPage() {
 
   return (
     <Page className="pb-safe-bar lg:pb-10">
+      <SectionNotch title="Fatture ditte" anchor={titleRef} />
       <div ref={wref} aria-hidden="true" className="h-0 w-full" />
       <div className="mx-auto px-4 lg:px-8 lg:pt-4" style={{ maxWidth: two ? 1280 : 760 }}>
         {!wide && (
@@ -294,7 +296,9 @@ export function MonthPage() {
             <BrandMark />
           </header>
         )}
-        <h1 className="w-wide mt-5 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink lg:text-[2.125rem] lg:tracking-[-0.02em]">Fatture ditte</h1>
+        <h1 ref={titleRef} className="w-wide mt-5 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink lg:text-[2.125rem] lg:tracking-[-0.02em]">
+          Fatture ditte
+        </h1>
         <p className="mt-1 max-w-[52ch] text-[0.9375rem] text-ink-2">I lavori di ogni ditta si raccolgono durante il mese: qui prepari un solo conto con tutte le voci e l'IVA divisa per aliquota.</p>
 
         {!co ? (

@@ -1,4 +1,5 @@
 import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor/core';
+import { holdTop, topIsNative } from './nativeBar';
 
 /**
  * Navigazione come in un'app iOS.
@@ -50,11 +51,24 @@ export function depthOf(path: string): number {
   return 1;
 }
 
-export type NavDirection = 'push' | 'pop' | 'none' | 'fade';
+/**
+ * Schermate presentate "a foglio" (come i modali a tutto schermo di iOS): il modulo di una nuova accettazione
+ * e la modifica dei dati. Salgono dal basso, si chiudono con la X e scendono; niente gesto dal bordo.
+ */
+export function isModal(path: string): boolean {
+  const p = path.split('?')[0].replace(/\/+$/, '');
+  return p === '/nuova' || /^\/job\/[^/]+\/modifica$/.test(p);
+}
+
+export type NavDirection = 'push' | 'pop' | 'none' | 'fade' | 'cover' | 'uncover';
 
 /** che movimento serve fra due schermate */
 export function direction(from: string, to: string, idxFrom: number | null, idxTo: number | null): NavDirection {
   if (from === to) return 'none';
+  const mf = isModal(from);
+  const mt = isModal(to);
+  if (mt && !mf) return 'cover';
+  if (mf && !mt) return 'uncover';
   const a = depthOf(from);
   const b = depthOf(to);
   if (a === 0 && b === 0) return 'none'; // da sezione a sezione: all'istante
@@ -76,6 +90,9 @@ const wide = () => matchMedia('(min-width: 1024px)').matches;
 
 export const viewTransitionsOn = () => typeof document !== 'undefined' && 'startViewTransition' in document && !wide();
 
+/** chi tiene da parte la testata nativa per la transizione in corso */
+let releaseTop: (() => void) | null = null;
+
 type Router = { navigate: (to: unknown, opts?: Record<string, unknown>) => Promise<void>; subscribe: (fn: (s: { location: { pathname: string } }) => void) => () => void };
 type VT = { skipTransition(): void; finished: Promise<void> };
 type Start = (cb: () => unknown) => VT;
@@ -89,7 +106,19 @@ export function installNavTransitions(router: Router) {
   if (typeof document === 'undefined' || !('startViewTransition' in document)) return;
   const nav = router.navigate.bind(router);
   // i link passano viewTransition: undefined in modo esplicito: lo si sostituisce, non lo si sovrascrive
-  router.navigate = (to, opts) => nav(to, viewTransitionsOn() ? { ...(opts || {}), viewTransition: opts?.viewTransition ?? true } : opts);
+  router.navigate = (to, opts) => {
+    const o = viewTransitionsOn() ? { ...(opts || {}), viewTransition: opts?.viewTransition ?? true } : opts;
+    // una schermata a foglio sale o scende con la sua testata: quella nativa (ferma, fuori dalla pagina) si fa da
+    // parte e la pagina disegna la sua copia web prima della fotografia di uscita; torna a transizione finita
+    const target = typeof to === 'string' ? to : typeof to === 'object' && to && 'pathname' in to ? String((to as { pathname?: string }).pathname ?? '') : '';
+    const sheet = isModal(currentPath()) || (target !== '' && isModal(target));
+    if (!o?.viewTransition || !sheet || !topIsNative()) return nav(to, o);
+    releaseTop?.();
+    const release = holdTop();
+    releaseTop = release;
+    setTimeout(release, 2000); // in ogni caso, mai una testata sparita
+    return new Promise<void>((res) => requestAnimationFrame(() => requestAnimationFrame(() => nav(to, o).then(res, res))));
+  };
 
   const doc = document as unknown as { startViewTransition: Start };
   const start = doc.startViewTransition.bind(document);
@@ -120,6 +149,8 @@ export function installNavTransitions(router: Router) {
       .catch(() => {})
       .finally(() => {
         delete document.documentElement.dataset.nav;
+        releaseTop?.();
+        releaseTop = null;
       });
     return t;
   };

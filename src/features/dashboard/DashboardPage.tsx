@@ -1,11 +1,11 @@
-import { useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { AlarmClock, ArrowUpRight, CheckCircle2, ChevronRight, Plus, ReceiptText, Sparkles, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { searchShortcut, useDesk, useJobs, useNativeBarOn, useSettings, useWide, useWidth } from '@/app/hooks';
 import { useNativeSearch } from '@/platform/nativeBar';
 import { BrandMark } from '@/app/Shell';
-import { Page } from '@/app/layout';
+import { Page, SEARCH_ACTION, SectionNotch } from '@/app/layout';
 import { statoLabel } from '@/domain/constants';
 import { dashboard, greeting, type Delivery, type WeekBar } from '@/domain/dashboard';
 import { eur, fmtPlate, relDay } from '@/domain/format';
@@ -45,6 +45,7 @@ export function DashboardPage() {
   const nav = useNavigate();
   const now = Date.now();
   const d = useMemo(() => dashboard(jobs || [], now), [jobs, now]);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   // la ricerca di Oggi cerca qui, senza portarti altrove: i risultati prendono il posto del cruscotto
   const [q, setQ] = useState('');
   const ns = useNativeSearch();
@@ -65,6 +66,7 @@ export function DashboardPage() {
 
   const header = (
     <>
+      <SectionNotch title="Oggi" anchor={titleRef} actions={jobs.length ? [SEARCH_ACTION] : []} />
       {!wide && (
         <header className="px-4 pt-[calc(env(safe-area-inset-top,0px)+16px)]">
           <BrandMark />
@@ -73,7 +75,7 @@ export function DashboardPage() {
       <div className="flex items-end justify-between gap-6 px-4 pt-5 lg:px-8 lg:pt-9">
         <div className="min-w-0">
           <p className="text-[0.875rem] font-medium text-ink-3">{todayLabel(now)}</p>
-          <h1 className="w-wide mt-0.5 text-[2.125rem] leading-[1.05] font-semibold tracking-[-0.02em] text-ink lg:text-[2.375rem]">
+          <h1 ref={titleRef} className="w-wide mt-0.5 text-[2.125rem] leading-[1.05] font-semibold tracking-[-0.02em] text-ink lg:text-[2.375rem]">
             {greeting(now)}
             {desk && shop ? <span className="text-ink-3">, {shop}</span> : null}
           </h1>
@@ -187,7 +189,7 @@ export function DashboardPage() {
         ) : (
           <>
             {header}
-            <div className="scroll-edge sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:hidden">
+            <div className="px-4 pt-3 pb-2 lg:hidden">
               <SearchField id="search-jobs" value={q} onChange={setQ} onKeyDown={onSearchKey} placeholder="Cerca targa, cliente, ditta" />
             </div>
           </>

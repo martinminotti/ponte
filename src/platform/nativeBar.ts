@@ -140,3 +140,113 @@ export function onBarSelect(cb: (id: string) => void): () => void {
     h?.remove();
   };
 }
+
+/* ---------- testata in alto: capsule di vetro con indietro, titolo e azioni ---------- */
+
+/** voce di un menu nativo (UIMenu): `group` separa le voci in blocchi, come le righe di separazione */
+export type TopMenuItem = { id: string; label: string; symbol: string; destructive?: boolean; group?: number };
+export type TopItem = { id: string; label: string; symbol: string; disabled?: boolean; menu?: TopMenuItem[] };
+export type TopConfig = {
+  title: string;
+  /** il titolo è in vista (le sezioni lo mostrano solo quando il titolo grande è passato sotto la testata) */
+  visible: boolean;
+  leading: TopItem | null;
+  trailing: TopItem[];
+};
+/** la testata dichiarata dalla schermata, con i gestori dei tocchi */
+export type TopSpec = TopConfig & { onSelect: (id: string) => void };
+
+interface NativeTopPlugin {
+  configureTop(c: (TopConfig & { mode: 'bar'; dark: boolean; animated: boolean }) | { mode: 'hidden'; animated: boolean }): Promise<void>;
+  addListener(e: 'top', cb: (d: { id: string }) => void): Promise<PluginListenerHandle>;
+}
+const NativeTop = NativeBar as unknown as NativeTopPlugin;
+
+let topSpec: TopSpec | null = null;
+const topSubs = new Set<() => void>();
+const emitTop = () => topSubs.forEach((f) => f());
+const subTop = (cb: () => void) => {
+  topSubs.add(cb);
+  return () => topSubs.delete(cb);
+};
+
+export function useTopSpec(): TopSpec | null {
+  return useSyncExternalStore(subTop, () => topSpec);
+}
+
+/** La schermata dichiara la sua testata finché è montata (la schermata disegnata sotto il gesto indietro no). */
+export function useNativeTop(spec: TopSpec | null) {
+  const latest = useRef(spec);
+  latest.current = spec;
+  const key = spec ? JSON.stringify([spec.title, spec.visible, spec.leading, spec.trailing.map(({ id, label, symbol, disabled, menu }) => [id, label, symbol, disabled, menu])]) : '';
+  useEffect(() => {
+    if (!latest.current) return;
+    const mine: TopSpec = { ...latest.current, onSelect: (id) => latest.current?.onSelect(id) };
+    topSpec = mine;
+    emitTop();
+    return () => {
+      if (topSpec === mine) {
+        topSpec = null;
+        emitTop();
+      }
+    };
+  }, [key]);
+}
+
+/**
+ * Quante ragioni tengono da parte la testata nativa: il gesto indietro (la testata deve scorrere con la sua
+ * pagina) e le schermate a foglio che salgono o scendono (la testata viaggia con il foglio). Intanto la pagina
+ * disegna la sua copia web, identica, che si muove con lei.
+ */
+let held = 0;
+export function holdTop(): () => void {
+  held++;
+  emitTop();
+  let done = false;
+  return () => {
+    if (done) return;
+    done = true;
+    held--;
+    emitTop();
+  };
+}
+export function useTopHeld(): boolean {
+  return useSyncExternalStore(subTop, () => held > 0);
+}
+
+/** la testata nativa è in vista: la pagina lascia solo lo spazio, senza disegnarla */
+let topNative = false;
+export function setTopNative(on: boolean) {
+  if (on === topNative) return;
+  topNative = on;
+  emitTop();
+}
+export const topIsNative = () => topNative;
+export function useTopNative(): boolean {
+  return useSyncExternalStore(subTop, () => topNative);
+}
+
+let lastTop = '';
+export function configureTop(c: TopConfig | null, dark: boolean, animated: boolean): Promise<void> {
+  const payload = c ? { ...c, mode: 'bar' as const, dark, animated } : { mode: 'hidden' as const, animated };
+  const s = JSON.stringify({ ...payload, animated: undefined });
+  if (s === lastTop) return Promise.resolve();
+  lastTop = s;
+  return NativeTop.configureTop(payload).catch(() => {
+    lastTop = '';
+    throw new Error('top');
+  });
+}
+
+export function onTopSelect(cb: (id: string) => void): () => void {
+  let h: PluginListenerHandle | undefined;
+  let off = false;
+  NativeTop.addListener('top', (d) => cb(d.id)).then((x) => {
+    if (off) x.remove();
+    else h = x;
+  });
+  return () => {
+    off = true;
+    h?.remove();
+  };
+}

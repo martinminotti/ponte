@@ -3,7 +3,8 @@ import { useMatch, useNavigate, useSearchParams } from 'react-router';
 import { Plus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsUnderlay } from '@/app/underlay';
-import { overlayOpen, searchShortcut, typing, useGlass, useJobs, useNativeBarOn, useSettings, useWide } from '@/app/hooks';
+import { overlayOpen, searchShortcut, typing, useJobs, useNativeBarOn, useSettings, useWide } from '@/app/hooks';
+import { SEARCH_ACTION, SectionNotch } from '@/app/layout';
 import { useNativeSearch } from '@/platform/nativeBar';
 import { STATI, statoIndex } from '@/domain/constants';
 import { fmtPlate } from '@/domain/format';
@@ -40,6 +41,7 @@ export function ListPage() {
   const jobs = useJobs();
   const wide = useWide();
   const nav = useNavigate();
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const match = useMatch('/job/:id/*');
   const activeId = match?.params.id;
   const [filter, setFilterState] = useState<FilterKey>(readFilter);
@@ -48,7 +50,6 @@ export function ListPage() {
     lastQuery = v;
     setQState(v);
   };
-  const glass = useGlass();
   const searchRef = useRef<HTMLInputElement>(null);
   const [sp, setSp] = useSearchParams();
 
@@ -144,20 +145,21 @@ export function ListPage() {
       {/* ricerca nativa di iOS agganciata in alto: la testata si fa da parte e i risultati partono sotto il campo */}
       {searching && <div aria-hidden="true" className="h-[calc(env(safe-area-inset-top,0px)+64px)]" />}
 
+      {!searching && <SectionNotch title="Schede" anchor={titleRef} actions={[SEARCH_ACTION]} />}
       {!wide && !searching && (
         <header className="px-4 pt-[calc(env(safe-area-inset-top,0px)+16px)]">
           <BrandMark />
         </header>
       )}
 
-      {!wide && !searching && <h1 className="w-wide px-4 pt-5 text-[2rem] leading-none font-semibold tracking-[-0.02em] text-ink">Schede</h1>}
+      {!wide && !searching && (
+        <h1 ref={titleRef} className="w-wide px-4 pt-5 text-[2rem] leading-none font-semibold tracking-[-0.02em] text-ink">
+          Schede
+        </h1>
+      )}
 
       {!searching && (
-        <div
-          className={`sticky top-[env(safe-area-inset-top,0px)] z-30 px-4 pt-3 pb-2 lg:top-0 lg:pt-5 ${
-            glass && !wide ? 'scroll-edge' : 'bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] backdrop-blur-xl backdrop-saturate-150'
-          }`}
-        >
+        <div className={`px-4 pt-3 pb-2 ${wide ? 'sticky top-0 z-30 bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] pt-5 backdrop-blur-xl backdrop-saturate-150' : ''}`}>
           {wide && <h1 className="w-wide mb-3 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink">Schede</h1>}
           <SearchField
             ref={searchRef}

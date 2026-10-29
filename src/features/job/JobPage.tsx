@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { Building2, CheckCircle2, ChevronDown, Copy, FileText, MessageCircle, MoreHorizontal, Pencil, Phone, Send, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AnimatePresence, motion } from 'motion/react';
-import { ActionBar, BarButton, Page, TopBar } from '@/app/layout';
+import { ActionBar, Page, TopBar } from '@/app/layout';
 import { useJob, useJobs, useSettings, useWidth } from '@/app/hooks';
 import { PAGAMENTI, STATI, statoIndex, statoLabel } from '@/domain/constants';
 import { eur, fmtDate, fmtDateTime, fmtIsoDay, jobNumber } from '@/domain/format';
@@ -15,7 +15,6 @@ import { copyText, haptic, openExternal } from '@/platform/native';
 import { Button, Section, SkeletonBlocks, ToggleChip } from '@/ui/controls';
 import { SPRING } from '@/ui/motion';
 import { Plate } from '@/ui/Plate';
-import { ActionMenu } from '@/ui/Menu';
 import { StatusPill, StatusRail, stColor } from '@/ui/status';
 import { sendBill } from '@/features/doc/sendBill';
 import { HistoryList, InvoiceSection, ItemsSection, PaymentSection, PhotosSection, VehicleHistory, WarrantySection, WorkersSection, updater } from './sections';
@@ -326,32 +325,37 @@ function JobView({ job }: { job: Job }) {
         back="/schede"
         backLabel="Schede"
         hideBackOnWide
-        title={<span className="tnum text-ink-2">Scheda N. {jobNumber(job.number)}</span>}
-        right={
-          <ActionMenu
-            title={`Scheda N. ${jobNumber(job.number)}`}
-            trigger={(open) => (
-              <BarButton label="Altre azioni" onClick={open}>
-                <MoreHorizontal size={22} />
-              </BarButton>
-            )}
-            items={[
-              { icon: <Pencil size={19} />, label: 'Modifica dati', onSelect: () => nav(`/job/${job.id}/modifica`) },
-              { icon: <FileText size={19} />, label: 'Apri il conto', onSelect: () => nav(`/job/${job.id}/conto`) },
-              { icon: <Send size={19} />, label: 'Invia il conto in PDF', onSelect: send },
-              {
-                icon: <Copy size={19} />,
-                label: 'Copia riepilogo',
-                onSelect: async () => {
-                  const ok = await copyText(buildMsg(job, job.status === 'consegnato' ? 'consegnato' : 'pronto', settings));
-                  toast[ok ? 'success' : 'error'](ok ? 'Riepilogo copiato' : 'Non riesco a copiare');
+        title={`Scheda N. ${jobNumber(job.number)}`}
+        actions={[
+          {
+            id: 'more',
+            label: 'Altre azioni',
+            icon: <MoreHorizontal size={22} />,
+            symbol: 'ellipsis',
+            menu: {
+              title: `Scheda N. ${jobNumber(job.number)}`,
+              items: [
+                { id: 'edit', symbol: 'pencil', icon: <Pencil size={19} />, label: 'Modifica dati', onSelect: () => nav(`/job/${job.id}/modifica`) },
+                { id: 'doc', symbol: 'doc.text', icon: <FileText size={19} />, label: 'Apri il conto', onSelect: () => nav(`/job/${job.id}/conto`) },
+                { id: 'send', symbol: 'paperplane', icon: <Send size={19} />, label: 'Invia il conto in PDF', onSelect: send },
+                {
+                  id: 'copy',
+                  symbol: 'doc.on.doc',
+                  icon: <Copy size={19} />,
+                  label: 'Copia riepilogo',
+                  onSelect: async () => {
+                    const ok = await copyText(buildMsg(job, job.status === 'consegnato' ? 'consegnato' : 'pronto', settings));
+                    toast[ok ? 'success' : 'error'](ok ? 'Riepilogo copiato' : 'Non riesco a copiare');
+                  },
                 },
-              },
-              ...(canWa ? [{ icon: <MessageCircle size={19} />, label: 'Apri la chat WhatsApp', onSelect: () => openExternal(waLink(job.phone, '', settings.prefix)!) }] : []),
-              { icon: <Trash2 size={19} />, label: 'Elimina scheda', danger: true, separator: true, onSelect: remove },
-            ]}
-          />
-        }
+                ...(canWa
+                  ? [{ id: 'wa', symbol: 'message', icon: <MessageCircle size={19} />, label: 'Apri la chat WhatsApp', onSelect: () => openExternal(waLink(job.phone, '', settings.prefix)!) }]
+                  : []),
+                { id: 'delete', symbol: 'trash', icon: <Trash2 size={19} />, label: 'Elimina scheda', danger: true, separator: true, onSelect: remove },
+              ],
+            },
+          },
+        ]}
       />
 
       <div ref={wref} aria-hidden="true" className="h-0 w-full" />

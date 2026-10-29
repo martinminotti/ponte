@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useRoutes, type Location } from 'react-router';
 import { animate, motion, useMotionValue, useTransform } from 'motion/react';
-import { depthOf, markSwipe } from '@/platform/navigation';
+import { depthOf, isModal, markSwipe } from '@/platform/navigation';
+import { holdTop } from '@/platform/nativeBar';
 import { haptic } from '@/platform/native';
 import { overlayOpen } from './hooks';
 import { screenRoutes } from './routes';
@@ -37,7 +38,7 @@ function backTarget(loc: Location): { entry: Entry | null; parent: string } {
 function Underlay({ loc, scrollY }: { loc: Location; scrollY: number }) {
   const el = useRoutes(screenRoutes, loc);
   return (
-    <UnderlayContext.Provider value={true}>
+    <UnderlayContext.Provider value={scrollY}>
       <div style={{ transform: `translateY(${-scrollY}px)` }}>{el}</div>
     </UnderlayContext.Provider>
   );
@@ -57,7 +58,14 @@ export function SwipeBack({ enabled, children }: { enabled: boolean; children: R
   const shadow = useTransform(x, (v) => (v > 0.5 ? '-10px 0 30px -8px rgba(0,0,0,0.22)' : 'none'));
   const anim = useRef<ReturnType<typeof animate> | null>(null);
   const depth = depthOf(loc.pathname);
-  const active = enabled && depth > 0;
+  // le schermate a foglio si chiudono con la X, come i modali di iOS: niente gesto dal bordo
+  const active = enabled && depth > 0 && !isModal(loc.pathname);
+  // durante il gesto la testata nativa si fa da parte: quella web scorre con la sua pagina
+  const release = useRef<(() => void) | null>(null);
+  const letGo = () => {
+    release.current?.();
+    release.current = null;
+  };
   const pageRef = useRef<HTMLDivElement>(null);
 
   /* ---- cronologia e posizione di scorrimento ---- */
@@ -122,6 +130,7 @@ export function SwipeBack({ enabled, children }: { enabled: boolean; children: R
             haptic('light');
           } else {
             setUnder(null);
+            letGo();
           }
         },
       });
@@ -141,6 +150,8 @@ export function SwipeBack({ enabled, children }: { enabled: boolean; children: R
       }
       if (t.clientX > EDGE || overlayOpen()) return;
       width.current = window.innerWidth;
+      letGo();
+      release.current = holdTop();
       start = { x: t.clientX, y: t.clientY, t: performance.now() };
       engaged = false;
       samples = [];
@@ -159,6 +170,7 @@ export function SwipeBack({ enabled, children }: { enabled: boolean; children: R
           // è uno scorrimento verticale: il gesto non c'entra
           start = null;
           setUnder(null);
+          letGo();
           return;
         }
         if (dx < 8) return;
@@ -177,7 +189,10 @@ export function SwipeBack({ enabled, children }: { enabled: boolean; children: R
       start = null;
       engaged = false;
       if (!wasEngaged) {
-        if (!anim.current) setUnder(null);
+        if (!anim.current) {
+          setUnder(null);
+          letGo();
+        }
         return;
       }
       const a = samples[0];
@@ -194,6 +209,7 @@ export function SwipeBack({ enabled, children }: { enabled: boolean; children: R
       removeEventListener('touchmove', onMove);
       removeEventListener('touchend', onEnd);
       removeEventListener('touchcancel', onEnd);
+      letGo();
     };
   }, [active, nav, x]);
 
@@ -203,6 +219,8 @@ export function SwipeBack({ enabled, children }: { enabled: boolean; children: R
     anim.current = null;
     x.set(0);
     setUnder(null);
+    // la schermata nuova ha già dichiarato la sua testata: la nativa torna, all'istante
+    letGo();
   }, [loc.key, loc.pathname, x]);
 
   // a riposo la pagina non crea un contesto di sovrapposizione (le barre fisse dell'app restano sopra);

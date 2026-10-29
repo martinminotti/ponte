@@ -211,115 +211,114 @@ input[type='date']::-webkit-date-and-time-value {
 }
 
 @layer components {
-/* larghezze tipografiche */
-.w-cond {
-  font-stretch: 75%;
-  font-variation-settings: 'wdth' 75;
-}
-.w-semi {
-  font-stretch: 87%;
-  font-variation-settings: 'wdth' 87;
-}
-.w-wide {
-  font-stretch: 112%;
-  font-variation-settings: 'wdth' 112;
-}
-.w-xwide {
-  font-stretch: 125%;
-  font-variation-settings: 'wdth' 125;
-}
-.tnum {
-  font-variant-numeric: tabular-nums;
-}
+  /* larghezze tipografiche */
+  .w-cond {
+    font-stretch: 75%;
+    font-variation-settings: 'wdth' 75;
+  }
+  .w-semi {
+    font-stretch: 87%;
+    font-variation-settings: 'wdth' 87;
+  }
+  .w-wide {
+    font-stretch: 112%;
+    font-variation-settings: 'wdth' 112;
+  }
+  .w-xwide {
+    font-stretch: 125%;
+    font-variation-settings: 'wdth' 125;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
 
-.safe-top {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-.pb-safe-bar {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 112px);
-}
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pb-safe-bar {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 112px);
+  }
 
-.no-scrollbar {
-  scrollbar-width: none;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
-/* superfici */
-.card {
-  background: var(--surface);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-1);
-}
-.raised {
-  box-shadow: var(--shadow-2);
-}
-.hairline {
-  border-color: var(--line);
-}
-
-/* campi */
-.ctl {
-  width: 100%;
-  min-width: 0;
-  min-height: 52px;
-  padding: 0 14px;
-  border-radius: var(--radius-ctl);
-  background: var(--surface-2);
-  color: var(--ink);
-  border: 1px solid transparent;
-  transition:
-    border-color 0.15s,
-    background-color 0.15s,
-    box-shadow 0.15s;
-}
-.ctl::placeholder {
-  color: var(--ink-3);
-}
-@media (hover: hover) {
-  .ctl:hover {
+  /* superfici */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-1);
+  }
+  .raised {
+    box-shadow: var(--shadow-2);
+  }
+  .hairline {
     border-color: var(--line);
   }
-}
-.ctl:focus {
-  outline: none;
-  background: var(--surface);
-  border-color: var(--accent-ink);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
-}
-textarea.ctl {
-  padding: 13px 14px;
-  line-height: 1.45;
-  resize: vertical;
-  min-height: 96px;
-}
-select.ctl {
-  -webkit-appearance: none;
-  appearance: none;
-  padding-right: 40px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238a929c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-}
 
-/* pressione: risposta tattile visiva */
-.press {
-  transition:
-    transform 0.16s var(--ease-out-soft),
-    background-color 0.15s,
-    border-color 0.15s,
-    color 0.15s,
-    opacity 0.15s,
-    box-shadow 0.15s;
-}
-.press:active {
-  transform: scale(0.97);
-}
+  /* campi */
+  .ctl {
+    width: 100%;
+    min-width: 0;
+    min-height: 52px;
+    padding: 0 14px;
+    border-radius: var(--radius-ctl);
+    background: var(--surface-2);
+    color: var(--ink);
+    border: 1px solid transparent;
+    transition:
+      border-color 0.15s,
+      background-color 0.15s,
+      box-shadow 0.15s;
+  }
+  .ctl::placeholder {
+    color: var(--ink-3);
+  }
+  @media (hover: hover) {
+    .ctl:hover {
+      border-color: var(--line);
+    }
+  }
+  .ctl:focus {
+    outline: none;
+    background: var(--surface);
+    border-color: var(--accent-ink);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+  }
+  textarea.ctl {
+    padding: 13px 14px;
+    line-height: 1.45;
+    resize: vertical;
+    min-height: 96px;
+  }
+  select.ctl {
+    -webkit-appearance: none;
+    appearance: none;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238a929c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
 
+  /* pressione: risposta tattile visiva */
+  .press {
+    transition:
+      transform 0.16s var(--ease-out-soft),
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s,
+      opacity 0.15s,
+      box-shadow 0.15s;
+  }
+  .press:active {
+    transform: scale(0.97);
+  }
 }
 
 /* ---------------- vetro liquido ----------------
@@ -358,9 +357,13 @@ select.ctl {
   [data-glass='on'] .glass::before {
     padding: 1px;
     background: linear-gradient(140deg, var(--glass-rim) 0%, var(--glass-rim-low) 38%, var(--glass-rim-low) 62%, var(--glass-rim) 100%);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
     mask-composite: exclude;
   }
   /* riflesso */
@@ -372,18 +375,26 @@ select.ctl {
     background: color-mix(in srgb, var(--accent) 86%, transparent);
     color: var(--on-accent);
   }
-  /* bordo superiore e inferiore sfumati sotto le barre flottanti (scroll edge) */
-  [data-glass='on'] .edge-top {
+  /* sotto la barra di stato, solo mentre si scorre: tiene leggibile l'ora. Le testate sono capsule, non fasce. */
+  .status-veil {
     position: fixed;
     inset: 0 0 auto;
     z-index: 29;
-    height: calc(env(safe-area-inset-top, 0px) + 84px);
+    height: env(safe-area-inset-top, 0px);
     pointer-events: none;
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    background: linear-gradient(var(--bg) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 50%, transparent);
-    -webkit-mask-image: linear-gradient(#000 55%, transparent);
-    mask-image: linear-gradient(#000 55%, transparent);
+    transition: opacity 0.25s ease;
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.4);
+    backdrop-filter: blur(10px) saturate(1.4);
+    -webkit-mask-image: linear-gradient(#000 70%, transparent);
+    mask-image: linear-gradient(#000 70%, transparent);
+  }
+  /* capsule della testata senza vetro liquido: superficie traslucida con un contorno, così si staccano dal contenuto */
+  [data-glass='off'] .notch-pill {
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    box-shadow:
+      var(--shadow-1),
+      0 0 0 1px var(--line);
   }
   [data-glass='on'] .edge-bottom {
     position: fixed;
@@ -393,28 +404,10 @@ select.ctl {
     pointer-events: none;
     background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 70%, transparent));
   }
-  /* bordo di scorrimento sotto le barre fisse in vetro (testata con ricerca, barra delle schermate):
-     sfocatura progressiva che parte dalla status bar e sfuma sotto la barra, come lo scroll edge effect di iOS 26 */
-  [data-glass='on'] .scroll-edge::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    left: 0;
-    right: 0;
-    top: 0; /* mai sopra la barra: coprirebbe il titolo quando la testata non è ancora agganciata */
-    bottom: -20px;
-    pointer-events: none;
-    -webkit-backdrop-filter: blur(16px) saturate(1.3);
-    backdrop-filter: blur(16px) saturate(1.3);
-    background: linear-gradient(var(--bg) 0%, color-mix(in srgb, var(--bg) 84%, transparent) calc(100% - 34px), transparent);
-    -webkit-mask-image: linear-gradient(#000 calc(100% - 24px), transparent);
-    mask-image: linear-gradient(#000 calc(100% - 24px), transparent);
-  }
   /* il foglio di vetro flotta staccato dal bordo: niente prolungamento pieno sotto */
   [data-glass='on'] [data-vaul-drawer-direction='bottom']::after {
     display: none;
   }
-  [data-glass='off'] .edge-top,
   [data-glass='off'] .edge-bottom {
     display: none;
   }
@@ -491,7 +484,9 @@ select.ctl {
   font: 600 0.75rem/1 var(--font-sans);
   color: var(--ink-3);
   background: var(--surface-2);
-  box-shadow: inset 0 -1px 0 var(--line), 0 0 0 1px var(--line);
+  box-shadow:
+    inset 0 -1px 0 var(--line),
+    0 0 0 1px var(--line);
 }
 
 /* bersaglio di tocco: almeno 44 pt anche quando il disegno è più piccolo.
@@ -656,7 +651,37 @@ select.ctl {
    come UINavigationController: avanti la nuova entra da destra e la vecchia arretra del 30 % scurendosi;
    indietro il percorso inverso. Curva: molla senza rimbalzo (risposta 0,45 s). */
 :root {
-  --nav-spring: linear(0, 0.0324, 0.1084, 0.2048, 0.3072, 0.4069, 0.4991, 0.5816, 0.6536, 0.7154, 0.7676, 0.8113, 0.8475, 0.8773, 0.9016, 0.9213, 0.9373, 0.9501, 0.9605, 0.9687, 0.9753, 0.9805, 0.9847, 0.9879, 0.9905, 0.9926, 0.9942, 0.9955, 1);
+  --nav-spring: linear(
+    0,
+    0.0324,
+    0.1084,
+    0.2048,
+    0.3072,
+    0.4069,
+    0.4991,
+    0.5816,
+    0.6536,
+    0.7154,
+    0.7676,
+    0.8113,
+    0.8475,
+    0.8773,
+    0.9016,
+    0.9213,
+    0.9373,
+    0.9501,
+    0.9605,
+    0.9687,
+    0.9753,
+    0.9805,
+    0.9847,
+    0.9879,
+    0.9905,
+    0.9926,
+    0.9942,
+    0.9955,
+    1
+  );
   --nav-dur: 0.56s;
 }
 ::view-transition-old(root),
@@ -678,6 +703,46 @@ html[data-nav='pop']::view-transition-old(root) {
 html[data-nav='pop']::view-transition-new(root) {
   z-index: 1;
   animation: nav-from-back var(--nav-dur) var(--nav-spring) both;
+}
+/* schermate a foglio (nuova accettazione, modifica): salgono dal basso sopra la pagina, che resta ferma e si
+   scurisce appena; chiudendo scendono lungo lo stesso percorso */
+html[data-nav='cover']::view-transition-old(root) {
+  z-index: 1;
+  animation: nav-dim var(--nav-dur) var(--nav-spring) both;
+}
+html[data-nav='cover']::view-transition-new(root) {
+  z-index: 2;
+  animation: nav-in-up var(--nav-dur) var(--nav-spring) both;
+  box-shadow: 0 -8px 30px -6px rgba(0, 0, 0, 0.22);
+}
+html[data-nav='uncover']::view-transition-old(root) {
+  z-index: 2;
+  animation: nav-out-down var(--nav-dur) var(--nav-spring) both;
+  box-shadow: 0 -8px 30px -6px rgba(0, 0, 0, 0.22);
+}
+html[data-nav='uncover']::view-transition-new(root) {
+  z-index: 1;
+  animation: nav-undim var(--nav-dur) var(--nav-spring) both;
+}
+@keyframes nav-in-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes nav-out-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes nav-dim {
+  to {
+    filter: brightness(0.9);
+  }
+}
+@keyframes nav-undim {
+  from {
+    filter: brightness(0.9);
+  }
 }
 html[data-nav='fade']::view-transition-old(root),
 html[data-nav='fade']::view-transition-new(root) {

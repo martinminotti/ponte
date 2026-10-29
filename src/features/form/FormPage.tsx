@@ -4,7 +4,7 @@ import { scan, useScanner } from '@/platform/scanner';
 import { History, Mic, RotateCcw, ScanLine, ScanText } from 'lucide-react';
 import { PhotosSection } from '@/features/job/sections';
 import { toast } from 'sonner';
-import { ActionBar, BarButton, Page, TopBar } from '@/app/layout';
+import { ActionBar, Page, TopBar } from '@/app/layout';
 import { useJob, useJobs, useSettings } from '@/app/hooks';
 import { SERVIZI } from '@/domain/constants';
 import { fmtDate, fmtPlate, jobNumber, normPlateText, norm } from '@/domain/format';
@@ -18,6 +18,7 @@ import { useCanListen } from '@/features/voice/useVoice';
 import { clearSavedDraft, loadSavedDraft, savedLabel, storeDraft, type SavedDraft } from './draftStore';
 import { addPhoto, createJob, patchJob } from '@/data/repo';
 import { haptic } from '@/platform/native';
+import { viewTransitionsOn } from '@/platform/navigation';
 import { Button, Field, Input, Note, Segmented, Switch, TextArea, ToggleChip } from '@/ui/controls';
 import { PlateInput } from './PlateInput';
 import { Group, PendingPhotos, type Shot } from './parts';
@@ -287,21 +288,33 @@ function FormInner({ job }: { job?: Job }) {
   };
   saveRef.current = () => trySave(false);
 
+  /** chiude il modulo (X): si torna da dove si era venuti; la schermata a foglio scende */
+  const leave = () => {
+    const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+    if (idx > 0) nav(-1);
+    else nav(job ? `/job/${job.id}` : '/schede', { replace: true });
+  };
+  /**
+   * Esci dalla voce: tutto il foglio (voce e modulo sotto) scende e lascia vedere la schermata di prima.
+   * Con le View Transitions basta cambiare pagina: la fotografia di uscita contiene ancora la voce.
+   * Senza, prima scende la voce e poi si cambia pagina.
+   */
+  const exitVoice = () => {
+    if (viewTransitionsOn() && !matchMedia('(prefers-reduced-motion: reduce)').matches) return leave();
+    setVoice(false);
+    setTimeout(leave, 420);
+  };
+
   const errFor = (f: string) => errs[f] || (err?.field === f ? err.msg : undefined);
 
   return (
     <Page className="pb-28">
       <TopBar
-        back={job ? `/job/${job.id}` : '/'}
-        backLabel={editing ? 'Scheda' : 'Annulla'}
+        close
+        onBack={leave}
+        backLabel={editing ? 'Chiudi senza salvare' : 'Annulla l’accettazione'}
         title={editing ? 'Modifica dati' : 'Nuova accettazione'}
-        right={
-          canListen ? (
-            <BarButton label="Detta a voce" onClick={() => setVoice(true)}>
-              <Mic size={22} />
-            </BarButton>
-          ) : undefined
-        }
+        actions={canListen ? [{ id: 'voice', label: 'Detta a voce', icon: <Mic size={22} />, symbol: 'mic', onPress: () => setVoice(true) }] : []}
       />
       <form id="job-form" onSubmit={submit} noValidate className="mx-auto flex max-w-[760px] flex-col gap-3 px-4 pt-1">
         {restoreOffer && !voice && (
@@ -505,15 +518,7 @@ function FormInner({ job }: { job?: Job }) {
         host={host}
         editing={editing}
         onClose={() => setVoice(false)}
-        onExit={() => {
-          setVoice(false);
-          if (job) nav(`/job/${job.id}`, { replace: true });
-          else {
-            const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
-            if (idx > 0) nav(-1);
-            else nav('/schede', { replace: true });
-          }
-        }}
+        onExit={exitVoice}
         onEdit={editField}
         shots={job ? undefined : shots}
         onShots={job ? undefined : setShots}

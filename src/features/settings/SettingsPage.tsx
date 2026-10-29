@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Download, ImagePlus, Pipette, ShieldCheck, Sparkles, Trash2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { Page } from '@/app/layout';
+import { Page, SectionNotch } from '@/app/layout';
 import { useJobs, useSettings, useWide } from '@/app/hooks';
 import { BrandMark } from '@/app/Shell';
 import { GARANZIE, PRESETS, VATS } from '@/domain/constants';
@@ -22,6 +22,7 @@ export function SettingsPage() {
   const jobs = useJobs() || [];
   const wide = useWide();
   const logoIn = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const importIn = useRef<HTMLInputElement>(null);
   const [newW, setNewW] = useState('');
   const [pending, setPending] = useState<string | null>(null);
@@ -87,13 +88,16 @@ export function SettingsPage() {
 
   return (
     <Page className="pb-safe-bar lg:pb-10">
+      <SectionNotch title="Impostazioni" anchor={titleRef} />
       <div className="mx-auto max-w-[760px] px-4 lg:px-8 lg:pt-4 xl:max-w-[1240px]">
         {!wide && (
           <header className="pt-[calc(env(safe-area-inset-top,0px)+16px)]">
             <BrandMark />
           </header>
         )}
-        <h1 className="w-wide mt-5 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink lg:text-[2.125rem] lg:tracking-[-0.02em]">Impostazioni</h1>
+        <h1 ref={titleRef} className="w-wide mt-5 text-[1.625rem] font-semibold tracking-[-0.01em] text-ink lg:text-[2.125rem] lg:tracking-[-0.02em]">
+          Impostazioni
+        </h1>
         <p className="mt-1 text-[0.9375rem] text-ink-2">Le modifiche si salvano da sole.</p>
 
         <div className="mt-5 flex flex-col gap-3 xl:grid xl:grid-cols-2 xl:items-start xl:gap-4">
