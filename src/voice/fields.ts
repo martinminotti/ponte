@@ -77,9 +77,24 @@ export interface Change {
 export interface Issue {
   field: FieldKey;
   code: 'plate_unusual' | 'plate_bad' | 'vin_len' | 'phone_short' | 'km_range' | 'date_past' | 'date_bad' | 'vat_len' | 'vat_checksum' | 'cf_bad';
-  /** domanda o avviso per la persona */
+  /** domanda o avviso detto a voce */
   say: string;
+  /** versione corta per lo schermo: mentre si parla si legge poco */
+  show: string;
 }
+
+const ISSUE_SHOW: Record<Issue['code'], string> = {
+  plate_bad: 'Ripeti la targa',
+  plate_unusual: 'La targa è giusta?',
+  vin_len: 'Controlla il telaio',
+  km_range: 'Quanti chilometri?',
+  date_bad: 'Per quando?',
+  date_past: 'Per quando?',
+  phone_short: 'Ripeti il telefono',
+  vat_len: 'Ripeti la partita IVA',
+  vat_checksum: 'Ripeti la partita IVA',
+  cf_bad: 'Controlla il codice fiscale',
+};
 
 export interface Applied {
   draft: Draft;
@@ -189,7 +204,7 @@ const FIELDS_CLEARABLE: FieldKey[] = ['plate', 'vin', 'make', 'model', 'km', 'du
  */
 export function applyPatch(d0: Draft, p: VoicePatch, now = new Date()): Applied {
   const d: Draft = { ...d0, company: { ...d0.company }, services: [...d0.services] };
-  const issues: Issue[] = [];
+  const issues: Omit<Issue, 'show'>[] = [];
 
   for (const f of p.clear || []) {
     if (!FIELDS_CLEARABLE.includes(f)) continue;
@@ -302,7 +317,7 @@ export function applyPatch(d0: Draft, p: VoicePatch, now = new Date()): Applied 
   if (typeof p.request === 'string' && p.request.trim()) d.request = p.requestMode === 'replace' ? sentence(p.request) : appendText(d.request, p.request);
   if (typeof p.notes === 'string' && p.notes.trim()) d.notes = p.notesMode === 'replace' ? sentence(p.notes) : appendText(d.notes, p.notes);
 
-  return { draft: d, changes: diff(d0, d, now), issues };
+  return { draft: d, changes: diff(d0, d, now), issues: issues.map((i) => ({ ...i, show: ISSUE_SHOW[i.code] })) };
 }
 
 /* ------------------------------------------------------------------ cosa è cambiato */

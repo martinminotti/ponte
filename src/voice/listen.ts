@@ -352,7 +352,7 @@ class CloudTranscriber implements Transcriber {
           })
           .catch((e) => {
             h.partial('');
-            if ((e as { kind?: string }).kind !== 'cancelled') h.error(new SttError('network', 'Non riesco a trascrivere: controlla la connessione.'));
+            if ((e as { kind?: string }).kind !== 'cancelled') h.error(new SttError('network', 'Trascrizione non riuscita'));
           });
       };
       r.start(250);

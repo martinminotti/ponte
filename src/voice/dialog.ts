@@ -9,6 +9,8 @@ import type { Change, Issue } from './fields';
 export interface Ask {
   field: FieldKey;
   say: string;
+  /** versione corta per lo schermo: mentre si parla si legge poco */
+  show: string;
   /** obbligatorio per registrare */
   required: boolean;
 }
@@ -16,15 +18,16 @@ export interface Ask {
 /** quante volte si è già chiesto un campo: i facoltativi si chiedono una volta sola, gli obbligatori al massimo due */
 export type Asked = Partial<Record<FieldKey, number>>;
 
-const QUESTIONS: Record<string, string> = {
-  plate: 'Qual è la targa?',
-  cname: 'Come si chiama la ditta?',
-  cvat: 'Mi dici la partita IVA della ditta?',
-  owner: 'Di chi è il veicolo? Nome e cognome.',
-  phone: 'Il numero di telefono del cliente?',
-  request: 'Cosa c’è da fare?',
-  make: 'Che veicolo è? Marca e modello.',
-  dueDate: 'Per quando lo vuole?',
+/** [detto a voce, scritto sullo schermo] */
+const QUESTIONS: Record<string, [string, string]> = {
+  plate: ['Qual è la targa?', 'La targa?'],
+  cname: ['Come si chiama la ditta?', 'Il nome della ditta?'],
+  cvat: ['Mi dici la partita IVA della ditta?', 'La partita IVA?'],
+  owner: ['Di chi è il veicolo? Nome e cognome.', 'Di chi è il veicolo?'],
+  phone: ['Il numero di telefono del cliente?', 'Il telefono?'],
+  request: ['Cosa c’è da fare?', 'Cosa c’è da fare?'],
+  make: ['Che veicolo è? Marca e modello.', 'Che veicolo è?'],
+  dueDate: ['Per quando lo vuole?', 'Per quando?'],
 };
 
 /** La prossima cosa da chiedere, in ordine di importanza. null = ha tutto quello che serve. */
@@ -44,7 +47,7 @@ export function nextAsk(d: Draft, asked: Asked = {}): Ask | null {
   for (const [f, miss, req] of order) {
     if (!miss) continue;
     if (times(f) >= (req ? 2 : 1)) continue;
-    return { field: f, say: QUESTIONS[f], required: req };
+    return { field: f, say: QUESTIONS[f][0], show: QUESTIONS[f][1], required: req };
   }
   return null;
 }
@@ -104,33 +107,37 @@ export function confirmations(changes: Change[]): string {
   return sentenceCase(top.join(', ')) + (rest > 0 ? `, e ${rest === 1 ? 'un’altra cosa' : `altre ${rest} cose`}` : '') + '.';
 }
 
-export function compose(changes: Change[], issues: Issue[], ask: Ask | null, extra?: string): Reply {
+/** una frase con la sua versione corta per lo schermo */
+export type Said = { say: string; show: string };
+
+export const DONE: Said = { say: 'Ho tutto quello che serve. Aggiungi pure altro, oppure dì «registra».', show: 'Tutto pronto.' };
+
+export function compose(changes: Change[], issues: Issue[], ask: Ask | null, extra?: Said): Reply {
   const conf = confirmations(changes);
   // un dato da confermare o da ripetere viene prima della domanda successiva
   const issue = issues[0];
   if (issue) {
     const yesNo = /giust[ao]\?$/i.test(issue.say);
-    return { show: issue.say, say: [conf, issue.say].filter(Boolean).join(' '), expect: issue.field, yesNo };
+    return { show: issue.show, say: [conf, issue.say].filter(Boolean).join(' '), expect: issue.field, yesNo };
   }
-  if (extra) return { show: extra, say: [conf, extra].filter(Boolean).join(' '), expect: null, yesNo: /\?$/.test(extra) };
-  if (ask) return { show: ask.say, say: [conf, ask.say].filter(Boolean).join(' '), expect: ask.field };
-  const done = 'Ho tutto quello che serve. Aggiungi pure altro, oppure dì «registra».';
-  return { show: conf ? done : 'Ti ascolto.', say: conf ? `${conf} ${done}` : '', expect: null };
+  if (extra) return { show: extra.show, say: [conf, extra.say].filter(Boolean).join(' '), expect: null, yesNo: /\?$/.test(extra.say) };
+  if (ask) return { show: ask.show, say: [conf, ask.say].filter(Boolean).join(' '), expect: ask.field };
+  return { show: conf ? DONE.show : 'Ti ascolto.', say: conf ? `${conf} ${DONE.say}` : '', expect: null };
 }
 
 export function greeting(d: Draft, asked: Asked = {}): Reply {
   const ask = nextAsk(d, asked);
   const blank = !d.plate && !d.vin && !d.owner && !d.company.name;
-  if (blank) {
-    const show = 'Dimmi targa, cliente e cosa c’è da fare.';
-    return { show, say: 'Ciao. Dimmi pure: targa, cliente e cosa c’è da fare.', expect: 'plate' };
-  }
+  if (blank) return { show: 'Dimmi targa, cliente e lavori.', say: 'Ciao. Dimmi pure: targa, cliente e cosa c’è da fare.', expect: 'plate' };
   const who = d.client === 'azienda' ? d.company.name : d.owner;
   const intro = who ? `Ho già i dati di ${who}.` : 'Ho già qualche dato.';
-  if (!ask) return { show: 'Aggiungi pure altro, oppure dì «registra».', say: `${intro} Aggiungi pure altro, oppure dì «registra».`, expect: null };
-  return { show: ask.say, say: `${intro} ${ask.say}`, expect: ask.field };
+  if (!ask) return { show: DONE.show, say: `${intro} ${DONE.say}`, expect: null };
+  return { show: ask.show, say: `${intro} ${ask.say}`, expect: ask.field };
 }
 
-export const HELP = 'Parla come al banco: targa, nome del cliente, telefono e cosa c’è da fare. Se sbaglio dimmi «no, la targa è…» oppure «annulla». Quando hai finito dì «registra».';
+export const HELP: Said = {
+  say: 'Parla come al banco: targa, nome del cliente, telefono e cosa c’è da fare. Se sbaglio dimmi «no, la targa è…» oppure «annulla». Quando hai finito dì «registra».',
+  show: 'Dì targa, cliente e lavori. Poi «registra».',
+};
 
-export const NOT_UNDERSTOOD = 'Scusa, non ho capito. Puoi ripetere con calma?';
+export const NOT_UNDERSTOOD: Said = { say: 'Scusa, non ho capito. Puoi ripetere con calma?', show: 'Non ho capito.' };

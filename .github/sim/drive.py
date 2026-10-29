@@ -257,7 +257,7 @@ try:
     # accettazione a voce (microfono simulato: il simulatore non ha voce da riconoscere)
     if tap("A voce", exact=False, wait=2.0, kinds=("web:button",)):
         shot("12a-voce")
-        check(has("Accettazione a voce", exact=False), "a voce: schermata aperta")
+        check(has("Esci") and has("Apri il modulo"), "a voce: schermata aperta, in alto solo cerchi di vetro")
         check(not has("Oggi", kinds=NATIVE), "a voce: la barra nativa si fa da parte")
         if not has("Metti in pausa l’ascolto", exact=False):
             tap("Inizia a dettare", exact=False, wait=1.0, kinds=("web:button",))
@@ -265,6 +265,7 @@ try:
         shot("12b-voce-golf")
         check(has("Marco Bianchi", exact=False), "a voce: proprietario scritto nella scheda")
         check(has("335 812 4471", exact=False), "a voce: telefono scritto e formattato")
+        check(has("Registra accettazione", exact=False, kinds=("web:button",)), "a voce: «Registra» compare quando la scheda è pronta")
         say("fa rumore ai freni e c'è un graffio sul paraurti, la vuole venerdì")
         shot("12c-voce-lavori")
         check(has("Fa rumore ai freni", exact=False), "a voce: lavori richiesti")
@@ -272,7 +273,7 @@ try:
         say("annulla")
         check(not has("graffio sul paraurti", exact=False), "a voce: «annulla» toglie l'ultima modifica")
         shot("12d-voce-annulla")
-        tap("Modulo", exact=False, wait=1.4, kinds=("web:button",))
+        tap("Apri il modulo", wait=1.4, kinds=("web:button",))
         shot("12e-voce-modulo")
         check(has("Registra accettazione"), "dalla voce al modulo: stessa bozza, pronta da registrare")
         sh("xcrun", "simctl", "ui", UDID, "appearance", "dark")
@@ -280,7 +281,7 @@ try:
         tap("Detta a voce", exact=False, wait=1.6)
         shot("12f-voce-scuro")
         sh("xcrun", "simctl", "ui", UDID, "appearance", "light")
-        tap("Chiudi", exact=False, wait=1.6, kinds=("web:button",))  # esce dall'accettazione: la bozza resta da riprendere
+        tap("Esci", wait=1.6, kinds=("web:button",))  # esce dall'accettazione: la bozza resta da riprendere
         shot("12g-voce-chiusa")
         check(has("Nuova accettazione", kinds=NATIVE), "«Chiudi» torna all'elenco con la barra nativa")
         tap("Nuova accettazione", wait=1.2, kinds=NATIVE)

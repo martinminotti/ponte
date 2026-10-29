@@ -15,12 +15,12 @@ import { validate } from '@/domain/draft';
 import type { Job, VoiceSettings } from '@/domain/types';
 import { veic } from '@/domain/logic';
 import { aiReady } from './config';
-import { HELP, NOT_UNDERSTOOD, compose, greeting, missingForSave, nextAsk, type Asked, type Reply } from './dialog';
+import { HELP, NOT_UNDERSTOOD, compose, greeting, missingForSave, nextAsk, type Asked, type Reply, type Said } from './dialog';
 import { detectCommand, isFiller } from './commands';
 import { applyPatch, type Change, type Intent, type VoicePatch } from './fields';
 import { knownCompany, knownPerson, knownVehicle, knownVehicleQuestion, withKnownCompany, withKnownVehicle } from './known';
 import { isEmptyPatch, localInterpret } from './local';
-import { AiError, aiErrorText, interpretWithAi, type InterpretInput } from './providers';
+import { AiError, aiErrorShort, interpretWithAi, type InterpretInput } from './providers';
 import { vocabulary, type Turn } from './prompt';
 import { SttError, type Speaker, type Transcriber } from './listen';
 import { similarity, spellPhone } from './spoken';
@@ -128,7 +128,7 @@ export class VoiceSession {
       phase: 'idle',
       partial: '',
       level: 0,
-      reply: d.transcriber ? greeting(draft) : { show: 'Ascolto non disponibile.', say: '', expect: null },
+      reply: d.transcriber ? greeting(draft) : { show: 'Puoi scrivere qui sotto.', say: '', expect: null },
       lines: [],
       recent: [],
       recentAt: 0,
@@ -248,7 +248,7 @@ export class VoiceSession {
     const ms = this.d.idlePauseMs ?? 90_000;
     this.idleTimer = setTimeout(() => {
       if (this.listening && !this.busy) {
-        this.setReply({ show: 'Mi sono messo in pausa. Tocca il microfono per continuare.', say: '', expect: this.s.reply.expect });
+        this.setReply({ show: 'In pausa', say: '', expect: this.s.reply.expect });
         this.pause();
       }
     }, ms);
@@ -260,7 +260,7 @@ export class VoiceSession {
     this.wantListen = false;
     void this.d.transcriber?.stop().catch(() => {});
     if (err.kind === 'interrupted') {
-      this.set({ phase: 'paused', notice: 'Ascolto fermato da una chiamata o da un’altra app. Tocca il microfono per riprendere.' });
+      this.set({ phase: 'paused', notice: 'In pausa per una chiamata' });
       return;
     }
     if (err.kind === 'network' && this.d.transcriber?.kind === 'cloud') {
@@ -373,7 +373,7 @@ export class VoiceSession {
     if (changes.length) this.commit(next);
 
     // dati in archivio: ditta e cliente si completano da soli, il veicolo si propone
-    let extra: string | undefined;
+    let extra: Said | undefined;
     const ch = (f: FieldKey) => changes.some((c) => c.field === f);
     if (ch('cname') && next.client === 'azienda') {
       const c = knownCompany(next.company.name, this.d.host.jobs());
@@ -394,7 +394,7 @@ export class VoiceSession {
         // una domanda alla volta: se c'è un dato da ripetere, la proposta resta solo come riquadro con i pulsanti
         if (!applied.issues.length) {
           this.pending = { kind: 'vehicle', job: j };
-          extra = knownVehicleQuestion(j);
+          extra = { say: knownVehicleQuestion(j), show: 'Uso i suoi dati?' };
         }
       }
     }
@@ -403,7 +403,7 @@ export class VoiceSession {
       if (c && !this.declined.has('p:' + c.key)) {
         this.pending = { kind: 'person', name: c.name, phone: c.phone, wa: c.wa };
         this.declined.add('p:' + c.key);
-        extra = `${c.name} è già cliente, con il numero ${spellPhone(c.phone)}. Uso questo numero?`;
+        extra = { say: `${c.name} è già cliente, con il numero ${spellPhone(c.phone)}. Uso questo numero?`, show: 'Uso il suo numero?' };
       }
     }
     const issue = applied.issues[0];
@@ -419,8 +419,8 @@ export class VoiceSession {
       this.misses++;
       // la prima volta lo dice, poi lo scrive soltanto: non si insiste a voce
       const r: Reply = {
-        show: isEmptyPatch(patch) ? NOT_UNDERSTOOD : 'Niente di nuovo da scrivere.',
-        say: this.misses === 1 && isEmptyPatch(patch) ? NOT_UNDERSTOOD : '',
+        show: isEmptyPatch(patch) ? NOT_UNDERSTOOD.show : 'Niente di nuovo.',
+        say: this.misses === 1 && isEmptyPatch(patch) ? NOT_UNDERSTOOD.say : '',
         expect: this.s.reply.expect,
       };
       this.setReply(r);
@@ -430,7 +430,7 @@ export class VoiceSession {
     this.misses = 0;
     this.flash(changes);
     const ask = nextAsk(next, this.asked);
-    const r = compose(changes, applied.issues, ask, extra ?? patch.question);
+    const r = compose(changes, applied.issues, ask, extra ?? (patch.question ? { say: patch.question, show: patch.question } : undefined));
     if (extra) r.yesNo = true;
     this.setReply(r);
     this.turn(text, changes, r);
@@ -462,11 +462,11 @@ export class VoiceSession {
       if (err.kind === 'cancelled') return {};
       if (err.kind === 'auth' || err.kind === 'model' || err.kind === 'quota') {
         this.aiDead = true;
-        this.set({ mode: 'base', notice: `${aiErrorText(err)} Continuo con le regole di base: capisco targa, telefono e le frasi semplici. Il titolare può controllare in Impostazioni.` });
+        this.set({ mode: 'base', notice: `${aiErrorShort(err)} · modalità base` });
       } else {
         // rete o servizio lenti: per un minuto si va avanti senza AI, poi si riprova
         this.aiOffUntil = Date.now() + 60_000;
-        this.set({ mode: 'base', notice: `${aiErrorText(err)} Intanto capisco le cose semplici.` });
+        this.set({ mode: 'base', notice: `${aiErrorShort(err)} · modalità base` });
       }
       return local();
     } finally {
@@ -525,7 +525,7 @@ export class VoiceSession {
       if (p?.kind === 'confirm' || this.s.reply.expect === 'plate') {
         const d = host.getDraft();
         this.commit({ ...d, plate: '' });
-        const r: Reply = { show: 'Me la ripeti lettera per lettera?', say: 'Va bene. Me la ripeti lettera per lettera?', expect: 'plate' };
+        const r: Reply = { show: 'Ripeti la targa', say: 'Va bene. Me la ripeti lettera per lettera?', expect: 'plate' };
         this.setReply(r);
         return this.say(r.say);
       }
@@ -540,11 +540,11 @@ export class VoiceSession {
       return this.reply('Ho annullato l’ultima modifica.');
     }
     if (i === 'pause') {
-      this.setReply({ show: 'In pausa. Tocca il microfono quando vuoi continuare.', say: '', expect: this.s.reply.expect });
+      this.setReply({ show: 'In pausa', say: '', expect: this.s.reply.expect });
       return this.pause();
     }
     if (i === 'help') {
-      const r: Reply = { show: HELP, say: HELP, expect: this.s.reply.expect };
+      const r: Reply = { show: HELP.show, say: HELP.say, expect: this.s.reply.expect };
       this.setReply(r);
       return this.say(r.say);
     }
@@ -596,7 +596,7 @@ export class VoiceSession {
       const what = missingForSave(d);
       const ask = nextAsk(d, {});
       const r: Reply = {
-        show: `Per registrare mi manca ${what}.`,
+        show: `Manca ${what}`,
         say: [changes.length ? 'Fatto.' : '', `Per registrare mi manca ${what}.`, ask?.say].filter(Boolean).join(' '),
         expect: ask?.field ?? null,
       };
@@ -609,7 +609,7 @@ export class VoiceSession {
     this.set({ phase: 'saving' });
     const ok = await host.save().catch(() => false);
     if (!ok && !this.disposed) {
-      this.setReply({ show: 'Non sono riuscito a registrare. Controlla il modulo e riprova.', say: '', expect: null });
+      this.setReply({ show: 'Non registrata: controlla il modulo.', say: '', expect: null });
       this.set({ phase: 'paused' });
     }
   }
@@ -633,7 +633,7 @@ export class VoiceSession {
 
   /** l'app va in secondo piano o si apre un'altra schermata */
   background() {
-    if (this.listening || this.speaking) void this.pause('In pausa mentre eri fuori dall’app.');
+    if (this.listening || this.speaking) void this.pause();
   }
 }
 

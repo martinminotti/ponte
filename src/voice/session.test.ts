@@ -194,7 +194,7 @@ describe('sessione a voce', () => {
     await settle();
     expect(t.draft.plate).toBe('GK482TR');
     expect(t.s.state.mode).toBe('base');
-    expect(t.s.state.notice).toContain('chiave');
+    expect(t.s.state.notice?.toLowerCase()).toContain('chiave');
     t.mic.say('telefono 335 812 4471');
     await settle();
     expect(calls).toBe(1);
@@ -207,7 +207,7 @@ describe('sessione a voce', () => {
     t.mic.say('targa GK 482 TR');
     await settle();
     expect(t.draft.plate).toBe('GK482TR');
-    expect(t.s.state.notice).toContain('senza connessione');
+    expect(t.s.state.notice?.toLowerCase()).toContain('senza connessione');
   });
 
   it('frasi arrivate mentre il modello pensa: una richiesta sola', async () => {

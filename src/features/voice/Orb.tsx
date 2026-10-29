@@ -55,8 +55,9 @@ export function Orb({ phase, level, onPress, invite }: { phase: Phase; level: nu
         onClick={onPress}
         disabled={phase === 'saving' || phase === 'starting'}
         aria-label={ARIA[phase]}
-        className={`press relative grid size-[76px] place-items-center rounded-full shadow-[var(--shadow-accent),0_10px_30px_-10px_rgba(214,78,0,.55)] active:scale-[0.95] disabled:opacity-80 ${
-          off ? 'bg-surface-3 text-ink-2 shadow-none' : 'bg-accent text-on-accent'
+        // vetro colorato come il + della barra; fuori da iOS un pieno arancio
+        className={`glass press relative grid size-[76px] place-items-center rounded-full active:scale-[0.95] disabled:opacity-80 ${
+          off ? 'text-ink-2' : 'glass-tint text-on-accent noglass:bg-accent noglass:shadow-[var(--shadow-accent),0_10px_30px_-10px_rgba(214,78,0,.55)]'
         }`}
       >
         {phase === 'speaking' ? (

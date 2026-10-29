@@ -54,6 +54,23 @@ export function aiErrorText(e: AiError): string {
   }
 }
 
+/** avviso brevissimo per la schermata a voce (si legge mentre si parla) */
+export function aiErrorShort(e: AiError): string {
+  const t: Record<AiErrorKind, string> = {
+    offline: 'Senza connessione',
+    network: 'Servizio AI irraggiungibile',
+    timeout: 'Servizio AI lento',
+    auth: 'Chiave AI non valida',
+    quota: 'Credito AI esaurito',
+    model: 'Modello AI non disponibile',
+    request: 'Richiesta AI rifiutata',
+    server: 'Servizio AI in difficoltà',
+    bad_response: 'Risposta AI non valida',
+    cancelled: 'Richiesta annullata',
+  };
+  return t[e.kind];
+}
+
 /* ------------------------------------------------------------------ rete */
 
 type Fetch = typeof fetch;
