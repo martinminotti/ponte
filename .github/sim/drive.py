@@ -151,7 +151,11 @@ def enter_as_owner():
         if has("Titolare", exact=False, kinds=("web:button",)):
             break
         time.sleep(2)
-    tap("Titolare", exact=False, wait=2.5, kinds=("web:button",))
+    # il primo tocco subito dopo l'avvio a volte si perde: si riprova finché il benvenuto non se ne va
+    for _ in range(3):
+        tap("Titolare", exact=False, wait=2.5, kinds=("web:button",))
+        if not has("Chi usa Ponte?"):
+            break
 
 
 def launch(wait=6.0):
