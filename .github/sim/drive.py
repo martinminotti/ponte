@@ -240,7 +240,7 @@ try:
     if tap("Altre azioni", wait=1.2, kinds=NATIVE):
         shot("07b-menu")
         check(has("Elimina scheda", exact=False) and has("Modifica dati", exact=False), "•••: menu nativo con le azioni della scheda")
-        idb("ui", "tap", "40", "24")  # fuori dal menu (all'altezza della barra di stato, a sinistra): si chiude
+        idb("ui", "tap", "40", "640")  # fuori dal menu (in basso a sinistra): si chiude
         time.sleep(1.4)
         check(not has("Elimina scheda", exact=False), "il menu si chiude toccando fuori")
     check(has("Avvisa"), "scheda: «Avvisa» nella barra nativa")
