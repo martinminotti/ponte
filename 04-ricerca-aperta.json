@@ -1,0 +1,402 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "y": 0,
+   "width": 402,
+   "x": 0,
+   "height": 874
+  }
+ },
+ {
+  "label": "Targa, telaio, cliente, ditta, telefono",
+  "type": "TextField",
+  "frame": {
+   "width": 287.6666666666667,
+   "height": 40,
+   "x": 24,
+   "y": 72
+  }
+ },
+ {
+  "label": "Annulla",
+  "type": "Button",
+  "frame": {
+   "y": 70,
+   "x": 325.6666666666667,
+   "width": 64.33333333333331,
+   "height": 44
+  }
+ },
+ {
+  "label": "q",
+  "type": "Button",
+  "frame": {
+   "x": 4.666666666666657,
+   "width": 39.333333333333336,
+   "y": 590,
+   "height": 54
+  }
+ },
+ {
+  "label": "w",
+  "type": "Button",
+  "frame": {
+   "width": 39.66666666666666,
+   "y": 590,
+   "height": 54,
+   "x": 44
+  }
+ },
+ {
+  "label": "e",
+  "type": "Button",
+  "frame": {
+   "y": 590,
+   "height": 54,
+   "width": 39.33333333333334,
+   "x": 83.66666666666666
+  }
+ },
+ {
+  "label": "r",
+  "type": "Button",
+  "frame": {
+   "width": 39.66666666666667,
+   "x": 122.99999999999999,
+   "y": 590,
+   "height": 54
+  }
+ },
+ {
+  "label": "t",
+  "type": "Button",
+  "frame": {
+   "x": 162.66666666666666,
+   "height": 54,
+   "y": 590,
+   "width": 39.33333333333334
+  }
+ },
+ {
+  "label": "y",
+  "type": "Button",
+  "frame": {
+   "y": 590,
+   "x": 202,
+   "height": 54,
+   "width": 39.66666666666666
+  }
+ },
+ {
+  "label": "u",
+  "type": "Button",
+  "frame": {
+   "height": 54,
+   "width": 39.333333333333314,
+   "x": 241.66666666666669,
+   "y": 590
+  }
+ },
+ {
+  "label": "i",
+  "type": "Button",
+  "frame": {
+   "height": 54,
+   "y": 590,
+   "x": 281,
+   "width": 39.666666666666686
+  }
+ },
+ {
+  "label": "o",
+  "type": "Button",
+  "frame": {
+   "x": 320.66666666666663,
+   "width": 39.333333333333314,
+   "y": 590,
+   "height": 54
+  }
+ },
+ {
+  "label": "p",
+  "type": "Button",
+  "frame": {
+   "x": 360,
+   "y": 590,
+   "width": 39.666666666666686,
+   "height": 54
+  }
+ },
+ {
+  "label": "a",
+  "type": "Button",
+  "frame": {
+   "x": 24.333333333333318,
+   "y": 644,
+   "width": 39.33333333333334,
+   "height": 54
+  }
+ },
+ {
+  "label": "s",
+  "type": "Button",
+  "frame": {
+   "width": 39.66666666666666,
+   "x": 63.66666666666666,
+   "height": 54,
+   "y": 644
+  }
+ },
+ {
+  "label": "d",
+  "type": "Button",
+  "frame": {
+   "x": 103.33333333333331,
+   "height": 54,
+   "width": 39.33333333333334,
+   "y": 644
+  }
+ },
+ {
+  "label": "f",
+  "type": "Button",
+  "frame": {
+   "y": 644,
+   "width": 39.66666666666666,
+   "height": 54,
+   "x": 142.66666666666666
+  }
+ },
+ {
+  "label": "g",
+  "type": "Button",
+  "frame": {
+   "y": 644,
+   "height": 54,
+   "width": 39.33333333333334,
+   "x": 182.33333333333334
+  }
+ },
+ {
+  "label": "h",
+  "type": "Button",
+  "frame": {
+   "height": 54,
+   "y": 644,
+   "x": 221.66666666666666,
+   "width": 39.66666666666666
+  }
+ },
+ {
+  "label": "j",
+  "type": "Button",
+  "frame": {
+   "x": 261.33333333333326,
+   "y": 644,
+   "width": 39.333333333333314,
+   "height": 54
+  }
+ },
+ {
+  "label": "k",
+  "type": "Button",
+  "frame": {
+   "height": 54,
+   "x": 300.66666666666663,
+   "width": 39.666666666666686,
+   "y": 644
+  }
+ },
+ {
+  "label": "l",
+  "type": "Button",
+  "frame": {
+   "width": 39.333333333333314,
+   "x": 340.33333333333326,
+   "height": 54,
+   "y": 644
+  }
+ },
+ {
+  "label": "shift",
+  "type": "Button",
+  "frame": {
+   "height": 54,
+   "x": 4.666666666666657,
+   "y": 698,
+   "width": 51.333333333333336
+  }
+ },
+ {
+  "label": "z",
+  "type": "Button",
+  "frame": {
+   "width": 39.66666666666666,
+   "height": 54,
+   "x": 63.66666666666666,
+   "y": 698
+  }
+ },
+ {
+  "label": "x",
+  "type": "Button",
+  "frame": {
+   "x": 103.33333333333331,
+   "width": 39.33333333333334,
+   "y": 698,
+   "height": 54
+  }
+ },
+ {
+  "label": "c",
+  "type": "Button",
+  "frame": {
+   "height": 54,
+   "x": 142.66666666666666,
+   "y": 698,
+   "width": 39.66666666666666
+  }
+ },
+ {
+  "label": "v",
+  "type": "Button",
+  "frame": {
+   "x": 182.33333333333334,
+   "height": 54,
+   "y": 698,
+   "width": 39.33333333333334
+  }
+ },
+ {
+  "label": "b",
+  "type": "Button",
+  "frame": {
+   "x": 221.66666666666666,
+   "width": 39.66666666666666,
+   "height": 54,
+   "y": 698
+  }
+ },
+ {
+  "label": "n",
+  "type": "Button",
+  "frame": {
+   "y": 698,
+   "x": 261.33333333333326,
+   "width": 39.333333333333314,
+   "height": 54
+  }
+ },
+ {
+  "label": "m",
+  "type": "Button",
+  "frame": {
+   "y": 698,
+   "x": 300.66666666666663,
+   "width": 39.666666666666686,
+   "height": 54
+  }
+ },
+ {
+  "label": "delete",
+  "type": "Button",
+  "frame": {
+   "width": 51.666666666666686,
+   "height": 54,
+   "x": 348,
+   "y": 698
+  }
+ },
+ {
+  "label": "numbers",
+  "type": "Button",
+  "frame": {
+   "x": 4.666666666666657,
+   "y": 752,
+   "width": 98.66666666666667,
+   "height": 54
+  }
+ },
+ {
+  "label": " ",
+  "type": "Button",
+  "frame": {
+   "height": 54,
+   "x": 103.3333333333333,
+   "y": 752,
+   "width": 197.33333333333331
+  }
+ },
+ {
+  "label": "search",
+  "type": "Button",
+  "frame": {
+   "width": 99,
+   "y": 752,
+   "x": 300.66666666666663,
+   "height": 54
+  }
+ },
+ {
+  "label": "",
+  "type": "GenericElement",
+  "frame": {
+   "width": 402,
+   "y": 583,
+   "x": 0,
+   "height": 291
+  }
+ },
+ {
+  "label": "Emoji",
+  "type": "Button",
+  "frame": {
+   "y": 805.6989567998571,
+   "width": 68.0852958475086,
+   "x": 8.47726568115926,
+   "height": 68.73516393505099
+  }
+ },
+ {
+  "label": "Dictate",
+  "type": "Button",
+  "frame": {
+   "width": 68.08529584750863,
+   "y": 805.3656234665239,
+   "height": 68.73516393505099,
+   "x": 325.43743847133214
+  }
+ },
+ {
+  "label": "I GN 037 HD Accettato Peugeot 208 Chiara Valentini N. 0016 · oggi",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 134,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "I GK 482 TR In lavorazione Volkswagen Golf 2.0 TDI Marco Bianchi totale 355,50 € N. 0015 · ieri",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 307,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "RSM A4721 Pronto Fiat Panda Cross Giulia Terenzi da incassare 80,00 € N. 0014 · 2 giorni fa",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 480,
+   "width": 370,
+   "height": 161
+  }
+ }
+]

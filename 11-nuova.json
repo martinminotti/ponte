@@ -1,0 +1,202 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "y": 0,
+   "width": 402,
+   "height": 874,
+   "x": 0
+  }
+ },
+ {
+  "label": "Annulla l’accettazione",
+  "type": "Button",
+  "frame": {
+   "y": 68,
+   "width": 44,
+   "height": 44,
+   "x": 12
+  }
+ },
+ {
+  "label": "Nuova accettazione",
+  "type": "Button",
+  "frame": {
+   "width": 185.33333333333337,
+   "height": 44,
+   "x": 108.33333333333333,
+   "y": 68
+  }
+ },
+ {
+  "label": "Detta a voce",
+  "type": "Button",
+  "frame": {
+   "y": 68,
+   "height": 44,
+   "width": 44,
+   "x": 346
+  }
+ },
+ {
+  "label": "Registra accettazione",
+  "type": "Button",
+  "frame": {
+   "height": 56,
+   "y": 780,
+   "x": 14,
+   "width": 374
+  }
+ },
+ {
+  "label": "No",
+  "type": "web:button",
+  "frame": {
+   "x": 209.515625,
+   "y": 154,
+   "width": 47.953125,
+   "height": 40
+  }
+ },
+ {
+  "label": "Riprendi",
+  "type": "web:button",
+  "frame": {
+   "x": 263.46875,
+   "y": 154,
+   "width": 108.53125,
+   "height": 40
+  }
+ },
+ {
+  "label": "Privato",
+  "type": "web:button",
+  "frame": {
+   "x": 20,
+   "y": 242,
+   "width": 181,
+   "height": 44
+  }
+ },
+ {
+  "label": "Azienda",
+  "type": "web:button",
+  "frame": {
+   "x": 201,
+   "y": 242,
+   "width": 181,
+   "height": 44
+  }
+ },
+ {
+  "label": "Veicolo",
+  "type": "web:h3",
+  "frame": {
+   "x": 32,
+   "y": 318,
+   "width": 338,
+   "height": 24
+  }
+ },
+ {
+  "label": "Targa",
+  "type": "web:input",
+  "frame": {
+   "x": 76.5,
+   "y": 356,
+   "width": 261,
+   "height": 76
+  }
+ },
+ {
+  "label": "Targa italiana",
+  "type": "web:button",
+  "frame": {
+   "x": 36,
+   "y": 448,
+   "width": 165,
+   "height": 36
+  }
+ },
+ {
+  "label": "Targa San Marino",
+  "type": "web:button",
+  "frame": {
+   "x": 201,
+   "y": 448,
+   "width": 165,
+   "height": 36
+  }
+ },
+ {
+  "label": "",
+  "type": "web:input",
+  "frame": {
+   "x": 32,
+   "y": 530,
+   "width": 338,
+   "height": 52
+  }
+ },
+ {
+  "label": "",
+  "type": "web:input",
+  "frame": {
+   "x": 32,
+   "y": 624,
+   "width": 163,
+   "height": 52
+  }
+ },
+ {
+  "label": "",
+  "type": "web:input",
+  "frame": {
+   "x": 207,
+   "y": 624,
+   "width": 163,
+   "height": 52
+  }
+ },
+ {
+  "label": "",
+  "type": "web:input",
+  "frame": {
+   "x": 32,
+   "y": 714,
+   "width": 163,
+   "height": 52
+  }
+ },
+ {
+  "label": "",
+  "type": "web:input",
+  "frame": {
+   "x": 207,
+   "y": 714,
+   "width": 163,
+   "height": 52
+  }
+ },
+ {
+  "label": "Proprietario",
+  "type": "web:h3",
+  "frame": {
+   "x": 32,
+   "y": 810,
+   "width": 338,
+   "height": 24
+  }
+ },
+ {
+  "label": "",
+  "type": "web:input",
+  "frame": {
+   "x": 32,
+   "y": 874,
+   "width": 338,
+   "height": 52
+  }
+ }
+]

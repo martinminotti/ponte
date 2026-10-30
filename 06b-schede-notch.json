@@ -1,0 +1,142 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "y": 0,
+   "height": 874,
+   "width": 402,
+   "x": 0
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "Button",
+  "frame": {
+   "width": 93,
+   "y": 68,
+   "x": 154.66666666666666,
+   "height": 44
+  }
+ },
+ {
+  "label": "Cerca",
+  "type": "Button",
+  "frame": {
+   "x": 346,
+   "y": 68,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Oggi",
+  "type": "Button",
+  "frame": {
+   "height": 44,
+   "width": 76,
+   "y": 788,
+   "x": 18
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "Button",
+  "frame": {
+   "height": 44,
+   "x": 94,
+   "y": 788,
+   "width": 76
+  }
+ },
+ {
+  "label": "Fatture",
+  "type": "Button",
+  "frame": {
+   "width": 76,
+   "y": 788,
+   "height": 44,
+   "x": 170
+  }
+ },
+ {
+  "label": "Impostazioni",
+  "type": "Button",
+  "frame": {
+   "y": 788,
+   "width": 76,
+   "height": 44,
+   "x": 246
+  }
+ },
+ {
+  "label": "Nuova accettazione",
+  "type": "Button",
+  "frame": {
+   "width": 52,
+   "x": 336,
+   "height": 52,
+   "y": 784
+  }
+ },
+ {
+  "label": "I GN 037 HD Accettato Peugeot 208 Chiara Valentini N. 0016 · oggi",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": -2,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "I GK 482 TR In lavorazione Volkswagen Golf 2.0 TDI Marco Bianchi totale 355,50 € N. 0015 · ieri",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 171,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "RSM A4721 Pronto Fiat Panda Cross Giulia Terenzi da incassare 80,00 € N. 0014 · 2 giorni fa",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 344,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "I FX 903 LM Attesa ricambi BMW X3 xDrive20d Andrea Gasperoni totale 45,00 € N. 0013 · 2 giorni fa",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 517,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "I FA 118 GS Pronto Ford Transit Custom Trasporti Gualdi S.r.l. da fatturare 672,75 € N. 0012 · 3 giorni fa",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 690,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "I GB 650 NV Consegnato Renault Clio TCe Simone Righi da incassare 300,00 € N. 0011 · 4 giorni fa",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 863,
+   "width": 370,
+   "height": 161
+  }
+ }
+]

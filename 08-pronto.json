@@ -1,0 +1,202 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "height": 874,
+   "y": 0,
+   "x": 0,
+   "width": 402
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "Button",
+  "frame": {
+   "y": 68,
+   "height": 44,
+   "width": 44,
+   "x": 12
+  }
+ },
+ {
+  "label": "Scheda N. 0015",
+  "type": "Button",
+  "frame": {
+   "height": 44,
+   "width": 155.66666666666669,
+   "x": 123.33333333333333,
+   "y": 68
+  }
+ },
+ {
+  "label": "Altre azioni",
+  "type": "Button",
+  "frame": {
+   "width": 44,
+   "x": 346,
+   "y": 68,
+   "height": 44
+  }
+ },
+ {
+  "label": "Avvisa",
+  "type": "Button",
+  "frame": {
+   "y": 780,
+   "height": 56,
+   "width": 187,
+   "x": 14
+  }
+ },
+ {
+  "label": "Incassa 355,50 €",
+  "type": "Button",
+  "frame": {
+   "y": 780,
+   "height": 56,
+   "width": 177,
+   "x": 211
+  }
+ },
+ {
+  "label": "Volkswagen Golf 2.0 TDI",
+  "type": "web:h1",
+  "frame": {
+   "x": 32,
+   "y": 188,
+   "width": 338,
+   "height": 25
+  }
+ },
+ {
+  "label": "Chiama il cliente",
+  "type": "web:a",
+  "frame": {
+   "x": 274,
+   "y": 219,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Scrivi su WhatsApp",
+  "type": "web:button",
+  "frame": {
+   "x": 326,
+   "y": 219,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Dettagli, richieste e foto",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 279,
+   "width": 370,
+   "height": 48
+  }
+ },
+ {
+  "label": "Pronto da ritirare",
+  "type": "web:h2",
+  "frame": {
+   "x": 32,
+   "y": 361,
+   "width": 116.78125,
+   "height": 24
+  }
+ },
+ {
+  "label": "Avvisa che è pronto",
+  "type": "web:button",
+  "frame": {
+   "x": 198.171875,
+   "y": 355,
+   "width": 171.828125,
+   "height": 36
+  }
+ },
+ {
+  "label": "Contanti",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 495,
+   "width": 85.78125,
+   "height": 44
+  }
+ },
+ {
+  "label": "Carta / POS",
+  "type": "web:button",
+  "frame": {
+   "x": 125.78125,
+   "y": 495,
+   "width": 107.5625,
+   "height": 44
+  }
+ },
+ {
+  "label": "Bonifico",
+  "type": "web:button",
+  "frame": {
+   "x": 241.34375,
+   "y": 495,
+   "width": 84.125,
+   "height": 44
+  }
+ },
+ {
+  "label": "Assegno",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 547,
+   "width": 88.390625,
+   "height": 44
+  }
+ },
+ {
+  "label": "Altro",
+  "type": "web:button",
+  "frame": {
+   "x": 128.390625,
+   "y": 547,
+   "width": 60.359375,
+   "height": 44
+  }
+ },
+ {
+  "label": "Vedi il conto",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 607,
+   "width": 338,
+   "height": 48
+  }
+ },
+ {
+  "label": "Lavori, stato e operai · 3 voci",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 683,
+   "width": 370,
+   "height": 48
+  }
+ },
+ {
+  "label": "Avvisa",
+  "type": "web:button",
+  "frame": {
+   "x": 281.640625,
+   "y": 95.5,
+   "width": 67.359375,
+   "height": 32
+  }
+ }
+]

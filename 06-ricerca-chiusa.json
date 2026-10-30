@@ -1,0 +1,172 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "y": 0,
+   "x": 0,
+   "width": 402,
+   "height": 874
+  }
+ },
+ {
+  "label": "Oggi",
+  "type": "Button",
+  "frame": {
+   "x": 18,
+   "y": 778,
+   "height": 54,
+   "width": 73.66666666666667
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "Button",
+  "frame": {
+   "y": 778,
+   "x": 91.66666666666669,
+   "width": 73.33333333333331,
+   "height": 54
+  }
+ },
+ {
+  "label": "Fatture",
+  "type": "Button",
+  "frame": {
+   "y": 778,
+   "width": 73.66666666666669,
+   "height": 54,
+   "x": 165
+  }
+ },
+ {
+  "label": "Impostazioni",
+  "type": "Button",
+  "frame": {
+   "width": 73.33333333333334,
+   "height": 54,
+   "x": 238.66666666666666,
+   "y": 778
+  }
+ },
+ {
+  "label": "Nuova accettazione",
+  "type": "Button",
+  "frame": {
+   "x": 326,
+   "y": 774,
+   "width": 62,
+   "height": 62
+  }
+ },
+ {
+  "label": "La tua officina Imposta nome e logo",
+  "type": "web:a",
+  "frame": {
+   "x": 206,
+   "y": 78,
+   "width": 180,
+   "height": 44
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "web:h1",
+  "frame": {
+   "x": 0,
+   "y": 122,
+   "width": 402,
+   "height": 52
+  }
+ },
+ {
+  "label": "Targa, telaio, cliente, ditta, telefono",
+  "type": "web:input",
+  "frame": {
+   "x": 16,
+   "y": 186,
+   "width": 370,
+   "height": 52
+  }
+ },
+ {
+  "label": "Attive 7",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 250,
+   "width": 87.265625,
+   "height": 44
+  }
+ },
+ {
+  "label": "In officina 3",
+  "type": "web:button",
+  "frame": {
+   "x": 111.265625,
+   "y": 250,
+   "width": 113.046875,
+   "height": 44
+  }
+ },
+ {
+  "label": "Pronte 2",
+  "type": "web:button",
+  "frame": {
+   "x": 232.3125,
+   "y": 250,
+   "width": 93.390625,
+   "height": 44
+  }
+ },
+ {
+  "label": "Da incassare 2",
+  "type": "web:button",
+  "frame": {
+   "x": 333.703125,
+   "y": 250,
+   "width": 136.125,
+   "height": 44
+  }
+ },
+ {
+  "label": "Elimina esempi",
+  "type": "web:button",
+  "frame": {
+   "x": 248.546875,
+   "y": 330.5,
+   "width": 121.453125,
+   "height": 33
+  }
+ },
+ {
+  "label": "I GN 037 HD Accettato Peugeot 208 Chiara Valentini N. 0016 · oggi",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 388,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "I GK 482 TR In lavorazione Volkswagen Golf 2.0 TDI Marco Bianchi totale 355,50 € N. 0015 · ieri",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 561,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "RSM A4721 Pronto Fiat Panda Cross Giulia Terenzi da incassare 80,00 € N. 0014 · 2 giorni fa",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 734,
+   "width": 370,
+   "height": 161
+  }
+ }
+]

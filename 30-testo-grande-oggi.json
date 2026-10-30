@@ -1,0 +1,132 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "height": 874,
+   "y": 0,
+   "width": 402,
+   "x": 0
+  }
+ },
+ {
+  "label": "Oggi",
+  "type": "Button",
+  "frame": {
+   "y": 778,
+   "x": 18,
+   "width": 73.66666666666667,
+   "height": 54
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "Button",
+  "frame": {
+   "y": 778,
+   "x": 91.66666666666669,
+   "width": 73.33333333333331,
+   "height": 54
+  }
+ },
+ {
+  "label": "Fatture",
+  "type": "Button",
+  "frame": {
+   "x": 165,
+   "y": 778,
+   "height": 54,
+   "width": 73.66666666666669
+  }
+ },
+ {
+  "label": "Impostazioni",
+  "type": "Button",
+  "frame": {
+   "y": 778,
+   "width": 73.33333333333334,
+   "height": 54,
+   "x": 238.66666666666666
+  }
+ },
+ {
+  "label": "Nuova accettazione",
+  "type": "Button",
+  "frame": {
+   "y": 774,
+   "width": 62,
+   "height": 62,
+   "x": 326
+  }
+ },
+ {
+  "label": "La tua officina Imposta nome e logo",
+  "type": "web:a",
+  "frame": {
+   "x": 164.78125,
+   "y": 78,
+   "width": 217.46875,
+   "height": 54.328125
+  }
+ },
+ {
+  "label": "Buonanotte",
+  "type": "web:h1",
+  "frame": {
+   "x": 19.75,
+   "y": 184.484375,
+   "width": 248.859375,
+   "height": 44
+  }
+ },
+ {
+  "label": "Cerca targa, cliente, ditta",
+  "type": "web:input",
+  "frame": {
+   "x": 19.75,
+   "y": 243.296875,
+   "width": 362.5,
+   "height": 52
+  }
+ },
+ {
+  "label": "In officina ora 2 veicoli Accettato 1 In diagnosi 0 Attesa ricambi 1 In lavorazione 0",
+  "type": "web:button",
+  "frame": {
+   "x": 19.75,
+   "y": 315.046875,
+   "width": 362.5,
+   "height": 316.09375
+  }
+ },
+ {
+  "label": "Pronte da ritirare 2 FA 118 GS, A4721",
+  "type": "web:a",
+  "frame": {
+   "x": 19.75,
+   "y": 645.953125,
+   "width": 173.84375,
+   "height": 186.171875
+  }
+ },
+ {
+  "label": "Da incassare 380 € 2 schede",
+  "type": "web:a",
+  "frame": {
+   "x": 208.40625,
+   "y": 645.953125,
+   "width": 173.84375,
+   "height": 186.171875
+  }
+ },
+ {
+  "label": "Da fatturare 1.468 € 1 ditta, 2 lavori",
+  "type": "web:a",
+  "frame": {
+   "x": 19.75,
+   "y": 846.9375,
+   "width": 173.84375,
+   "height": 206.171875
+  }
+ }
+]

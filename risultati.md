@@ -1,0 +1,49 @@
+# Prova sul simulatore
+
+45 di 45 controlli superati
+
+- ✅ benvenuto: scelta titolare / dipendente
+- ✅ sul benvenuto la barra nativa non c'è
+- ✅ barra nativa: «Oggi»
+- ✅ barra nativa: «Schede»
+- ✅ barra nativa: «Fatture»
+- ✅ barra nativa: «Impostazioni»
+- ✅ barra nativa: «Nuova accettazione»
+- ✅ campo di ricerca in Schede
+- ✅ ricerca nativa agganciata in alto, con Annulla
+- ✅ durante la ricerca la barra in basso si fa da parte
+- ✅ risultato «Volkswagen Golf» mentre scrivo
+- ✅ le altre schede spariscono
+- ✅ chiudendo torna l'elenco completo
+- ✅ Schede scorsa: notch nativa con la lente
+- ✅ in cima la notch si ritira: resta il titolo grande
+- ✅ scheda: testata nativa con indietro e •••
+- ✅ scheda: titolo nella capsula di vetro
+- ✅ •••: menu nativo con le azioni della scheda
+- ✅ il menu si chiude toccando fuori
+- ✅ scheda: «Avvisa» nella barra nativa
+- ✅ scheda: «Segna: Pronto» nella barra nativa
+- ✅ a pronto la barra propone «Incassa»
+- ✅ a pronto il pagamento è in primo piano
+- ✅ con il foglio aperto la barra si fa da parte
+- ✅ chiuso il foglio la barra torna
+- ✅ incassato: consegnato, la barra propone «Invia il conto»
+- ✅ gesto dal bordo: torna all'elenco con la barra nativa
+- ✅ +: prima la scelta privato / azienda
+- ✅ +: accettazione a voce come prima scelta
+- ✅ a voce: schermata aperta, in alto solo cerchi di vetro
+- ✅ a voce: la barra nativa si fa da parte
+- ✅ a voce: nell'app si apre già in ascolto
+- ✅ a voce: proprietario scritto nella scheda
+- ✅ a voce: telefono scritto e formattato
+- ✅ a voce: «Registra» compare quando la scheda è pronta
+- ✅ a voce: lavori richiesti
+- ✅ a voce: note all'arrivo separate
+- ✅ a voce: «annulla» toglie l'ultima modifica
+- ✅ dalla voce al modulo: stessa bozza, pronta da registrare
+- ✅ «Chiudi» torna all'elenco con la barra nativa
+- ✅ poi cliente nuovo o che torna
+- ✅ modulo: «Registra accettazione» nella barra nativa
+- ✅ modulo a foglio: X nativa in alto a sinistra
+- ✅ modulo: propone di riprendere l'accettazione a voce non finita
+- ✅ sul simulatore (senza fotocamera) il pulsante della targa non compare

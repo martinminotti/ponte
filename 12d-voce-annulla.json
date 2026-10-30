@@ -1,0 +1,292 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "y": 0,
+   "width": 402,
+   "height": 874,
+   "x": 0
+  }
+ },
+ {
+  "label": "Annulla l’accettazione",
+  "type": "web:button",
+  "frame": {
+   "x": 12,
+   "y": 68,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Detta a voce",
+  "type": "web:button",
+  "frame": {
+   "x": 346,
+   "y": 68,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Nuova accettazione",
+  "type": "web:button",
+  "frame": {
+   "x": 100.5,
+   "y": 68,
+   "width": 201,
+   "height": 44
+  }
+ },
+ {
+  "label": "Privato",
+  "type": "web:button",
+  "frame": {
+   "x": 20,
+   "y": 126,
+   "width": 181,
+   "height": 44
+  }
+ },
+ {
+  "label": "Azienda",
+  "type": "web:button",
+  "frame": {
+   "x": 201,
+   "y": 126,
+   "width": 181,
+   "height": 44
+  }
+ },
+ {
+  "label": "Veicolo",
+  "type": "web:h3",
+  "frame": {
+   "x": 32,
+   "y": 202,
+   "width": 338,
+   "height": 24
+  }
+ },
+ {
+  "label": "Targa",
+  "type": "web:input",
+  "frame": {
+   "x": 76.5,
+   "y": 240,
+   "width": 261,
+   "height": 76
+  }
+ },
+ {
+  "label": "Targa italiana",
+  "type": "web:button",
+  "frame": {
+   "x": 36,
+   "y": 332,
+   "width": 165,
+   "height": 36
+  }
+ },
+ {
+  "label": "Targa San Marino",
+  "type": "web:button",
+  "frame": {
+   "x": 201,
+   "y": 332,
+   "width": 165,
+   "height": 36
+  }
+ },
+ {
+  "label": "Usa i dati",
+  "type": "web:button",
+  "frame": {
+   "x": 265.1875,
+   "y": 402,
+   "width": 90.8125,
+   "height": 40
+  }
+ },
+ {
+  "label": "",
+  "type": "web:input",
+  "frame": {
+   "x": 32,
+   "y": 498,
+   "width": 338,
+   "height": 52
+  }
+ },
+ {
+  "label": "Volkswagen",
+  "type": "web:input",
+  "frame": {
+   "x": 32,
+   "y": 592,
+   "width": 163,
+   "height": 52
+  }
+ },
+ {
+  "label": "Golf",
+  "type": "web:input",
+  "frame": {
+   "x": 207,
+   "y": 592,
+   "width": 163,
+   "height": 52
+  }
+ },
+ {
+  "label": "",
+  "type": "web:input",
+  "frame": {
+   "x": 32,
+   "y": 682,
+   "width": 163,
+   "height": 52
+  }
+ },
+ {
+  "label": "",
+  "type": "web:input",
+  "frame": {
+   "x": 207,
+   "y": 682,
+   "width": 163,
+   "height": 52
+  }
+ },
+ {
+  "label": "Proprietario",
+  "type": "web:h3",
+  "frame": {
+   "x": 32,
+   "y": 778,
+   "width": 338,
+   "height": 24
+  }
+ },
+ {
+  "label": "Marco Bianchi",
+  "type": "web:input",
+  "frame": {
+   "x": 32,
+   "y": 842,
+   "width": 338,
+   "height": 52
+  }
+ },
+ {
+  "label": "I GK 482 TR Volkswagen Golf Marco Bianchi 335 812 4471 Targa Cliente Lavori A voce Ti ascolto. Registra accettazione",
+  "type": "web:div",
+  "frame": {
+   "x": 0,
+   "y": 0,
+   "width": 402,
+   "height": 874
+  }
+ },
+ {
+  "label": "I GK 482 TR Volkswagen Golf",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 134,
+   "width": 370,
+   "height": 140
+  }
+ },
+ {
+  "label": "Marco Bianchi",
+  "type": "web:button",
+  "frame": {
+   "x": 24,
+   "y": 274,
+   "width": 354,
+   "height": 43
+  }
+ },
+ {
+  "label": "335 812 4471",
+  "type": "web:button",
+  "frame": {
+   "x": 24,
+   "y": 317,
+   "width": 354,
+   "height": 43
+  }
+ },
+ {
+  "label": "Esci",
+  "type": "web:button",
+  "frame": {
+   "x": 12,
+   "y": 70,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "A voce",
+  "type": "web:h2",
+  "frame": {
+   "x": 64,
+   "y": 80.5,
+   "width": 274,
+   "height": 23
+  }
+ },
+ {
+  "label": "Apri il modulo",
+  "type": "web:button",
+  "frame": {
+   "x": 346,
+   "y": 70,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Annulla l’ultima modifica",
+  "type": "web:button",
+  "frame": {
+   "x": 63,
+   "y": 673,
+   "width": 54,
+   "height": 54
+  }
+ },
+ {
+  "label": "Metti in pausa l’ascolto",
+  "type": "web:button",
+  "frame": {
+   "x": 163,
+   "y": 662,
+   "width": 76,
+   "height": 76
+  }
+ },
+ {
+  "label": "Foto all’arrivo",
+  "type": "web:button",
+  "frame": {
+   "x": 285,
+   "y": 673,
+   "width": 54,
+   "height": 54
+  }
+ },
+ {
+  "label": "Registra accettazione",
+  "type": "web:button",
+  "frame": {
+   "x": 18,
+   "y": 770,
+   "width": 366,
+   "height": 56
+  }
+ }
+]

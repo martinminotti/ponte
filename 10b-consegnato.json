@@ -1,0 +1,132 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "x": 0,
+   "y": 0,
+   "width": 402,
+   "height": 874
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "Button",
+  "frame": {
+   "y": 68,
+   "x": 12,
+   "height": 44,
+   "width": 44
+  }
+ },
+ {
+  "label": "Scheda N. 0015",
+  "type": "Button",
+  "frame": {
+   "y": 68,
+   "x": 123.33333333333333,
+   "height": 44,
+   "width": 155.66666666666669
+  }
+ },
+ {
+  "label": "Altre azioni",
+  "type": "Button",
+  "frame": {
+   "width": 44,
+   "height": 44,
+   "y": 68,
+   "x": 346
+  }
+ },
+ {
+  "label": "Avvisa",
+  "type": "Button",
+  "frame": {
+   "height": 56,
+   "x": 14,
+   "width": 189.66666666666666,
+   "y": 780
+  }
+ },
+ {
+  "label": "Invia il conto",
+  "type": "Button",
+  "frame": {
+   "y": 780,
+   "width": 174.33333333333337,
+   "height": 56,
+   "x": 213.66666666666663
+  }
+ },
+ {
+  "label": "Volkswagen Golf 2.0 TDI",
+  "type": "web:h1",
+  "frame": {
+   "x": 32,
+   "y": 188,
+   "width": 338,
+   "height": 25
+  }
+ },
+ {
+  "label": "Chiama il cliente",
+  "type": "web:a",
+  "frame": {
+   "x": 274,
+   "y": 219,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Scrivi su WhatsApp",
+  "type": "web:button",
+  "frame": {
+   "x": 326,
+   "y": 219,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Dettagli, richieste e foto",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 279,
+   "width": 370,
+   "height": 48
+  }
+ },
+ {
+  "label": "Invia il conto al cliente",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 447,
+   "width": 338,
+   "height": 56
+  }
+ },
+ {
+  "label": "Vedi il conto",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 563,
+   "width": 338,
+   "height": 48
+  }
+ },
+ {
+  "label": "Lavori, stato e operai · 3 voci",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 639,
+   "width": 370,
+   "height": 48
+  }
+ }
+]

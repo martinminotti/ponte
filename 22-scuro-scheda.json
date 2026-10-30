@@ -1,0 +1,252 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "height": 874,
+   "y": 0,
+   "width": 402,
+   "x": 0
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "Button",
+  "frame": {
+   "y": 68,
+   "x": 12,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Scheda N. 0016",
+  "type": "Button",
+  "frame": {
+   "y": 68,
+   "x": 123,
+   "width": 156,
+   "height": 44
+  }
+ },
+ {
+  "label": "Altre azioni",
+  "type": "Button",
+  "frame": {
+   "x": 346,
+   "y": 68,
+   "height": 44,
+   "width": 44
+  }
+ },
+ {
+  "label": "Avvisa",
+  "type": "Button",
+  "frame": {
+   "width": 178.66666666666666,
+   "height": 56,
+   "x": 14,
+   "y": 780
+  }
+ },
+ {
+  "label": "Segna: In diagnosi",
+  "type": "Button",
+  "frame": {
+   "y": 780,
+   "width": 185.33333333333337,
+   "height": 56,
+   "x": 202.66666666666663
+  }
+ },
+ {
+  "label": "Peugeot 208",
+  "type": "web:h1",
+  "frame": {
+   "x": 32,
+   "y": 188,
+   "width": 338,
+   "height": 25
+  }
+ },
+ {
+  "label": "Chiama il cliente",
+  "type": "web:a",
+  "frame": {
+   "x": 274,
+   "y": 219,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Scrivi su WhatsApp",
+  "type": "web:button",
+  "frame": {
+   "x": 326,
+   "y": 219,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Dettagli, richieste e foto",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 279,
+   "width": 370,
+   "height": 48
+  }
+ },
+ {
+  "label": "Stato lavorazione",
+  "type": "web:h3",
+  "frame": {
+   "x": 32,
+   "y": 359,
+   "width": 120.28125,
+   "height": 24
+  }
+ },
+ {
+  "label": "Accettato",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 401,
+   "width": 56.328125,
+   "height": 67
+  }
+ },
+ {
+  "label": "In diagnosi",
+  "type": "web:button",
+  "frame": {
+   "x": 88.328125,
+   "y": 401,
+   "width": 56.328125,
+   "height": 67
+  }
+ },
+ {
+  "label": "Attesa ricambi",
+  "type": "web:button",
+  "frame": {
+   "x": 144.65625,
+   "y": 401,
+   "width": 56.34375,
+   "height": 67
+  }
+ },
+ {
+  "label": "In lavorazione",
+  "type": "web:button",
+  "frame": {
+   "x": 201,
+   "y": 401,
+   "width": 56.328125,
+   "height": 67
+  }
+ },
+ {
+  "label": "Pronto",
+  "type": "web:button",
+  "frame": {
+   "x": 257.328125,
+   "y": 401,
+   "width": 56.328125,
+   "height": 67
+  }
+ },
+ {
+  "label": "Consegnato",
+  "type": "web:button",
+  "frame": {
+   "x": 313.65625,
+   "y": 401,
+   "width": 56.34375,
+   "height": 67
+  }
+ },
+ {
+  "label": "Cronologia",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 484,
+   "width": 93.21875,
+   "height": 21
+  }
+ },
+ {
+  "label": "Lavori eseguiti",
+  "type": "web:h3",
+  "frame": {
+   "x": 32,
+   "y": 549,
+   "width": 100.875,
+   "height": 24
+  }
+ },
+ {
+  "label": "Aggiungi voce",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 649,
+   "width": 163.421875,
+   "height": 48
+  }
+ },
+ {
+  "label": "Manodopera",
+  "type": "web:button",
+  "frame": {
+   "x": 203.421875,
+   "y": 649,
+   "width": 151.328125,
+   "height": 48
+  }
+ },
+ {
+  "label": "+ Tagliando completo",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 707,
+   "width": 163.640625,
+   "height": 36
+  }
+ },
+ {
+  "label": "+ Cambio olio e filtri",
+  "type": "web:button",
+  "frame": {
+   "x": 203.640625,
+   "y": 707,
+   "width": 151.734375,
+   "height": 36
+  }
+ },
+ {
+  "label": "+ Pastiglie freni anteriori",
+  "type": "web:button",
+  "frame": {
+   "x": 363.375,
+   "y": 707,
+   "width": 179.875,
+   "height": 36
+  }
+ },
+ {
+  "label": "0,00",
+  "type": "web:input",
+  "frame": {
+   "x": 32,
+   "y": 785,
+   "width": 220,
+   "height": 52
+  }
+ }
+]

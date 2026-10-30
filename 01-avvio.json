@@ -1,0 +1,112 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "x": 0,
+   "y": 0,
+   "width": 402,
+   "height": 874
+  }
+ },
+ {
+  "label": "Oggi",
+  "type": "Button",
+  "frame": {
+   "y": 778,
+   "x": 18,
+   "width": 73.66666666666667,
+   "height": 54
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "Button",
+  "frame": {
+   "y": 778,
+   "height": 54,
+   "width": 73.33333333333331,
+   "x": 91.66666666666669
+  }
+ },
+ {
+  "label": "Fatture",
+  "type": "Button",
+  "frame": {
+   "width": 73.66666666666669,
+   "x": 165,
+   "height": 54,
+   "y": 778
+  }
+ },
+ {
+  "label": "Impostazioni",
+  "type": "Button",
+  "frame": {
+   "x": 238.66666666666666,
+   "width": 73.33333333333334,
+   "height": 54,
+   "y": 778
+  }
+ },
+ {
+  "label": "Nuova accettazione",
+  "type": "Button",
+  "frame": {
+   "y": 774,
+   "x": 326,
+   "height": 62,
+   "width": 62
+  }
+ },
+ {
+  "label": "La tua officina Imposta nome e logo",
+  "type": "web:a",
+  "frame": {
+   "x": 206,
+   "y": 78,
+   "width": 180,
+   "height": 44
+  }
+ },
+ {
+  "label": "Buonanotte",
+  "type": "web:h1",
+  "frame": {
+   "x": 16,
+   "y": 164,
+   "width": 201.515625,
+   "height": 35
+  }
+ },
+ {
+  "label": "Nessun veicolo in archivio",
+  "type": "web:h3",
+  "frame": {
+   "x": 72.640625,
+   "y": 339,
+   "width": 256.71875,
+   "height": 27
+  }
+ },
+ {
+  "label": "Registra la prima accettazione",
+  "type": "web:button",
+  "frame": {
+   "x": 48.65625,
+   "y": 470,
+   "width": 304.671875,
+   "height": 56
+  }
+ },
+ {
+  "label": "Prova con dati di esempio",
+  "type": "web:button",
+  "frame": {
+   "x": 77.96875,
+   "y": 536,
+   "width": 246.0625,
+   "height": 48
+  }
+ }
+]

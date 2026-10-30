@@ -1,0 +1,42 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "y": 0,
+   "height": 874,
+   "width": 402,
+   "x": 0
+  }
+ },
+ {
+  "label": "Chi usa Ponte?",
+  "type": "web:h1",
+  "frame": {
+   "x": 20,
+   "y": 295,
+   "width": 362,
+   "height": 34
+  }
+ },
+ {
+  "label": "Titolare La giornata, gli incassi, le fatture e le impostazioni",
+  "type": "web:button",
+  "frame": {
+   "x": 20,
+   "y": 345,
+   "width": 362,
+   "height": 98
+  }
+ },
+ {
+  "label": "Dipendente Schede, lavori e accettazioni",
+  "type": "web:button",
+  "frame": {
+   "x": 20,
+   "y": 455,
+   "width": 362,
+   "height": 80
+  }
+ }
+]

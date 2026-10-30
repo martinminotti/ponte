@@ -1,0 +1,162 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "width": 402,
+   "y": 0,
+   "x": 0,
+   "height": 874
+  }
+ },
+ {
+  "label": "Oggi",
+  "type": "Button",
+  "frame": {
+   "x": 18,
+   "y": 778,
+   "width": 73.66666666666667,
+   "height": 54
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "Button",
+  "frame": {
+   "height": 54,
+   "width": 73.33333333333331,
+   "y": 778,
+   "x": 91.66666666666669
+  }
+ },
+ {
+  "label": "Fatture",
+  "type": "Button",
+  "frame": {
+   "height": 54,
+   "x": 165,
+   "y": 778,
+   "width": 73.66666666666669
+  }
+ },
+ {
+  "label": "Impostazioni",
+  "type": "Button",
+  "frame": {
+   "width": 73.33333333333334,
+   "y": 778,
+   "height": 54,
+   "x": 238.66666666666666
+  }
+ },
+ {
+  "label": "Nuova accettazione",
+  "type": "Button",
+  "frame": {
+   "y": 774,
+   "width": 62,
+   "height": 62,
+   "x": 326
+  }
+ },
+ {
+  "label": "La tua officina Imposta nome e logo",
+  "type": "web:a",
+  "frame": {
+   "x": 164.78125,
+   "y": 78,
+   "width": 217.46875,
+   "height": 54.328125
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "web:h1",
+  "frame": {
+   "x": 0,
+   "y": 132.328125,
+   "width": 402,
+   "height": 63.6875
+  }
+ },
+ {
+  "label": "Targa, telaio, cliente, ditta, telefono",
+  "type": "web:input",
+  "frame": {
+   "x": 19.75,
+   "y": 210.828125,
+   "width": 362.5,
+   "height": 52
+  }
+ },
+ {
+  "label": "Attive 6",
+  "type": "web:button",
+  "frame": {
+   "x": 19.75,
+   "y": 277.640625,
+   "width": 107.75,
+   "height": 54.328125
+  }
+ },
+ {
+  "label": "In officina 2",
+  "type": "web:button",
+  "frame": {
+   "x": 137.375,
+   "y": 277.640625,
+   "width": 139.578125,
+   "height": 54.328125
+  }
+ },
+ {
+  "label": "Pronte 2",
+  "type": "web:button",
+  "frame": {
+   "x": 286.828125,
+   "y": 277.640625,
+   "width": 115.3125,
+   "height": 54.328125
+  }
+ },
+ {
+  "label": "Elimina esempi",
+  "type": "web:button",
+  "frame": {
+   "x": 212.515625,
+   "y": 376.5625,
+   "width": 149.984375,
+   "height": 39.8125
+  }
+ },
+ {
+  "label": "I GN 037 HD Accettato Peugeot 208 Chiara Valentini N. 0016 · oggi",
+  "type": "web:a",
+  "frame": {
+   "x": 19.75,
+   "y": 446.15625,
+   "width": 362.5,
+   "height": 190.53125
+  }
+ },
+ {
+  "label": "RSM A4721 Pronto Fiat Panda Cross Giulia Terenzi da incassare 80,00 € N. 0014 · 2 giorni fa",
+  "type": "web:a",
+  "frame": {
+   "x": 19.75,
+   "y": 651.5,
+   "width": 362.5,
+   "height": 190.53125
+  }
+ },
+ {
+  "label": "I FX 903 LM Attesa ricambi BMW X3 xDrive20d Andrea Gasperoni totale 45,00 € N. 0013 · 2 giorni fa",
+  "type": "web:a",
+  "frame": {
+   "x": 19.75,
+   "y": 856.84375,
+   "width": 362.5,
+   "height": 190.53125
+  }
+ }
+]

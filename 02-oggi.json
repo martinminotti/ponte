@@ -1,0 +1,132 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "y": 0,
+   "x": 0,
+   "width": 402,
+   "height": 874
+  }
+ },
+ {
+  "label": "Oggi",
+  "type": "Button",
+  "frame": {
+   "y": 778,
+   "width": 73.66666666666667,
+   "x": 18,
+   "height": 54
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "Button",
+  "frame": {
+   "width": 73.33333333333331,
+   "height": 54,
+   "x": 91.66666666666669,
+   "y": 778
+  }
+ },
+ {
+  "label": "Fatture",
+  "type": "Button",
+  "frame": {
+   "y": 778,
+   "x": 165,
+   "width": 73.66666666666669,
+   "height": 54
+  }
+ },
+ {
+  "label": "Impostazioni",
+  "type": "Button",
+  "frame": {
+   "x": 238.66666666666666,
+   "width": 73.33333333333334,
+   "y": 778,
+   "height": 54
+  }
+ },
+ {
+  "label": "Nuova accettazione",
+  "type": "Button",
+  "frame": {
+   "width": 62,
+   "y": 774,
+   "height": 62,
+   "x": 326
+  }
+ },
+ {
+  "label": "La tua officina Imposta nome e logo",
+  "type": "web:a",
+  "frame": {
+   "x": 206,
+   "y": 78,
+   "width": 180,
+   "height": 44
+  }
+ },
+ {
+  "label": "Buonanotte",
+  "type": "web:h1",
+  "frame": {
+   "x": 16,
+   "y": 164,
+   "width": 201.515625,
+   "height": 35
+  }
+ },
+ {
+  "label": "Cerca targa, cliente, ditta",
+  "type": "web:input",
+  "frame": {
+   "x": 16,
+   "y": 211,
+   "width": 370,
+   "height": 52
+  }
+ },
+ {
+  "label": "In officina ora 3 veicoli Accettato 1 In diagnosi 0 Attesa ricambi 1 In lavorazione 1",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 279,
+   "width": 370,
+   "height": 255
+  }
+ },
+ {
+  "label": "Pronte da ritirare 2 FA 118 GS, A4721",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 546,
+   "width": 179,
+   "height": 150
+  }
+ },
+ {
+  "label": "Da incassare 380 € 2 schede",
+  "type": "web:a",
+  "frame": {
+   "x": 207,
+   "y": 546,
+   "width": 179,
+   "height": 150
+  }
+ },
+ {
+  "label": "Da fatturare 1.468 € 1 ditta, 2 lavori",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 708,
+   "width": 179,
+   "height": 150
+  }
+ }
+]

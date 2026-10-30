@@ -1,0 +1,182 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "y": 0,
+   "height": 874,
+   "width": 402,
+   "x": 0
+  }
+ },
+ {
+  "label": "La tua officina Imposta nome e logo",
+  "type": "web:a",
+  "frame": {
+   "x": 206,
+   "y": 78,
+   "width": 180,
+   "height": 44
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "web:h1",
+  "frame": {
+   "x": 0,
+   "y": 122,
+   "width": 402,
+   "height": 52
+  }
+ },
+ {
+  "label": "Targa, telaio, cliente, ditta, telefono",
+  "type": "web:input",
+  "frame": {
+   "x": 16,
+   "y": 186,
+   "width": 370,
+   "height": 52
+  }
+ },
+ {
+  "label": "Attive 6",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 250,
+   "width": 87.265625,
+   "height": 44
+  }
+ },
+ {
+  "label": "In officina 2",
+  "type": "web:button",
+  "frame": {
+   "x": 111.265625,
+   "y": 250,
+   "width": 113.046875,
+   "height": 44
+  }
+ },
+ {
+  "label": "Pronte 2",
+  "type": "web:button",
+  "frame": {
+   "x": 232.3125,
+   "y": 250,
+   "width": 93.390625,
+   "height": 44
+  }
+ },
+ {
+  "label": "Da incassare 2",
+  "type": "web:button",
+  "frame": {
+   "x": 333.703125,
+   "y": 250,
+   "width": 136.125,
+   "height": 44
+  }
+ },
+ {
+  "label": "Elimina esempi",
+  "type": "web:button",
+  "frame": {
+   "x": 248.546875,
+   "y": 330.5,
+   "width": 121.453125,
+   "height": 33
+  }
+ },
+ {
+  "label": "I GN 037 HD Accettato Peugeot 208 Chiara Valentini N. 0016 · oggi",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 388,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "RSM A4721 Pronto Fiat Panda Cross Giulia Terenzi da incassare 80,00 € N. 0014 · 2 giorni fa",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 561,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "I FX 903 LM Attesa ricambi BMW X3 xDrive20d Andrea Gasperoni totale 45,00 € N. 0013 · 2 giorni fa",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 734,
+   "width": 370,
+   "height": 161
+  }
+ },
+ {
+  "label": "Nuova accettazione Chi porta il veicolo? A voce Parla come al banco: compilo io la scheda Oppure scrivi tu: chi porta il",
+  "type": "web:div",
+  "frame": {
+   "x": 8,
+   "y": 383,
+   "width": 386,
+   "height": 451
+  }
+ },
+ {
+  "label": "Nuova accettazione",
+  "type": "web:h2",
+  "frame": {
+   "x": 28,
+   "y": 411,
+   "width": 208.046875,
+   "height": 29
+  }
+ },
+ {
+  "label": "Chiudi",
+  "type": "web:button",
+  "frame": {
+   "x": 342,
+   "y": 409,
+   "width": 36,
+   "height": 36
+  }
+ },
+ {
+  "label": "A voce Parla come al banco: compilo io la scheda",
+  "type": "web:button",
+  "frame": {
+   "x": 28,
+   "y": 481,
+   "width": 346,
+   "height": 100
+  }
+ },
+ {
+  "label": "Privato Conto lavori, nessuna fattura",
+  "type": "web:button",
+  "frame": {
+   "x": 28,
+   "y": 626,
+   "width": 346,
+   "height": 80
+  }
+ },
+ {
+  "label": "Azienda Dati per la fattura, IVA, conto di fine mese",
+  "type": "web:button",
+  "frame": {
+   "x": 28,
+   "y": 716,
+   "width": 346,
+   "height": 98
+  }
+ }
+]

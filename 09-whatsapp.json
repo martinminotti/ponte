@@ -1,0 +1,272 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "width": 402,
+   "x": 0,
+   "y": 0,
+   "height": 874
+  }
+ },
+ {
+  "label": "Schede",
+  "type": "web:button",
+  "frame": {
+   "x": 12,
+   "y": 68,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Altre azioni",
+  "type": "web:button",
+  "frame": {
+   "x": 346,
+   "y": 68,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Scheda N. 0015",
+  "type": "web:button",
+  "frame": {
+   "x": 117.5,
+   "y": 68,
+   "width": 167.046875,
+   "height": 44
+  }
+ },
+ {
+  "label": "Volkswagen Golf 2.0 TDI",
+  "type": "web:h1",
+  "frame": {
+   "x": 32,
+   "y": 188,
+   "width": 338,
+   "height": 25
+  }
+ },
+ {
+  "label": "Chiama il cliente",
+  "type": "web:a",
+  "frame": {
+   "x": 274,
+   "y": 219,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Scrivi su WhatsApp",
+  "type": "web:button",
+  "frame": {
+   "x": 326,
+   "y": 219,
+   "width": 44,
+   "height": 44
+  }
+ },
+ {
+  "label": "Dettagli, richieste e foto",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 279,
+   "width": 370,
+   "height": 48
+  }
+ },
+ {
+  "label": "Pronto da ritirare",
+  "type": "web:h2",
+  "frame": {
+   "x": 32,
+   "y": 361,
+   "width": 116.78125,
+   "height": 24
+  }
+ },
+ {
+  "label": "Avvisa che è pronto",
+  "type": "web:button",
+  "frame": {
+   "x": 198.171875,
+   "y": 355,
+   "width": 171.828125,
+   "height": 36
+  }
+ },
+ {
+  "label": "Contanti",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 495,
+   "width": 85.78125,
+   "height": 44
+  }
+ },
+ {
+  "label": "Carta / POS",
+  "type": "web:button",
+  "frame": {
+   "x": 125.78125,
+   "y": 495,
+   "width": 107.5625,
+   "height": 44
+  }
+ },
+ {
+  "label": "Bonifico",
+  "type": "web:button",
+  "frame": {
+   "x": 241.34375,
+   "y": 495,
+   "width": 84.125,
+   "height": 44
+  }
+ },
+ {
+  "label": "Assegno",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 547,
+   "width": 88.390625,
+   "height": 44
+  }
+ },
+ {
+  "label": "Altro",
+  "type": "web:button",
+  "frame": {
+   "x": 128.390625,
+   "y": 547,
+   "width": 60.359375,
+   "height": 44
+  }
+ },
+ {
+  "label": "Vedi il conto",
+  "type": "web:button",
+  "frame": {
+   "x": 32,
+   "y": 607,
+   "width": 338,
+   "height": 48
+  }
+ },
+ {
+  "label": "Lavori, stato e operai · 3 voci",
+  "type": "web:button",
+  "frame": {
+   "x": 16,
+   "y": 683,
+   "width": 370,
+   "height": 48
+  }
+ },
+ {
+  "label": "Avvisa il cliente WhatsApp a Marco Bianchi, 335 812 4471 Accettato In diagnosi Attesa ricambi In lavorazione Pronto Cons",
+  "type": "web:div",
+  "frame": {
+   "x": 8,
+   "y": 219,
+   "width": 386,
+   "height": 615
+  }
+ },
+ {
+  "label": "Avvisa il cliente",
+  "type": "web:h2",
+  "frame": {
+   "x": 28,
+   "y": 247,
+   "width": 267.28125,
+   "height": 29
+  }
+ },
+ {
+  "label": "Chiudi",
+  "type": "web:button",
+  "frame": {
+   "x": 342,
+   "y": 245,
+   "width": 36,
+   "height": 36
+  }
+ },
+ {
+  "label": "Accettato",
+  "type": "web:button",
+  "frame": {
+   "x": 28,
+   "y": 317,
+   "width": 89.046875,
+   "height": 36
+  }
+ },
+ {
+  "label": "In diagnosi",
+  "type": "web:button",
+  "frame": {
+   "x": 125.046875,
+   "y": 317,
+   "width": 96.734375,
+   "height": 36
+  }
+ },
+ {
+  "label": "Attesa ricambi",
+  "type": "web:button",
+  "frame": {
+   "x": 229.78125,
+   "y": 317,
+   "width": 118.734375,
+   "height": 36
+  }
+ },
+ {
+  "label": "In lavorazione",
+  "type": "web:button",
+  "frame": {
+   "x": 356.515625,
+   "y": 317,
+   "width": 115.828125,
+   "height": 36
+  }
+ },
+ {
+  "label": "Testo del messaggio",
+  "type": "web:textarea",
+  "frame": {
+   "x": 28,
+   "y": 369,
+   "width": 346,
+   "height": 288
+  }
+ },
+ {
+  "label": "Copia",
+  "type": "web:button",
+  "frame": {
+   "x": 28,
+   "y": 750,
+   "width": 114.234375,
+   "height": 56
+  }
+ },
+ {
+  "label": "Apri WhatsApp",
+  "type": "web:button",
+  "frame": {
+   "x": 152.234375,
+   "y": 750,
+   "width": 221.765625,
+   "height": 56
+  }
+ }
+]
