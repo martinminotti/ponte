@@ -96,16 +96,22 @@ run('Supabase vero', () => {
     const b = await device(s.sb, w as string, false);
     // avviso in tempo reale: B lo riceve quando A cambia la scheda
     let pinged = 0;
-    const off = b.transport.subscribe(w as string, () => pinged++);
+    let status = '';
+    const off = b.transport.subscribe(
+      w as string,
+      () => pinged++,
+      (st) => (status = st),
+    );
     await b.engine.syncNow();
     expect(await b.db.jobs.get(job.id)).toMatchObject({ plate: 'CI00001', owner: 'Cliente CI', number: 1 });
     expect((await b.engine.fetchPhoto(photo.id))?.size).toBe(6);
     expect((await b.repo.getSettings()).shop).toBe('Officina CI');
 
-    await new Promise((r) => setTimeout(r, 1500)); // il canale si collega
+    for (let i = 0; i < 60 && status !== 'SUBSCRIBED'; i++) await new Promise((r) => setTimeout(r, 250)); // il canale si collega
+    expect(status).toBe('SUBSCRIBED');
     await a.repo.patchJob(job.id, { status: 'pronto', km: '99' });
     await a.engine.syncNow();
-    for (let i = 0; i < 20 && !pinged; i++) await new Promise((r) => setTimeout(r, 250));
+    for (let i = 0; i < 40 && !pinged; i++) await new Promise((r) => setTimeout(r, 250));
     off();
     expect(pinged).toBeGreaterThan(0);
     await b.engine.syncNow();

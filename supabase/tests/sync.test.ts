@@ -28,7 +28,8 @@ class PgTransport implements Transport {
   }
   async upload(path: string, blob: Blob) {
     this.check();
-    await as(this.u, `insert into storage.objects (bucket_id, name) values ('photos', $1) on conflict (bucket_id, name) do nothing`, [path]);
+    const there = await as(this.u, `select 1 from storage.objects where bucket_id = 'photos' and name = $1`, [path]);
+    if (!there.length) await as(this.u, `insert into storage.objects (bucket_id, name) values ('photos', $1)`, [path]);
     files.set(path, blob);
   }
   async download(path: string) {

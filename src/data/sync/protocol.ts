@@ -67,7 +67,7 @@ export interface Transport {
   upload?(path: string, blob: Blob): Promise<void>;
   download?(path: string): Promise<Blob>;
   /** avviso in tempo reale che qualcosa è cambiato sul server */
-  subscribe?(workshop: string, onChange: () => void): () => void;
+  subscribe?(workshop: string, onChange: () => void, onStatus?: (status: string) => void): () => void;
 }
 
 /** senza rete o server irraggiungibile: si riprova più tardi, la coda resta */

@@ -44,13 +44,13 @@ export class SupabaseTransport implements Transport {
   }
 
   /** il server avvisa che qualcosa è cambiato; i dati veri si prendono poi con pull (che rispetta i permessi) */
-  subscribe(workshop: string, onChange: () => void) {
+  subscribe(workshop: string, onChange: () => void, onStatus?: (status: string) => void) {
     const ch = this.sb.channel(`officina:${workshop}`);
     for (const table of ['jobs', 'photos', 'members']) {
       ch.on('postgres_changes', { event: '*', schema: 'public', table, filter: `workshop_id=eq.${workshop}` }, onChange);
     }
     ch.on('postgres_changes', { event: '*', schema: 'public', table: 'workshops', filter: `id=eq.${workshop}` }, onChange);
-    ch.subscribe();
+    ch.subscribe((status) => onStatus?.(status));
     return () => {
       void this.sb.removeChannel(ch);
     };
