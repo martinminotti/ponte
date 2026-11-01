@@ -12,7 +12,8 @@ import { setSyncTarget } from '../changes';
 import { clearWorkshopData, getSettings, queueLocalArchive, saveSettings } from '../repo';
 import type { SyncEngine } from '../sync/engine';
 import type { SyncFatal } from '../sync/protocol';
-import { cloudAvailable } from './config';
+import { cloudAvailable, cloudConfig } from './config';
+import { setCloudAi } from '@/voice/config';
 import type { WorkshopRef } from './account';
 
 // client, motore e validazione si caricano solo con il cloud attivo (pacchetto a parte)
@@ -59,14 +60,24 @@ async function activate(ws: WorkshopRef) {
   engine = null;
   setSyncTarget({ workshop: ws.id, owner: ws.role === 'owner' });
   const { SyncEngine, SupabaseTransport, supabase } = await rt();
-  engine = new SyncEngine({ transport: new SupabaseTransport(supabase()), workshop: ws.id, onFatal, log });
+  const sb = supabase();
+  engine = new SyncEngine({ transport: new SupabaseTransport(sb), workshop: ws.id, onFatal, log });
   engine.start();
+  // assistente vocale incluso: il token della sessione (rinnovato da Supabase) apre la funzione "ai" del server
+  const ai = (token?: string) => setCloudAi(token ? { url: cloudConfig.url, key: cloudConfig.key, token, workshop: ws.id } : null);
+  ai((await sb.auth.getSession()).data.session?.access_token);
+  authOff?.();
+  authOff = sb.auth.onAuthStateChange((_e, s) => ai(s?.access_token)).data.subscription.unsubscribe;
 }
+let authOff: (() => void) | null = null;
 
 function deactivate() {
   engine?.stop();
   engine = null;
   setSyncTarget(null);
+  authOff?.();
+  authOff = null;
+  setCloudAi(null);
 }
 
 async function onFatal(e: SyncFatal) {

@@ -43,7 +43,23 @@ export function VoiceSettingsSection({ s }: { s: Settings }) {
     >
       <Switch checked={v.enabled} onChange={(on) => save({ enabled: on })} label="Accettazione a voce" description="Nel + e nel modulo compare il microfono: si detta la scheda parlando." />
 
-      {v.enabled && (
+      {v.enabled && v.connection === 'ponte' && (
+        <>
+          <Note icon={<Sparkles size={18} />}>
+            Assistente AI incluso con l’officina: capisce le frasi dette come al banco. Niente chiavi da inserire. Le frasi dettate e i campi della scheda in compilazione passano dal server di Ponte
+            al modello AI solo per essere interpretati, senza essere salvati.
+          </Note>
+          <Switch
+            checked={v.replies}
+            onChange={(on) => save({ replies: on })}
+            label="Risposte a voce"
+            description="Spente: l’assistente non parla, si guarda la scheda. Accese: conferma targa e telefono e chiede quello che manca."
+          />
+          {v.replies && <VoiceQuality />}
+        </>
+      )}
+
+      {v.enabled && v.connection !== 'ponte' && (
         <>
           <Field label="Chi capisce le frasi" htmlFor="v-provider" hint={OPTIONS.find((o) => o.v === v.provider)?.d}>
             <select

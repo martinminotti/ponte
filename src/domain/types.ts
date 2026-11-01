@@ -106,7 +106,8 @@ export interface VoiceSettings {
   enabled: boolean;
   provider: VoiceProvider;
   /** 'key' = chiave sul dispositivo; 'proxy' = la chiave sta su un server ponte (consigliato con più dispositivi) */
-  connection: 'key' | 'proxy';
+  /** ponte = assistente incluso con l'officina nel cloud (chiave sul server di Ponte, nessuna configurazione) */
+  connection: 'key' | 'proxy' | 'ponte';
   apiKey: string;
   /** modello; vuoto = quello consigliato per il fornitore */
   model: string;

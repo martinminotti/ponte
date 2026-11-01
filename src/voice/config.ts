@@ -18,8 +18,21 @@ export const DEFAULT_VOICE: VoiceSettings = {
   replies: false,
 };
 
+/**
+ * Assistente incluso con l'officina nel cloud: la chiave del modello sta sul server di Ponte (funzione "ai"),
+ * l'app ci arriva con il token della sessione. Lo imposta la sessione cloud; null = non disponibile.
+ */
+export type CloudAi = { url: string; key: string; token: string; workshop: string };
+let cloudAi: CloudAi | null = null;
+export function setCloudAi(c: CloudAi | null) {
+  cloudAi = c;
+}
+export const cloudAiOn = () => !!cloudAi;
+
 export function voiceSettings(s: Pick<Settings, 'voice'> | undefined): VoiceSettings {
-  return { ...DEFAULT_VOICE, ...(s?.voice || {}) };
+  const v = { ...DEFAULT_VOICE, ...(s?.voice || {}) };
+  // con l'officina nel cloud l'AI è quella di Ponte: niente fornitori né chiavi da scegliere
+  return cloudAi ? { ...v, provider: 'anthropic', connection: 'ponte', model: '', stt: 'device', apiKey: '', proxyUrl: '', proxyToken: '' } : v;
 }
 
 export interface ProviderInfo {
@@ -88,6 +101,7 @@ export const sttModelOf = (v: VoiceSettings) => (v.provider === 'base' ? '' : v.
 /** il fornitore scelto ha quello che serve per funzionare (chiave o proxy, modello, indirizzo) */
 export function aiReady(v: VoiceSettings): boolean {
   if (!usesAi(v)) return false;
+  if (v.connection === 'ponte') return !!cloudAi?.token;
   if (!modelOf(v)) return false;
   if (v.connection === 'proxy') return /^https:\/\/|^http:\/\/localhost/.test(v.proxyUrl.trim());
   if (!v.apiKey.trim()) return false;
@@ -107,6 +121,10 @@ export interface Endpoint {
 /** Dove mandare le richieste e con quali intestazioni, con la chiave sul dispositivo o attraverso il proxy. */
 export function endpoint(v: VoiceSettings): Endpoint {
   const p = v.provider as Exclude<VoiceProvider, 'base'>;
+  if (v.connection === 'ponte') {
+    const c = cloudAi;
+    return { base: `${c?.url ?? ''}/functions/v1/ai/anthropic`, headers: { Authorization: `Bearer ${c?.token ?? ''}`, apikey: c?.key ?? '', 'x-ponte-workshop': c?.workshop ?? '' } };
+  }
   if (v.connection === 'proxy') {
     const root = v.proxyUrl.trim().replace(/\/+$/, '');
     const path = p === 'openai' ? '/openai/v1' : p === 'anthropic' ? '/anthropic' : p === 'gemini' ? '/gemini' : '/compatible';
