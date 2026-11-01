@@ -297,3 +297,20 @@ describe('foto nello storage', () => {
     expect(r).toMatchObject({ ok: false, error: 'no_job' });
   });
 });
+
+describe('errori dell’app', () => {
+  it('si registrano con un tetto per persona; niente officine altrui', async () => {
+    const { owner, w } = await shop();
+    const other = await shop();
+    const items = Array.from({ length: 25 }, (_, i) => ({ kind: 'error', message: `boom ${i}`, version: '2.1.0', platform: 'ios', workshop: i === 0 ? other.w : w, context: { route: '/job/x' } }));
+    expect(await rpc(owner, 'report_errors', { p_items: items })).toBe(20);
+    const rows = (await db().query('select workshop_id, message from public.client_errors where user_id = $1 order by id', [owner.id])).rows;
+    expect(rows).toHaveLength(20);
+    expect(rows[0].workshop_id).toBeNull(); // officina di cui non è membro: non si registra
+    expect(rows[1].workshop_id).toBe(w);
+    for (let i = 0; i < 3; i++) await rpc(owner, 'report_errors', { p_items: items });
+    expect(Number((await db().query('select count(*) from public.client_errors where user_id = $1', [owner.id])).rows[0].count)).toBe(60);
+    expect(await rejects(as(owner, 'select * from public.client_errors'))).toMatch(/permission denied/);
+    expect(await rpc(null as never, 'report_errors', { p_items: items }).catch((e: Error) => e.message)).toMatch(/permission denied/);
+  });
+});

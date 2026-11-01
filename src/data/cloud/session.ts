@@ -53,7 +53,11 @@ export function useCloud(): CloudState {
 }
 
 let engine: SyncEngine | null = null;
-const log = (msg: string, data?: unknown) => console.info('[sync]', msg, data ?? '');
+const log = (msg: string, data?: unknown) => {
+  console.info('[sync]', msg, data ?? '');
+  // rifiuti del server e dati malformati: da guardare (gli errori di rete no, sono normali)
+  if (/rifiutata|malformat/.test(msg)) void import('./errors').then((m) => m.reportError(new Error(msg), 'sync', { data: JSON.parse(JSON.stringify(data ?? null)) }));
+};
 
 async function activate(ws: WorkshopRef) {
   engine?.stop();

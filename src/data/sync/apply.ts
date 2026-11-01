@@ -65,7 +65,8 @@ export async function applyPull(res: PullResponse, workshop: string, log: Log = 
     for (const raw of res.jobs) {
       const p = PulledJob.safeParse(raw);
       if (!p.success) {
-        log('scheda malformata dal server, scartata', { raw, issues: p.error.issues });
+        // niente contenuto della scheda nel registro: solo l'id e cosa non va
+        log('scheda malformata dal server, scartata', { id: (raw as { id?: unknown })?.id, issues: p.error.issues.map((i) => `${i.path.join('.')}: ${i.code}`) });
         continue;
       }
       await putServerJob(p.data, pending.get(`job:${p.data.id}`) || []);
@@ -75,7 +76,7 @@ export async function applyPull(res: PullResponse, workshop: string, log: Log = 
     for (const raw of res.photos) {
       const p = PulledPhoto.safeParse(raw);
       if (!p.success) {
-        log('foto malformata dal server, scartata', { raw });
+        log('foto malformata dal server, scartata', { id: (raw as { id?: unknown })?.id });
         continue;
       }
       const f = p.data;

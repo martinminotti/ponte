@@ -11,6 +11,9 @@ import { preload, screenRoutes } from './routes';
 import { UpdatePrompt } from './UpdatePrompt';
 import { installNavTransitions } from '@/platform/navigation';
 import { bootCloud, useCloud } from '@/data/cloud/session';
+import { installErrorReporting, reportError } from '@/data/cloud/errors';
+
+installErrorReporting();
 // l'accesso al cloud (e il client Supabase) si scarica solo se serve
 const AccountGate = lazy(() => import('@/features/account/AccountGate').then((m) => ({ default: m.AccountGate })));
 import { setDeviceLocalOnly, useDevice } from './device';
@@ -26,8 +29,8 @@ class Boundary extends Component<{ children: ReactNode }, { err: Error | null }>
   static getDerivedStateFromError(err: Error) {
     return { err };
   }
-  componentDidCatch(err: Error) {
-    console.error('[Ponte]', err);
+  componentDidCatch(err: Error, info: { componentStack?: string | null }) {
+    reportError(err, 'render', { component: info.componentStack?.slice(0, 600) });
   }
   render() {
     if (!this.state.err) return this.props.children;

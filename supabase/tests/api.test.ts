@@ -73,7 +73,36 @@ async function device(sb: SupabaseClient, workshop: string, owner = true) {
   return { db, repo, engine, transport };
 }
 
-const base = { owner: '', plateCountry: 'I' as const, vin: '', make: 'Fiat', model: 'Panda', km: '', dueDate: '', client: 'privato' as const, company: { name: '', vat: '', cf: '', addr: '', sdi: '' }, phone: '', wa: true, services: [], tyres: '', request: '', notes: '', workers: [], photoIds: [], items: [], deposit: 0, vatRate: 22, vatIncl: true, billing: 'mensile' as const, invoiced: false, invoiceNo: '', paid: false, payMethod: '', warrantyMonths: 12, warrantyNote: '' };
+const base = {
+  owner: '',
+  plateCountry: 'I' as const,
+  vin: '',
+  make: 'Fiat',
+  model: 'Panda',
+  km: '',
+  dueDate: '',
+  client: 'privato' as const,
+  company: { name: '', vat: '', cf: '', addr: '', sdi: '' },
+  phone: '',
+  wa: true,
+  services: [],
+  tyres: '',
+  request: '',
+  notes: '',
+  workers: [],
+  photoIds: [],
+  items: [],
+  deposit: 0,
+  vatRate: 22,
+  vatIncl: true,
+  billing: 'mensile' as const,
+  invoiced: false,
+  invoiceNo: '',
+  paid: false,
+  payMethod: '',
+  warrantyMonths: 12,
+  warrantyNote: '',
+};
 
 run('Supabase vero', () => {
   it('titolare e dipendente: accesso con codice, invito, schede e foto sincronizzate, avvisi in tempo reale', async () => {
