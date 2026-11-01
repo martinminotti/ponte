@@ -55,6 +55,19 @@ jobs:
         run: npx supabase db lint --level warning --fail-on error
       - name: Test del database, della sincronizzazione e delle API
         run: npm run test:db
+      - name: App nel browser contro Supabase locale (accesso, officina, invito, sincronizzazione)
+        run: |
+          VITE_SUPABASE_URL="$SUPABASE_API_URL" VITE_SUPABASE_KEY="$SUPABASE_KEY" npm run build
+          (npx vite preview --port 4173 --strictPort > preview.log 2>&1 &)
+          npm i --no-save playwright@1
+          npx playwright install --with-deps chromium
+          APP_URL=http://localhost:4173/ node e2e/cloud.mjs
+      - if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: e2e-cloud
+          path: e2e/out
+          if-no-files-found: ignore
       - if: failure()
         name: Registri dei servizi
         run: |

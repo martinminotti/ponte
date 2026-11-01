@@ -9,3 +9,4 @@ coverage/
 
 # generati da brand/rasterize.mjs (npm run brand:icons)
 assets/
+e2e/out/
