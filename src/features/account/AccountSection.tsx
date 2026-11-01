@@ -76,7 +76,8 @@ export function AccountSection() {
   const loadInvites = useCallback(() => {
     if (owner) listInvites(w.id).then(setInvites, () => {});
   }, [owner, w.id]);
-  useEffect(loadInvites, [loadInvites]);
+  // quando qualcuno entra (la squadra cambia) il suo invito non è più in attesa
+  useEffect(loadInvites, [loadInvites, members.length]);
   const open = invites.filter((i) => !i.usedAt && !i.revokedAt && new Date(i.expiresAt).getTime() > Date.now());
 
   const act = async (fn: () => Promise<unknown>, ok?: string) => {

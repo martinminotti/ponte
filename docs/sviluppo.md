@@ -19,7 +19,12 @@ npm run typecheck    # TypeScript senza emettere file
 npm run build        # build di produzione in dist/ con service worker
 npm run preview      # serve dist/ su http://localhost:4173
 npm run check        # lint + typecheck + test + build, come la CI
+npm run db:local     # Postgres di prova in locale (senza Docker) con le migrazioni di supabase/
+npm run test:db      # database, regole d'accesso e sincronizzazione su Postgres vero
+npx supabase start   # (con Docker) Supabase completo in locale; poi copia URL e chiave in .env.local
 ```
+
+Senza `VITE_SUPABASE_URL` / `VITE_SUPABASE_KEY` l'app funziona tutta sul dispositivo. L'architettura (livelli, archivio locale, sincronizzazione, server) è descritta in [architettura.md](architettura.md); la messa in linea del cloud in [cloud.md](cloud.md).
 
 Al primo avvio l'app propone schede di esempio; si eliminano da *Schede* → *Elimina esempi*.
 
@@ -42,13 +47,15 @@ Il router usa l'hash (`#/job/…`): funziona su qualunque hosting statico senza 
 ```
 src/
   domain/      logica pura e testata: tipi, IVA e saldo, filtri, mensile, cruscotto, WhatsApp, formati
-  data/        IndexedDB (Dexie), repository, migrazione dalla bozza, backup, dati di esempio
+  data/        IndexedDB (Dexie), repository e coda delle modifiche, sincronizzazione (sync/), cloud Supabase (cloud/), backup
   pdf/         conto singolo e conto mensile
   platform/    web/nativo: condivisione, salvataggio, aptica, immagini, colore officina
   ui/          componenti: targa, controlli, ricerca, stati, fogli, marchio
   app/         shell, navigazione, layout, hook, aggiornamenti
-  features/    schermate: dashboard (Oggi), list, form, job, doc, month, settings
+  features/    schermate: dashboard (Oggi), list, form, job, doc, month, settings, account, voice
   styles/      token di design, tema, vetro liquido
+supabase/      migrazioni SQL, funzioni del server (ai, account), test del database e della sincronizzazione
+e2e/           prova dell'app nel browser contro Supabase (CI)
 brand/         sorgenti del marchio, guida di stile, generatori
 android/ ios/  progetti nativi Capacitor
 public/        icone PWA, intestazioni HTTP

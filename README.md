@@ -80,8 +80,14 @@ Ponte mette tutto questo in tasca. Un'auto si accetta in trenta secondi scrivend
 - **IVA** al 22, 17, 10, 4 % o esente, importi IVA inclusa o esclusa.
 - **Fatture mensili**: i lavori di ogni ditta si raccolgono nel mese in un unico conto; fattura emessa e incasso si segnano in un colpo.
 
+### Tutta l'officina, su ogni dispositivo
+- **Account dell'officina**: si entra con l'email e un codice di 6 cifre, senza password. Il titolare crea l'officina e invita i dipendenti con un codice; ognuno lavora dal suo telefono.
+- **Sincronizzazione** in tempo reale fra telefoni, tablet e computer, campo per campo: due persone sulla stessa scheda non si cancellano a vicenda. Numeri di scheda unici assegnati dal server.
+- **Dati al sicuro** in UE (Supabase, Francoforte): un telefono rotto o perso non porta via niente. Ogni officina vede solo i suoi dati, per regole del database.
+- **Assistente vocale incluso**: con l'officina nel cloud l'AI è già collegata, nessuna chiave da inserire.
+
 ### Pensato per l'uso vero
-- **Offline sempre**: l'archivio vive sul dispositivo, nessun account, nessun canone.
+- **Offline sempre**: si lavora anche senza rete, le modifiche partono appena torna. Chi vuole può usare Ponte solo sul dispositivo, senza account.
 - **Annulla** su eliminazioni, voci e incassi. **Backup** completo con foto, promemoria settimanale.
 - **Vetro liquido su iOS**, tema chiaro e scuro, vibrazione aptica, tasto indietro su Android.
 - **Tablet e desktop** con cruscotto a tutta larghezza, archivio e scheda affiancati, scorciatoie da tastiera (<kbd>⌘K</kbd> cerca, <kbd>N</kbd> nuova accettazione, <kbd>↑</kbd> <kbd>↓</kbd> scorre le schede).
@@ -143,6 +149,8 @@ Apri http://localhost:5173: al primo avvio Ponte propone alcune schede di esempi
 |---|---|
 | [docs/sviluppo.md](docs/sviluppo.md) | Stack, struttura, modello dei dati, marchio, sicurezza, backend |
 | [docs/rilascio.md](docs/rilascio.md) | Pubblicazione web, TestFlight da GitHub Actions, Android |
+| [docs/architettura.md](docs/architettura.md) | Livelli, archivio locale, sincronizzazione offline-first, server Supabase, test |
+| [docs/cloud.md](docs/cloud.md) | Mettere in linea il cloud: progetto Supabase, variabili, email, chiave AI |
 | [brand/STYLEGUIDE.md](brand/STYLEGUIDE.md) | Marchio, colori, tipografia, voce, componenti |
 
 ## Dati e privacy
