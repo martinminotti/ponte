@@ -20,6 +20,7 @@ import { FILTRI, type FilterKey } from '@/domain/constants';
 import { eur } from '@/domain/format';
 import { daSaldare, inFilter, matchJob } from '@/domain/logic';
 import { seedDemo } from '@/data/demo';
+import { useCloud } from '@/data/cloud/session';
 import { deleteDemo } from '@/data/repo';
 import { Button, Chip, EmptyState } from '@/ui/controls';
 import { Plate } from '@/ui/Plate';
@@ -87,6 +88,8 @@ export function ListPage() {
   const list = useMemo(() => (jobs || []).filter((j) => (q.trim() ? true : inFilter(j, filter)) && matchJob(j, q)), [jobs, filter, q]);
   const dueTotal = useMemo(() => list.reduce((t, j) => t + daSaldare(j), 0), [list]);
   const demoN = (jobs || []).filter((j) => j.demo).length;
+  // con l'officina nel cloud niente schede di esempio: finirebbero nell'archivio di tutti
+  const linked = useCloud().phase === 'linked';
   const qq = q.trim();
   const looksPlate = /^[a-z0-9 ]{4,10}$/i.test(qq) && /\d/.test(qq);
 
@@ -220,9 +223,11 @@ export function ListPage() {
                 <Button variant="primary" size="lg" icon={<Plus size={20} strokeWidth={2.6} />} onClick={newJob}>
                   Registra la prima accettazione
                 </Button>
-                <Button variant="ghost" icon={<Sparkles size={18} />} onClick={loadDemo}>
-                  Prova con dati di esempio
-                </Button>
+                {!linked && (
+                  <Button variant="ghost" icon={<Sparkles size={18} />} onClick={loadDemo}>
+                    Prova con dati di esempio
+                  </Button>
+                )}
               </>
             }
           >

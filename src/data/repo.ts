@@ -1,6 +1,6 @@
 import { db } from './db';
 import { record, syncTarget } from './changes';
-import type { Job, Photo, Settings } from '@/domain/types';
+import { DEFAULT_SETTINGS, type Job, type Photo, type Settings } from '@/domain/types';
 import { uid } from '@/domain/format';
 import { diffJob } from '@/domain/job';
 import { normalizeSettings, pickWorkshop } from '@/domain/settings';
@@ -152,5 +152,71 @@ export async function requestPersistence(): Promise<boolean> {
   }
 }
 
-/** schede presenti sul dispositivo (per proporre di portarle nel cloud) */
-export const localJobCount = () => db.jobs.count();
+/** schede vere (non di esempio) presenti sul dispositivo: per proporre di portarle nel cloud */
+export const localJobCount = () => db.jobs.filter((j) => !j.demo).count();
+
+/** preferenze di questo dispositivo che non sono impostazioni (es. scelta di restare senza account) */
+export type DevicePrefs = { localOnly?: boolean };
+export async function getDevice(): Promise<DevicePrefs> {
+  return ((await db.meta.get('device'))?.value as DevicePrefs | undefined) ?? {};
+}
+export async function setDevice(patch: DevicePrefs): Promise<void> {
+  await db.transaction('rw', db.meta, async () => {
+    await db.meta.put({ key: 'device', value: { ...(await getDevice()), ...patch } });
+  });
+}
+
+/* ---------------- collegamento al cloud ---------------- */
+
+const VALID_ID = /^[A-Za-z0-9_-]{4,64}$/;
+
+/**
+ * Porta nel cloud l'archivio di questo dispositivo (chi crea l'officina e aveva già delle schede):
+ * mette in coda tutte le schede (con il loro numero), le foto e le impostazioni dell'officina.
+ * Le schede di esempio restano fuori (si cancellano). Va chiamata dopo setSyncTarget.
+ */
+export async function queueLocalArchive(): Promise<{ jobs: number; photos: number }> {
+  let jobs = 0;
+  let photos = 0;
+  await db.transaction('rw', [db.jobs, db.photos, db.settings, db.outbox], async () => {
+    const demo = (await db.jobs.toArray()).filter((j) => j.demo).map((j) => j.id);
+    await db.photos.where('jobId').anyOf(demo).delete();
+    await db.jobs.bulkDelete(demo);
+    for (let j of await db.jobs.orderBy('number').toArray()) {
+      // id dei vecchi archivi che il server non accetta: se ne dà uno nuovo (e le foto lo seguono)
+      if (!VALID_ID.test(j.id)) {
+        const old = j.id;
+        j = { ...j, id: uid('j') };
+        await db.jobs.delete(old);
+        await db.jobs.put(j);
+        await db.photos.where('jobId').equals(old).modify({ jobId: j.id });
+      }
+      await record('job', j.id, 'put', diffJob(undefined, j), j.number || undefined);
+      jobs++;
+    }
+    for (const p of await db.photos.toArray()) {
+      await db.photos.update(p.id, { up: 0 });
+      await record('photo', p.id, 'put', { jobId: p.jobId, w: p.w, h: p.h });
+      photos++;
+    }
+    const t = syncTarget();
+    if (t) await record('workshop', t.workshop, 'put', pickWorkshop(await getSettings()) as Record<string, unknown>);
+  });
+  return { jobs, photos };
+}
+
+/**
+ * Toglie dal dispositivo i dati dell'officina (uscita, cambio officina, account eliminato).
+ * Restano le preferenze del dispositivo: tema, vetro, voce.
+ */
+export async function clearWorkshopData(): Promise<void> {
+  await db.transaction('rw', [db.jobs, db.photos, db.outbox, db.meta, db.settings], async () => {
+    await Promise.all([db.jobs.clear(), db.photos.clear(), db.outbox.clear()]);
+    const keys = (await db.meta.toCollection().primaryKeys()).filter((k) => k !== 'device');
+    await db.meta.bulkDelete(keys);
+    const cur = await getSettings();
+    const reset: Partial<Settings> = {};
+    for (const k of Object.keys(pickWorkshop(DEFAULT_SETTINGS)) as (keyof Settings)[]) (reset as Record<string, unknown>)[k] = DEFAULT_SETTINGS[k];
+    await db.settings.put({ ...cur, ...reset, nextNumber: 1, role: undefined, staffName: undefined, adminPin: undefined, key: 'main' });
+  });
+}

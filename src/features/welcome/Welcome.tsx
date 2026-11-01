@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronLeft, ChevronRight, Delete, Gauge, Lock, Wrench } from 'lucide-react';
+import { Cloud, Delete, Gauge, Wrench } from 'lucide-react';
+import { Back, Tile } from './parts';
 import type { Settings } from '@/domain/types';
 import { saveSettings } from '@/data/repo';
 import { haptic } from '@/platform/native';
@@ -14,7 +15,7 @@ import { SPRING } from '@/ui/motion';
  * Titolare: vede tutto, compresa la giornata (Oggi). Se ha impostato un PIN, lo chiede.
  * Dipendente: sceglie il suo nome e va dritto alle schede; la manodopera che segna porta il suo nome.
  */
-export function Welcome({ s, onDone }: { s: Settings; onDone: (role: 'admin' | 'staff') => void }) {
+export function Welcome({ s, onDone, onCloud }: { s: Settings; onDone: (role: 'admin' | 'staff') => void; onCloud?: () => void }) {
   const [step, setStep] = useState<'who' | 'staff' | 'pin'>('who');
   const [name, setName] = useState('');
   const [pin, setPin] = useState('');
@@ -87,6 +88,11 @@ export function Welcome({ s, onDone }: { s: Settings; onDone: (role: 'admin' | '
                     accent={!last}
                   />
                   <Tile icon={<Wrench size={24} />} title={last ? 'Un altro dipendente' : 'Dipendente'} text="Schede, lavori e accettazioni" onClick={() => setStep('staff')} />
+                  {onCloud && (
+                    <button type="button" onClick={onCloud} className="press mt-3 flex h-12 items-center justify-center gap-2 text-[0.9375rem] font-semibold text-accent-ink">
+                      <Cloud size={19} /> Entra con l’account dell’officina
+                    </button>
+                  )}
                 </>
               )}
 
@@ -169,29 +175,6 @@ export function Welcome({ s, onDone }: { s: Settings; onDone: (role: 'admin' | '
         </div>
       </div>
     </div>
-  );
-}
-
-function Tile({ icon, title, text, onClick, lock, accent }: { icon: ReactNode; title: string; text: string; onClick: () => void; lock?: boolean; accent?: boolean }) {
-  return (
-    <button type="button" onClick={onClick} className="press card flex w-full items-center gap-4 p-4 text-left hover:shadow-[var(--shadow-2)]">
-      <span className={`grid size-12 shrink-0 place-items-center rounded-[14px] ${accent ? 'bg-accent text-on-accent' : 'bg-surface-2 text-ink'}`}>{icon}</span>
-      <span className="min-w-0 flex-1">
-        <span className="w-wide flex items-center gap-1.5 text-[1.0625rem] font-semibold text-ink">
-          {title} {lock && <Lock size={15} className="text-ink-3" aria-label="Con PIN" />}
-        </span>
-        <span className="block text-[0.9062rem] text-ink-2">{text}</span>
-      </span>
-      <ChevronRight size={20} className="shrink-0 text-ink-3" />
-    </button>
-  );
-}
-
-function Back({ onClick }: { onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} className="press -ml-1 flex h-10 items-center gap-0.5 self-start rounded-full pr-3 text-[0.9375rem] font-medium text-accent-ink">
-      <ChevronLeft size={20} /> Indietro
-    </button>
   );
 }
 

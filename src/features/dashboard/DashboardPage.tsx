@@ -12,6 +12,7 @@ import { eur, fmtPlate, relDay } from '@/domain/format';
 import { custName, matchJob, veic } from '@/domain/logic';
 import type { Job } from '@/domain/types';
 import { seedDemo } from '@/data/demo';
+import { useCloud } from '@/data/cloud/session';
 import { Button, EmptyState, SkeletonBlocks } from '@/ui/controls';
 import { Plate } from '@/ui/Plate';
 import { SearchField } from '@/ui/SearchField';
@@ -46,6 +47,7 @@ export function DashboardPage() {
   const now = Date.now();
   const d = useMemo(() => dashboard(jobs || [], now), [jobs, now]);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const linked = useCloud().phase === 'linked';
   // la ricerca di Oggi cerca qui, senza portarti altrove: i risultati prendono il posto del cruscotto
   const [q, setQ] = useState('');
   const ns = useNativeSearch();
@@ -102,9 +104,11 @@ export function DashboardPage() {
                 <Button variant="primary" size="lg" icon={<Plus size={20} strokeWidth={2.6} />} onClick={() => window.dispatchEvent(new Event('ro:new-job'))}>
                   Registra la prima accettazione
                 </Button>
-                <Button variant="ghost" icon={<Sparkles size={18} />} onClick={async () => toast.success(`${await seedDemo()} schede di esempio caricate`)}>
-                  Prova con dati di esempio
-                </Button>
+                {!linked && (
+                  <Button variant="ghost" icon={<Sparkles size={18} />} onClick={async () => toast.success(`${await seedDemo()} schede di esempio caricate`)}>
+                    Prova con dati di esempio
+                  </Button>
+                )}
               </>
             }
           >

@@ -134,3 +134,21 @@ export async function bindAndroidBack(goBack: () => boolean) {
   });
   return () => h.remove();
 }
+
+/** condivide un testo (foglio di sistema); dove non si può, lo copia. */
+export async function shareText(text: string, title?: string): Promise<'shared' | 'copied' | 'cancelled'> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const { Share } = await import('@capacitor/share');
+      await Share.share({ text, title, dialogTitle: title });
+      return 'shared';
+    }
+    if (navigator.share) {
+      await navigator.share({ text, title });
+      return 'shared';
+    }
+  } catch (e) {
+    if ((e as Error)?.name === 'AbortError' || /cancel/i.test(String((e as Error)?.message))) return 'cancelled';
+  }
+  return (await copyText(text)) ? 'copied' : 'cancelled';
+}

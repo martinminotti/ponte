@@ -1,4 +1,4 @@
-import { Component, useEffect, useState, type ReactNode } from 'react';
+import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { createHashRouter, RouterProvider } from 'react-router';
 import { MotionConfig } from 'motion/react';
 import { migrateLegacy } from '@/data/backup';
@@ -10,6 +10,10 @@ import { Shell } from './Shell';
 import { preload, screenRoutes } from './routes';
 import { UpdatePrompt } from './UpdatePrompt';
 import { installNavTransitions } from '@/platform/navigation';
+import { bootCloud, useCloud } from '@/data/cloud/session';
+// l'accesso al cloud (e il client Supabase) si scarica solo se serve
+const AccountGate = lazy(() => import('@/features/account/AccountGate').then((m) => ({ default: m.AccountGate })));
+import { setDeviceLocalOnly, useDevice } from './device';
 
 // Hash router: funziona su qualunque hosting statico, dentro Capacitor e come file singolo.
 const router = createHashRouter([{ element: <Shell />, children: screenRoutes }]);
@@ -49,6 +53,8 @@ export function App() {
   // benvenuto a ogni apertura dell'app (non al ritorno da sfondo): chi la sta usando, titolare o dipendente
   const [entered, setEntered] = useState(false);
   const st = useLiveQuery(getSettings, []);
+  const cloud = useCloud();
+  const device = useDevice();
   useEffect(() => {
     const again = () => setEntered(false);
     window.addEventListener('ro:profile', again);
@@ -59,6 +65,8 @@ export function App() {
       try {
         await db.open();
         await migrateLegacy();
+        // officina nel cloud: si riparte da quella collegata, anche senza rete (il controllo col server viene dopo)
+        await bootCloud();
         requestPersistence();
         setBoot('ready');
         setTimeout(preload, 300);
@@ -78,11 +86,20 @@ export function App() {
         </div>
       </div>
     );
-  if (boot === 'loading' || !st) return null;
-  if (!entered || !st.role)
+  if (boot === 'loading' || !st || !device || !cloud.ready) return null;
+  // cloud disponibile e nessuna officina collegata: accesso (salvo chi ha scelto di restare sul dispositivo)
+  if (cloud.phase !== 'off' && cloud.phase !== 'linked' && !device.localOnly)
+    return (
+      <Suspense fallback={null}>
+        <AccountGate />
+      </Suspense>
+    );
+  // con l'officina nel cloud chi usa l'app lo dice l'account: niente scelta titolare/dipendente
+  if (cloud.phase !== 'linked' && (!entered || !st.role))
     return (
       <Welcome
         s={st}
+        onCloud={cloud.phase !== 'off' ? () => setDeviceLocalOnly(false) : undefined}
         onDone={(role) => {
           // dopo la scelta si parte dalla propria sezione: Oggi per il titolare, Schede per il dipendente
           window.location.hash = role === 'staff' ? '#/schede' : '#/';

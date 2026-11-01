@@ -111,8 +111,9 @@ export function shiftMonth(ym: string, delta: number): string {
   return ymOf(d.getTime());
 }
 
+/** numero della scheda a 4 cifre; "—" finché il server non l'ha assegnato (scheda nata senza rete) */
 export function jobNumber(n: number): string {
-  return String(n || 0).padStart(4, '0');
+  return n ? String(n).padStart(4, '0') : '—';
 }
 
 export function uid(prefix = ''): string {

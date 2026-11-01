@@ -2,15 +2,13 @@ import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import { Camera, CheckCircle2, ChevronRight, Clock, Minus, Plus, Trash2, X } from 'lucide-react';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { toast } from 'sonner';
 import { GARANZIE, PAGAMENTI, VATS, VOCI_SUGGERITE, statoLabel } from '@/domain/constants';
 import { amountInput, eur, fmtDate, fmtDateTime, parseAmount, uid } from '@/domain/format';
 import { billingOf, calc, daSaldare, isAz, monthlyPending, sameVehicle, scadenza, totale, withPayment } from '@/domain/logic';
 import type { Job, LineItem, Photo, Settings } from '@/domain/types';
-import { db } from '@/data/db';
 import { addPhoto, mutateJob, removePhoto, saveSettings } from '@/data/repo';
-import { useObjectUrl } from '@/app/hooks';
+import { usePhotos, usePhotoUrl } from '@/app/hooks';
 import { compressPhoto } from '@/platform/images';
 import { haptic } from '@/platform/native';
 import { AutoInput, Button, Field, Note, Section, Segmented, ToggleChip } from '@/ui/controls';
@@ -459,7 +457,7 @@ export function WorkersSection({ job, up, settings }: { job: Job; up: Up; settin
 /* ---------------- foto ---------------- */
 
 function Thumb({ p, onOpen }: { p: Photo; onOpen: () => void }) {
-  const url = useObjectUrl(p.blob);
+  const url = usePhotoUrl(p);
   return (
     <button type="button" onClick={onOpen} className="press relative aspect-square overflow-hidden rounded-[14px] bg-surface-2" aria-label="Apri foto">
       {url && <img src={url} alt="" className="size-full object-cover" loading="lazy" />}
@@ -468,7 +466,7 @@ function Thumb({ p, onOpen }: { p: Photo; onOpen: () => void }) {
 }
 
 function Viewer({ p, onClose }: { p: Photo; onClose: () => void }) {
-  const url = useObjectUrl(p.blob);
+  const url = usePhotoUrl(p);
   return (
     <motion.div className="fixed inset-0 z-[60] flex flex-col bg-black/92" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-label="Foto">
       <div className="flex items-center justify-between px-3 pb-3 pt-[calc(env(safe-area-inset-top,0px)+12px)]">
@@ -496,7 +494,7 @@ function Viewer({ p, onClose }: { p: Photo; onClose: () => void }) {
 }
 
 export function PhotosSection({ job, bare }: { job: Job; bare?: boolean }) {
-  const photos = useLiveQuery(() => db.photos.where('jobId').equals(job.id).sortBy('createdAt'), [job.id], []);
+  const photos = usePhotos(job.id);
   const [open, setOpen] = useState<Photo | null>(null);
   const [busy, setBusy] = useState(false);
   const inp = useRef<HTMLInputElement>(null);

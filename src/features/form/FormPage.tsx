@@ -19,6 +19,7 @@ import { clearSavedDraft, loadSavedDraft, savedLabel, storeDraft, type SavedDraf
 import { addPhoto, createJob, patchJob } from '@/data/repo';
 import { haptic } from '@/platform/native';
 import { viewTransitionsOn } from '@/platform/navigation';
+import { awaitJobNumber } from '@/data/cloud/session';
 import { Button, Field, Input, Note, Segmented, Switch, TextArea, ToggleChip } from '@/ui/controls';
 import { PlateInput } from './PlateInput';
 import { Group, PendingPhotos, type Shot } from './parts';
@@ -273,8 +274,10 @@ function FormInner({ job }: { job?: Job }) {
         haptic('success');
         // l'accettazione è finita: si torna all'elenco, la scheda è in cima
         nav('/schede', { replace: true });
+        // con l'officina nel cloud il numero lo dà il server: lo si aspetta un attimo (senza rete arriva dopo)
+        const number = created.number || (await awaitJobNumber(created.id));
         toast.success(`Accettazione registrata${created.plate ? ` · ${fmtPlate(created.plate, created.plateCountry)}` : ''}`, {
-          description: `Scheda N. ${jobNumber(created.number)}`,
+          description: number ? `Scheda N. ${jobNumber(number)}` : 'Il numero arriva appena c’è rete',
           action: { label: 'Apri', onClick: () => nav(`/job/${created.id}`) },
           duration: 6000,
         });

@@ -11,10 +11,10 @@
 import { db, getMeta, type OutboxRow } from '../db';
 import { onLocalChange } from '../changes';
 import { applyPull, putServerJob, type Log } from './apply';
-import { photoPath, PullResponse, PulledJob, PushResponse, SyncFatal, type Change, type Transport } from './protocol';
+import { photoPath, PullResponse, PulledJob, PushResponse, SyncFatal, SyncNetworkError, type Change, type Transport } from './protocol';
 import { setSyncStatus } from './status';
 
-export class SyncNetworkError extends Error {}
+export { SyncNetworkError };
 
 export interface EngineOptions {
   transport: Transport;

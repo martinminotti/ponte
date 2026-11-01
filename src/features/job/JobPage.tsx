@@ -11,6 +11,7 @@ import { custName, daSaldare, isAz, monthlyPending, totale, veic, waLink, withPa
 import { buildMsg } from '@/domain/messages';
 import type { Job, StatusKey } from '@/domain/types';
 import { deleteJob, mutateJob, restoreJob } from '@/data/repo';
+import { useCloud } from '@/data/cloud/session';
 import { copyText, haptic, openExternal } from '@/platform/native';
 import { Button, Section, SkeletonBlocks, ToggleChip } from '@/ui/controls';
 import { SPRING } from '@/ui/motion';
@@ -79,6 +80,7 @@ function JobView({ job }: { job: Job }) {
   const settings = useSettings();
   const jobs = useJobs() || [];
   const nav = useNavigate();
+  const cloud = useCloud();
   const up = updater(job.id);
   const [wa, setWa] = useState<{ open: boolean; kind: StatusKey }>({ open: false, kind: job.status });
   const [showHist, setShowHist] = useState(false);
@@ -351,7 +353,10 @@ function JobView({ job }: { job: Job }) {
                 ...(canWa
                   ? [{ id: 'wa', symbol: 'message', icon: <MessageCircle size={19} />, label: 'Apri la chat WhatsApp', onSelect: () => openExternal(waLink(job.phone, '', settings.prefix)!) }]
                   : []),
-                { id: 'delete', symbol: 'trash', icon: <Trash2 size={19} />, label: 'Elimina scheda', danger: true, separator: true, onSelect: remove },
+                // con l'officina nel cloud cancella solo il titolare (lo controlla anche il server)
+                ...(cloud.phase === 'linked' && cloud.workshop?.role === 'staff'
+                  ? []
+                  : [{ id: 'delete', symbol: 'trash', icon: <Trash2 size={19} />, label: 'Elimina scheda', danger: true, separator: true, onSelect: remove }]),
               ],
             },
           },

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Check, Download, ImagePlus, Pipette, ShieldCheck, Sparkles, Trash2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Page, SectionNotch } from '@/app/layout';
@@ -15,9 +15,14 @@ import { haptic, saveFile } from '@/platform/native';
 import { AutoInput, Button, Field, Note, Section, Segmented } from '@/ui/controls';
 import { Sheet } from '@/ui/Sheet';
 import { VoiceSettingsSection } from '@/features/voice/VoiceSettings';
+const AccountSection = lazy(() => import('@/features/account/AccountSection').then((m) => ({ default: m.AccountSection })));
+const ConnectCloudSection = lazy(() => import('@/features/account/AccountSection').then((m) => ({ default: m.ConnectCloudSection })));
+import { useCloud } from '@/data/cloud/session';
 
 export function SettingsPage() {
   const admin = useSettings().role !== 'staff';
+  const cloud = useCloud();
+  const linked = cloud.phase === 'linked';
   const s = useSettings();
   const jobs = useJobs() || [];
   const wide = useWide();
@@ -102,7 +107,13 @@ export function SettingsPage() {
 
         <div className="mt-5 flex flex-col gap-3 xl:grid xl:grid-cols-2 xl:items-start xl:gap-4">
           <div className="flex flex-col gap-3 xl:gap-4">
-            <ProfileSection s={s} />
+            {linked ? (
+              <Suspense fallback={<div className="h-[148px] rounded-[20px] bg-surface" />}>
+                <AccountSection />
+              </Suspense>
+            ) : (
+              <ProfileSection s={s} />
+            )}
             {admin && (
               <Section title="Dati dell'officina">
                 <div className="flex items-center gap-4">
@@ -300,8 +311,11 @@ export function SettingsPage() {
                     <dd className="mt-1 text-[0.9375rem] font-semibold text-ink">{s.lastBackupAt ? fmtDateTime(s.lastBackupAt) : 'Mai'}</dd>
                   </div>
                 </dl>
-                {(daysSinceBackup === null || daysSinceBackup > 7) && jobs.length > 0 && (
-                  <Note tone="warn">L'archivio è salvato solo su questo dispositivo. Fai un backup ogni settimana e tienilo su un altro dispositivo o nel cloud.</Note>
+                {linked ? (
+                  <Note tone="ok">Le schede e le foto sono salvate nel cloud dell’officina: un telefono rotto o perso non porta via niente. Il backup resta utile come copia tua.</Note>
+                ) : (
+                  (daysSinceBackup === null || daysSinceBackup > 7) &&
+                  jobs.length > 0 && <Note tone="warn">L'archivio è salvato solo su questo dispositivo. Fai un backup ogni settimana e tienilo su un altro dispositivo o nel cloud.</Note>
                 )}
                 <div className="flex flex-col gap-2.5 sm:flex-row">
                   <Button variant="primary" block icon={<Download size={19} />} onClick={doExport}>
@@ -341,7 +355,7 @@ export function SettingsPage() {
                   </p>
                 )}
                 <div className="h-px bg-line" />
-                {demoN > 0 ? (
+                {linked && !demoN ? null : demoN > 0 ? (
                   <Button variant="danger" icon={<Trash2 size={18} />} className="self-start" onClick={async () => toast(`${await deleteDemo()} schede di esempio eliminate`)}>
                     Elimina le {demoN} schede di esempio
                   </Button>
@@ -351,6 +365,12 @@ export function SettingsPage() {
                   </Button>
                 )}
               </Section>
+            )}
+
+            {admin && cloud.phase !== 'off' && !linked && (
+              <Suspense fallback={null}>
+                <ConnectCloudSection />
+              </Suspense>
             )}
 
             <p className="px-1 pt-2 pb-4 text-[0.8125rem] leading-relaxed text-ink-3">
@@ -367,10 +387,12 @@ export function SettingsPage() {
             <span className="block text-[1rem] font-semibold text-ink">Unisci all'archivio</span>
             <span className="block text-[0.9062rem] text-ink-2">Aggiunge le schede nuove e aggiorna quelle modificate più di recente nel file.</span>
           </button>
-          <button type="button" onClick={() => doImport('replace')} className="press rounded-[16px] bg-danger-soft p-4 text-left">
-            <span className="block text-[1rem] font-semibold text-danger">Sostituisci tutto</span>
-            <span className="block text-[0.9062rem] text-danger/80">Cancella l'archivio di questo dispositivo e carica solo il file.</span>
-          </button>
+          {!linked && (
+            <button type="button" onClick={() => doImport('replace')} className="press rounded-[16px] bg-danger-soft p-4 text-left">
+              <span className="block text-[1rem] font-semibold text-danger">Sostituisci tutto</span>
+              <span className="block text-[0.9062rem] text-danger/80">Cancella l'archivio di questo dispositivo e carica solo il file.</span>
+            </button>
+          )}
         </div>
       </Sheet>
     </Page>

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/data/db';
 import { getSettings } from '@/data/repo';
-import { DEFAULT_SETTINGS, type Job, type Settings } from '@/domain/types';
+import { DEFAULT_SETTINGS, type Job, type Photo, type Settings } from '@/domain/types';
+import { fetchPhoto } from '@/data/cloud/session';
 import { applyThemeMeta } from '@/platform/brand';
 import { isAppleMobile } from '@/platform/native';
 import { nativeBarAvailable } from '@/platform/nativeBar';
@@ -136,6 +137,35 @@ export function useScrolledPast(y = 8): boolean {
     return () => window.removeEventListener('scroll', on);
   }, [y]);
   return past;
+}
+
+export type TeamMember = { userId: string; role: 'owner' | 'staff'; displayName: string; removed: boolean };
+/** Chi fa parte dell'officina (dal cloud): titolari prima, poi in ordine di nome. */
+export function useMembers(): TeamMember[] {
+  return useLiveQuery(
+    async () =>
+      (((await db.meta.get('members'))?.value as TeamMember[] | undefined) ?? [])
+        .filter((m) => !m.removed)
+        .sort((a, b) => (a.role === b.role ? a.displayName.localeCompare(b.displayName) : a.role === 'owner' ? -1 : 1)),
+    [],
+    [],
+  );
+}
+
+/** Le foto di una scheda, dalla più vecchia. */
+export function usePhotos(jobId: string): Photo[] {
+  return useLiveQuery(() => db.photos.where('jobId').equals(jobId).sortBy('createdAt'), [jobId], []);
+}
+
+/**
+ * Indirizzo da mostrare per una foto. Una foto scattata su un altro dispositivo arriva senza immagine:
+ * la si scarica la prima volta che serve (poi resta sul dispositivo).
+ */
+export function usePhotoUrl(p: Photo): string | undefined {
+  useEffect(() => {
+    if (!p.blob) fetchPhoto(p.id).catch(() => {});
+  }, [p.id, p.blob]);
+  return useObjectUrl(p.blob);
 }
 
 export function useObjectUrl(blob: Blob | undefined): string | undefined {

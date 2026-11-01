@@ -70,6 +70,9 @@ export interface Transport {
   subscribe?(workshop: string, onChange: () => void): () => void;
 }
 
+/** senza rete o server irraggiungibile: si riprova più tardi, la coda resta */
+export class SyncNetworkError extends Error {}
+
 /** errori che non dipendono dalla rete: riprovare non serve */
 export class SyncFatal extends Error {
   constructor(
