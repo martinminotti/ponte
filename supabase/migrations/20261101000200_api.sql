@@ -511,5 +511,6 @@ grant execute on function
 to authenticated;
 revoke execute on function public.account_workshops(uuid) from authenticated;
 grant execute on function public.account_workshops(uuid) to service_role;
+revoke all on all tables in schema ponte_private from public, anon, authenticated;
 revoke execute on all functions in schema ponte_private from public, anon, authenticated;
 grant execute on function ponte_private.role_in(uuid), ponte_private.is_member(uuid), ponte_private.my_workshops() to authenticated;

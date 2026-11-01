@@ -68,6 +68,13 @@ describe('officina e appartenenza', () => {
     // nessuna scrittura diretta, nemmeno da membro
     expect(await rejects(as(owner, `update public.jobs set doc = '{}' where id = $1`, [id('jobsecret1')]))).toMatch(/permission denied/);
     expect(await rejects(as(owner, `insert into public.members (workshop_id, user_id) values ($1, $2)`, [w, stranger.id]))).toMatch(/permission denied/);
+    // contatori e tentativi d'invito restano del server
+    expect(await rejects(as(owner, 'select * from ponte_private.counters'))).toMatch(/permission denied/);
+    expect(await rejects(as(owner, 'update ponte_private.counters set next_number = 1'))).toMatch(/permission denied/);
+    expect(await rejects(as(owner, 'delete from ponte_private.join_attempts'))).toMatch(/permission denied/);
+    // funzioni riservate al server
+    expect(await rejects(rpc(owner, 'ai_take', { p_workshop: w, p_user: owner.id, p_limit: 999 }))).toMatch(/permission denied/);
+    expect(await rejects(rpc(owner, 'account_workshops', { p_user: stranger.id }))).toMatch(/permission denied/);
   });
 
   it('al massimo tre officine per titolare', async () => {
