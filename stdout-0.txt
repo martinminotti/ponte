@@ -1,0 +1,99 @@
+⚡️  Loading app at capacitor://localhost...
+SplashScreen.hideSplash: SplashScreen was automatically hidden after default timeout. You should call `SplashScreen.hide()` as soon as your web app is loaded (or increase the timeout). Read more at https://capacitorjs.com/docs/apis/splash-screen#hiding-the-splash-screen
+⚡️  WebView loaded
+⚡️  To Native ->  Navigation addListener 117138631
+⚡️  To Native ->  NativeBar configure 117138632
+⚡️  TO JS undefined
+⚡️  To Native ->  Haptics notification 117138633
+⚡️  To Native ->  Navigation setSwipeBack 117138634
+⚡️  To Native ->  NativeBar configure 117138635
+⚡️  To Native ->  NativeBar addListener 117138636
+⚡️  To Native ->  NativeBar setCompact 117138637
+⚡️  To Native ->  NativeBar addListener 117138638
+⚡️  To Native ->  NativeBar addListener 117138639
+⚡️  To Native ->  NativeBar configureTop 117138640
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  To Native ->  StatusBar setStyle 117138641
+⚡️  To Native ->  NativeBar configureTop 117138642
+⚡️  TO JS {}
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  To Native ->  Keyboard setAccessoryBarVisible 117138643
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configureTop 117138644
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar setCompact 117138645
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configureTop 117138646
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar setCompact 117138647
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configureTop 117138648
+⚡️  TO JS undefined
+⚡️  TO JS {"id":"\/schede"}
+⚡️  To Native ->  NativeBar configure 117138649
+⚡️  To Native ->  NativeBar configureTop 117138650
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  TO JS {"id":"\/mensile"}
+⚡️  To Native ->  NativeBar configure 117138651
+⚡️  To Native ->  NativeBar configureTop 117138652
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  TO JS {"id":"\/impostazioni"}
+⚡️  To Native ->  NativeBar configure 117138653
+⚡️  To Native ->  NativeBar configureTop 117138654
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  TO JS {"id":"\/"}
+⚡️  To Native ->  NativeBar configure 117138655
+⚡️  To Native ->  NativeBar configureTop 117138656
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  TO JS {"id":"\/schede"}
+⚡️  To Native ->  NativeBar configure 117138657
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configureTop 117138658
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar setCompact 117138659
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configureTop 117138660
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar setCompact 117138661
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configureTop 117138662
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configure 117138663
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configureTop 117138664
+⚡️  TO JS undefined
+⚡️  TO JS {"end":false,"text":"g"}
+⚡️  TO JS {"end":false,"text":"go"}
+⚡️  TO JS {"end":false,"text":"gol"}
+⚡️  TO JS {"text":"golf","end":false}
+⚡️  TO JS {"text":"","end":true}
+⚡️  To Native ->  NativeBar configure 117138665
+⚡️  To Native ->  NativeBar configureTop 117138666
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar setCompact 117138667
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configureTop 117138668
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar setCompact 117138669
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configureTop 117138670
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configure 117138671
+⚡️  To Native ->  NativeBar configure 117138672
+⚡️  To Native ->  NativeBar configureTop 117138673
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  TO JS undefined
+⚡️  TO JS {"id":"next"}
+⚡️  To Native ->  Haptics impact 117138674
+⚡️  TO JS undefined
+⚡️  To Native ->  NativeBar configure 11713

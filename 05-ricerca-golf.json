@@ -1,0 +1,52 @@
+[
+ {
+  "label": "Ponte",
+  "type": "Application",
+  "frame": {
+   "x": 0,
+   "y": 0,
+   "height": 874,
+   "width": 402
+  }
+ },
+ {
+  "label": "golf",
+  "type": "TextField",
+  "frame": {
+   "y": 72,
+   "width": 287.6666666666667,
+   "height": 40,
+   "x": 24
+  }
+ },
+ {
+  "label": "Clear text",
+  "type": "Button",
+  "frame": {
+   "width": 19.666666666666686,
+   "y": 82.66666666666666,
+   "height": 19,
+   "x": 277.66666666666663
+  }
+ },
+ {
+  "label": "Annulla",
+  "type": "Button",
+  "frame": {
+   "y": 70,
+   "width": 64.33333333333331,
+   "x": 325.6666666666667,
+   "height": 44
+  }
+ },
+ {
+  "label": "I GK 482 TR In lavorazione Volkswagen Golf 2.0 TDI Marco Bianchi totale 355,50 € N. 0015 · oggi",
+  "type": "web:a",
+  "frame": {
+   "x": 16,
+   "y": 134,
+   "width": 370,
+   "height": 161
+  }
+ }
+]

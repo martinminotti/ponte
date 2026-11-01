@@ -1,0 +1,4 @@
+2026-11-01 15:30:22.671 App[24564:71541] DiskCookieStorage changing policy from 2 to 0, cookie file: file:///Users/runner/Library/Developer/CoreSimulator/Devices/CB833DA5-BA4E-42BE-B82D-C1E0C39A3C02/data/Containers/Data/Application/A84E1E36-98C5-4202-8CFD-8F01EA049FB7/Library/Cookies/app.ponte.officina.binarycookies
+2026-11-01 15:30:22.744 App[24564:71541] KeyboardPlugin: resize mode - native
+2026-11-01 15:30:23.211 App[24564:71541] void * _Nullable NSMapGet(NSMapTable * _Nonnull, const void * _Nullable): map table argument is NULL
+2026-11-01 15:30:32.125 App[24564:71545] Accessory bar visible change 0

@@ -1,0 +1,7 @@
+2026-11-01 15:24:43.726 App[6613:25122] DiskCookieStorage changing policy from 2 to 0, cookie file: file:///Users/runner/Library/Developer/CoreSimulator/Devices/CB833DA5-BA4E-42BE-B82D-C1E0C39A3C02/data/Containers/Data/Application/A84E1E36-98C5-4202-8CFD-8F01EA049FB7/Library/Cookies/app.ponte.officina.binarycookies
+2026-11-01 15:24:43.935 App[6613:25122] KeyboardPlugin: resize mode - native
+2026-11-01 15:25:27.617 App[6613:25181] Accessory bar visible change 0
+IOSurfaceClientSetSurfaceNotify failed e00002c7
+2026-11-01 15:29:16.966 App[6613:59048] Accessory bar visible change 0
+2026-11-01 15:29:24.325 App[6613:59066] Accessory bar visible change 0
+2026-11-01 15:29:49.754 App[6613:64834] Accessory bar visible change 0
