@@ -19,9 +19,6 @@ Deno.serve(async (req) => {
   const path = new URL(req.url).pathname.replace(/^.*\/ai/, '');
   if (path !== '/anthropic/v1/messages') return fail(404, 'Percorso non consentito');
 
-  const key = Deno.env.get('ANTHROPIC_API_KEY');
-  if (!key) return fail(503, 'Assistente AI non configurato sul server');
-
   const sb = admin();
   const user = await caller(req, sb);
   if (!user) return fail(401, 'Accesso scaduto');
@@ -41,6 +38,8 @@ Deno.serve(async (req) => {
   const { data: ok, error } = await sb.rpc('ai_take', { p_workshop: workshop, p_user: user.id, p_limit: limit });
   if (error) return fail(/not_member/.test(error.message) ? 403 : 500, /not_member/.test(error.message) ? 'Non fai parte di questa officina' : 'Errore del server');
   if (!ok) return fail(429, 'Limite giornaliero dell’assistente raggiunto: riprova domani o continua senza AI');
+  const key = Deno.env.get('ANTHROPIC_API_KEY');
+  if (!key) return fail(503, 'Assistente AI non configurato sul server');
 
   // il modello e la lunghezza li decide il server
   const def = Deno.env.get('AI_MODEL') || 'claude-haiku-5-5';

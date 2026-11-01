@@ -1,0 +1,86 @@
+name: Backend (Supabase)
+
+# Database, regole di accesso, sincronizzazione e funzioni del server provati su Supabase vero (supabase start),
+# poi, su main e con il progetto configurato, pubblicati sul progetto Supabase di produzione.
+
+on:
+  push:
+    branches: [main, architettura-cloud]
+    paths: ['supabase/**', 'src/data/**', 'src/domain/**', 'src/voice/config.ts', 'package*.json', 'vitest.db.config.ts', '.github/workflows/backend.yml', 'scripts/cloud-*.mjs']
+  pull_request:
+    paths: ['supabase/**', 'src/data/**', 'src/domain/**']
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Pubblica su Supabase (migrazioni, funzioni, email) anche se non è main'
+        type: boolean
+        default: false
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Funzioni del server (controllo dei tipi)
+        working-directory: supabase/functions
+        run: deno check ai/index.ts account/index.ts
+      - name: Supabase locale
+        run: npx supabase start -x studio,imgproxy,vector,logflare,supavisor,postgres-meta
+      - name: Indirizzi e chiavi del Supabase locale
+        run: |
+          npx supabase status -o env > status.env
+          get() { grep -E "^$1=" status.env | head -1 | cut -d= -f2- | tr -d '"'; }
+          {
+            echo "DATABASE_URL=$(get DB_URL)"
+            echo "SUPABASE_API_URL=$(get API_URL)"
+            echo "SUPABASE_KEY=$(get ANON_KEY || true)"
+            echo "SUPABASE_SERVICE_KEY=$(get SERVICE_ROLE_KEY || true)"
+            echo "SUPABASE_MAIL_URL=$( (get MAILPIT_URL; get INBUCKET_URL) | grep -m1 . )"
+          } >> "$GITHUB_ENV"
+          sed -E 's/(KEY|SECRET|PASSWORD)=.*/\1=***/' status.env
+      - name: Avvisi del linter del database
+        run: npx supabase db lint --level warning --fail-on error
+      - name: Test del database, della sincronizzazione e delle API
+        run: npm run test:db
+      - if: failure()
+        name: Registri dei servizi
+        run: |
+          docker ps --format '{{.Names}}' | while read c; do echo "=== $c"; docker logs --tail 80 "$c" 2>&1; done
+
+  deploy:
+    needs: test
+    if: ${{ vars.SUPABASE_PROJECT_REF != '' && (github.ref == 'refs/heads/main' || inputs.deploy) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: produzione
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx supabase link --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Migrazioni del database
+        run: npx supabase db push --include-all
+      - name: Funzioni del server
+        run: npx supabase functions deploy ai account --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Accesso con codice email (testi in italiano, durata, indirizzi dell'app)
+        run: node scripts/cloud-auth-config.mjs
