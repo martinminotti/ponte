@@ -109,23 +109,19 @@ run('Supabase vero', () => {
 
     for (let i = 0; i < 60 && status !== 'SUBSCRIBED'; i++) await new Promise((r) => setTimeout(r, 250)); // il canale si collega
     expect(status).toBe('SUBSCRIBED');
-    // diagnosi in CI: cosa vede il servizio realtime
-    if (process.env.DATABASE_URL) {
-      const pg = (await import('pg')).default;
-      const c = new pg.Client({ connectionString: process.env.DATABASE_URL });
-      await c.connect();
-      const pub = await c.query(`select tablename from pg_publication_tables where pubname = 'supabase_realtime'`);
-      const subs = await c.query(`select claims_role::text as role, entity::text, filters::text from realtime.subscription`).catch((e) => ({ rows: [String(e)] }));
-      console.log('REALTIME', JSON.stringify({ pub: pub.rows, subs: subs.rows }));
-      await c.end();
+    // il servizio realtime attiva l'ascolto del database qualche istante dopo l'iscrizione (la prima volta prepara
+    // la replica): le modifiche di quei primi istanti non arrivano come avviso, le recupera il giro periodico.
+    // Qui si riprova finché l'avviso arriva.
+    for (let k = 0; k < 12 && !pinged; k++) {
+      await a.repo.patchJob(job.id, { status: 'pronto', km: String(90 + k) });
+      await a.engine.syncNow();
+      for (let i = 0; i < 8 && !pinged; i++) await new Promise((r) => setTimeout(r, 250));
     }
-    await a.repo.patchJob(job.id, { status: 'pronto', km: '99' });
-    await a.engine.syncNow();
-    for (let i = 0; i < 40 && !pinged; i++) await new Promise((r) => setTimeout(r, 250));
     off();
     expect(pinged).toBeGreaterThan(0);
     await b.engine.syncNow();
-    expect(await b.db.jobs.get(job.id)).toMatchObject({ status: 'pronto', km: '99' });
+    expect((await b.db.jobs.get(job.id))?.status).toBe('pronto');
+    expect((await b.db.jobs.get(job.id))?.km).toBe((await a.db.jobs.get(job.id))?.km);
 
     // il dipendente non cancella
     await b.repo.deleteJob(job.id);
