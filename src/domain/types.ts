@@ -157,10 +157,13 @@ export interface Settings {
 export interface Photo {
   id: string;
   jobId: string;
-  blob: Blob;
+  /** l'immagine; assente se la foto è arrivata da un altro dispositivo e non è ancora stata scaricata */
+  blob?: Blob;
   w: number;
   h: number;
   createdAt: number;
+  /** con l'officina nel cloud: 0 = da caricare, 1 = già sul server */
+  up?: 0 | 1;
 }
 
 export const DEFAULT_ACCENT = '#1F3F99';

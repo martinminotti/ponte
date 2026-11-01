@@ -1,5 +1,7 @@
 import { db } from './db';
+import { record, syncTarget } from './changes';
 import { getSettings, normalizeJob, normalizeSettings } from './repo';
+import { diffJob } from '@/domain/job';
 import type { Job, LineItem, Photo, Settings } from '@/domain/types';
 import { uid } from '@/domain/format';
 import { withoutSecrets } from '@/voice/config';
@@ -123,6 +125,8 @@ export async function exportBackup(): Promise<BackupFile> {
   const [settings, jobs, photos] = await Promise.all([getSettings(), db.jobs.toArray(), db.photos.toArray()]);
   const dumps: PhotoDump[] = [];
   for (const p of photos) {
+    // con l'officina nel cloud una foto arrivata da un altro dispositivo può non essere ancora scaricata: resta sul server
+    if (!p.blob) continue;
     dumps.push({ id: p.id, jobId: p.jobId, w: p.w, h: p.h, createdAt: p.createdAt, type: p.blob.type || 'image/jpeg', data: await blobToBase64(p.blob) });
   }
   // la chiave dell'assistente vocale non esce dal dispositivo
@@ -162,7 +166,10 @@ export async function importBackup(text: string, mode: 'merge' | 'replace'): Pro
   }
 
   const res: ImportResult = { added: 0, updated: 0, skipped: 0 };
-  await db.transaction('rw', db.jobs, db.settings, db.photos, async () => {
+  const cloud = syncTarget();
+  // con l'officina nel cloud il file si unisce alle schede: svuotare qui non svuoterebbe gli altri dispositivi
+  if (cloud && mode === 'replace') mode = 'merge';
+  await db.transaction('rw', [db.jobs, db.settings, db.photos, db.outbox], async () => {
     const cur = await getSettings();
     if (mode === 'replace') {
       await db.jobs.clear();
@@ -179,16 +186,23 @@ export async function importBackup(text: string, mode: 'merge' | 'replace'): Pro
         const ex = await db.jobs.get(j.id);
         if (!ex) {
           const clash = j.number && (await db.jobs.where('number').equals(j.number).count());
-          await db.jobs.put(clash || !j.number ? { ...j, number: ++n } : j);
-          if (!clash && j.number > n) n = j.number;
+          // nel cloud il numero lo decide il server (tiene quello del file se è libero)
+          const next = cloud ? { ...j, number: 0 } : clash || !j.number ? { ...j, number: ++n } : j;
+          await db.jobs.put(next);
+          await record('job', j.id, 'put', diffJob(undefined, next), clash ? undefined : j.number || undefined);
+          if (!cloud && !clash && j.number > n) n = j.number;
           res.added++;
         } else if ((j.updatedAt || 0) > (ex.updatedAt || 0)) {
-          await db.jobs.put({ ...j, number: ex.number });
+          const next = { ...j, number: ex.number };
+          await db.jobs.put(next);
+          await record('job', j.id, 'put', diffJob(ex, next));
           res.updated++;
         } else res.skipped++;
       }
       const ids = new Set(jobs.map((j) => j.id));
-      await db.photos.bulkPut(photos.filter((p) => ids.has(p.jobId)));
+      const keep = photos.filter((p) => ids.has(p.jobId)).map((p) => (cloud ? { ...p, up: 0 as const } : p));
+      await db.photos.bulkPut(keep);
+      for (const p of keep) await record('photo', p.id, 'put', { jobId: p.jobId, w: p.w, h: p.h });
       await db.settings.put({ ...cur, nextNumber: n + 1, key: 'main' });
     }
   });

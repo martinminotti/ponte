@@ -3,7 +3,7 @@ import { amountInput, fmtPlate, norm, parseAmount, shiftMonth } from './format';
 import { calc, daSaldare, inFilter, isDue, matchJob, monthlyPending, sameVehicle, waNumber, withStatus } from './logic';
 import { companies, monthTotals } from './monthly';
 import { buildMsg } from './messages';
-import { normalizeJob } from '@/data/repo';
+import { normalizeJob } from '@/domain/job';
 import type { Job } from './types';
 
 const job = (p: Partial<Job> = {}): Job => normalizeJob({ id: 'x', number: 1, createdAt: 1_700_000_000_000, ...p });

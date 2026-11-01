@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { normalizeJob } from '@/data/repo';
+import { normalizeJob } from '@/domain/job';
 import { emptyDraft, type Draft } from '@/domain/draft';
 import type { Job, VoiceSettings } from '@/domain/types';
 import { DEFAULT_VOICE, endpoint, withoutSecrets } from './config';

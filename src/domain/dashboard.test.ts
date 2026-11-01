@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { dashboard, startOfWeek } from './dashboard';
-import { normalizeJob } from '@/data/repo';
+import { normalizeJob } from '@/domain/job';
 import type { Job } from './types';
 
 const NOW = new Date(2026, 9, 26, 10, 0).getTime(); // lunedì 26 ottobre 2026

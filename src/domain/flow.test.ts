@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeJob } from '@/data/repo';
+import { normalizeJob } from '@/domain/job';
 import { customers, companyVehicles, matchCustomer } from './customers';
 import { inFilter, isArchived, itemText, withPayment } from './logic';
 import { paidMsg } from './messages';
