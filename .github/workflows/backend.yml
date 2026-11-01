@@ -16,6 +16,9 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: write
+
 concurrency:
   group: backend-${{ github.ref }}
   cancel-in-progress: true
@@ -62,12 +65,18 @@ jobs:
           npm i --no-save playwright@1
           npx playwright install --with-deps chromium
           APP_URL=http://localhost:4173/ node e2e/cloud.mjs
-      - if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: e2e-cloud
-          path: e2e/out
-          if-no-files-found: ignore
+      - name: Screenshot della prova sul branch ci-e2e
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          [ -d e2e/out ] || exit 0
+          cd e2e/out
+          echo "${{ github.sha }}" > commit.txt
+          git init -q -b ci-e2e
+          git config user.name "Ponte CI"
+          git config user.email "ci@users.noreply.github.com"
+          git add -A
+          git commit -qm "Prova cloud: ${{ github.sha }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-e2e
       - if: failure()
         name: Registri dei servizi
         run: |
