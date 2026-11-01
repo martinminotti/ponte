@@ -109,6 +109,16 @@ run('Supabase vero', () => {
 
     for (let i = 0; i < 60 && status !== 'SUBSCRIBED'; i++) await new Promise((r) => setTimeout(r, 250)); // il canale si collega
     expect(status).toBe('SUBSCRIBED');
+    // diagnosi in CI: cosa vede il servizio realtime
+    if (process.env.DATABASE_URL) {
+      const pg = (await import('pg')).default;
+      const c = new pg.Client({ connectionString: process.env.DATABASE_URL });
+      await c.connect();
+      const pub = await c.query(`select tablename from pg_publication_tables where pubname = 'supabase_realtime'`);
+      const subs = await c.query(`select claims_role::text as role, entity::text, filters::text from realtime.subscription`).catch((e) => ({ rows: [String(e)] }));
+      console.log('REALTIME', JSON.stringify({ pub: pub.rows, subs: subs.rows }));
+      await c.end();
+    }
     await a.repo.patchJob(job.id, { status: 'pronto', km: '99' });
     await a.engine.syncNow();
     for (let i = 0; i < 40 && !pinged; i++) await new Promise((r) => setTimeout(r, 250));

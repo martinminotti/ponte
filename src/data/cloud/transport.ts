@@ -45,14 +45,23 @@ export class SupabaseTransport implements Transport {
 
   /** il server avvisa che qualcosa è cambiato; i dati veri si prendono poi con pull (che rispetta i permessi) */
   subscribe(workshop: string, onChange: () => void, onStatus?: (status: string) => void) {
-    const ch = this.sb.channel(`officina:${workshop}`);
-    for (const table of ['jobs', 'photos', 'members']) {
-      ch.on('postgres_changes', { event: '*', schema: 'public', table, filter: `workshop_id=eq.${workshop}` }, onChange);
-    }
-    ch.on('postgres_changes', { event: '*', schema: 'public', table: 'workshops', filter: `id=eq.${workshop}` }, onChange);
-    ch.subscribe((status) => onStatus?.(status));
+    let ch: ReturnType<SupabaseClient['channel']> | null = null;
+    let closed = false;
+    void (async () => {
+      // il canale deve partire con il token della sessione: le regole di accesso valgono anche per gli avvisi
+      const { data } = await this.sb.auth.getSession();
+      if (data.session) await this.sb.realtime.setAuth(data.session.access_token);
+      if (closed) return;
+      ch = this.sb.channel(`officina:${workshop}`);
+      for (const table of ['jobs', 'photos', 'members']) {
+        ch.on('postgres_changes', { event: '*', schema: 'public', table, filter: `workshop_id=eq.${workshop}` }, onChange);
+      }
+      ch.on('postgres_changes', { event: '*', schema: 'public', table: 'workshops', filter: `id=eq.${workshop}` }, onChange);
+      ch.subscribe((status) => onStatus?.(status));
+    })();
     return () => {
-      void this.sb.removeChannel(ch);
+      closed = true;
+      if (ch) void this.sb.removeChannel(ch);
     };
   }
 }

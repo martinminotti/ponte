@@ -48,6 +48,10 @@ jobs:
           cache: npm
 
       - name: Build web e sync Capacitor
+        # officina nel cloud: indirizzo e chiave pubblica del progetto Supabase (variabili del repository, non segreti)
+        env:
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}
         run: |
           npm ci
           npm run build
